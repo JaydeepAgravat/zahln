@@ -163,6 +163,7 @@ export const API_ERROR_CODES = [
   'otp_expired',
   'otp_too_many_attempts',
   'name_required',
+  'wrong_app',
   'idempotency_key_missing',
   'idempotency_key_reused',
   'idempotency_in_progress',

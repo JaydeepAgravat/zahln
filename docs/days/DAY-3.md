@@ -1,4 +1,15 @@
-# Day 3: Two apps, shared packages (Zahln + ZYSYGY)
+# Day 3: Two apps, shared packages (Zahln + ZYSYGY) ✅ Done
+
+> **Status: complete (2026-10-18).**
+> - `apps/mobile` is now `apps/consumer` (**Zahln**, `de.zahln.app`), and there's a new `apps/merchant` (**ZYSYGY**, `de.zysygy.app`).
+> - What both apps need lives in `packages/mobile-core` (no UI) and `packages/mobile-ui` (design system + shared flows).
+> - The API refuses to bind a ZYSYGY till to a non-staff number (`403 wrong_app`), with a test.
+> - **138 tests green:** 93 shared, 41 API, 4 mobile-core. Typecheck and Biome are clean.
+> - Icons for both apps come from one script: `pnpm icons` (`scripts/generate-icons.mjs`).
+>
+> ![App icons](../screenshots/app-icons.png)
+>
+> Deviations from the plan below are listed under "As built".
 
 ## Goal
 "Zahln (consumer) and ZYSYGY (merchant) are two separate apps with their own bundle IDs, icons and store
@@ -22,8 +33,8 @@ identities. About 90 % of their code is shared packages, and both build, launch 
 | Shared flows | `packages/mobile-core/flows` | Onboarding steps (phone, OTP, name, PIN, biometrics), LockScreen, Settings, as screens with props, not navigators |
 | App shell | `apps/consumer`, `apps/merchant` | `App.tsx`, the navigator, feature screens, native projects, `metro.config.js`, `babel.config.js`, `tailwind.config.js` |
 
-Rule: **packages never import from apps**, and `mobile-ui` never imports from `mobile-core`. Biome's `noRestrictedImports`
-enforces both.
+Rule: **packages never import from apps**, and `mobile-core` never imports from `mobile-ui` (UI sits on top of core).
+Biome's `noRestrictedImports` enforces both.
 
 ### 2. Shared flows, app-specific wiring
 Onboarding differs per app: the merchant app adds "pick your business", and the consumer app adds the camera
@@ -89,6 +100,43 @@ Move in this order, and run `pnpm typecheck && pnpm test` after each step:
 - [ ] Both apps build on both platforms, release configuration included (`--mode Release` once)
 
 ---
+
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| `mobile-ui` never imports `mobile-core` | Reversed: UI depends on core | The design system already used haptics, i18n and prefs. Core is the lower layer with no UI, which is the natural direction |
+| Shared flows in `mobile-core/flows` | In `mobile-ui/src/flows` | Flows are screens; they need the design system, so they belong with it |
+| Role picker on the Welcome screen | Removed; each app *is* its role (`configureApp` in `index.js`) | A cashier never sees "I pay", and a student never sees "I collect" |
+| ZYSYGY dark by default | Both apps follow the system theme; ZYSYGY is ink-first in its icon and launch screen | Prefs are created before `configureApp` runs; forcing dark would override the user's system choice |
+| Separate MMKV IDs per app | Not needed | Each bundle ID has its own sandbox, so MMKV and the keychain are already isolated |
+| Fresh `react-native init` for ZYSYGY | Copied the consumer native project and renamed it with a script (project, scheme, bundle ID, Kotlin package) | Keeps every Day 2 native tweak (SceneDelegate background, splash, Gradle paths) identical in both apps |
+| — | `react-hook-form` removed from the apps | Unused so far; it comes back with the first real form |
+
+Native details:
+- Fonts live once in `packages/mobile-ui/assets/fonts`, and both apps link them from there (`react-native.config.js`).
+- ZYSYGY doesn't declare or link the camera (no `NSCameraUsageDescription`, no `CAMERA` permission, no VisionCamera pod).
+- Metro: Zahln on `:8081`, ZYSYGY on `:8082`, so both can run side by side.
+- The first build after the rename is a full clean build (about 10 minutes per iOS app). After that, builds are incremental.
+- ZYSYGY debug builds point at Metro on `:8082`: iOS sets `jsLocation` in `SceneDelegate.bundleURL()`, and Android sets
+  `reactNativeDevServerPort=8082` in `gradle.properties`. Without this, the ZYSYGY binary silently loads Zahln's bundle from `:8081`.
+- The biometrics step could sit blank for about 40 s on a cold iOS simulator while the keychain probed biometry. The probe
+  now runs once at app start (`prefetchBiometry()`), and the result is cached.
+
+Verified on device (2026-10-18):
+- iOS (iPhone 17 Pro sim): Zahln, where Lena onboards and lands on her wallet (35,40 €). ZYSYGY shows its own Welcome
+  screen; Lena's number gets the "not a business" explanation.
+- Android (Phone_16k emulator, Android 16): Zahln launches. In ZYSYGY, Mila onboards → Café Mila (Business) → till with
+  today's takings.
+
+Android tips learned today:
+- **Android 16 local network permission:** debug builds reach Metro at `10.0.2.2`, which Android 16 treats as the
+  local network, so the system asks to "find nearby devices". Denying it gives "Unable to load script". Allow it, or run
+  `adb shell pm grant de.zahln.app android.permission.ACCESS_LOCAL_NETWORK` (and the same for `de.zysygy.app`).
+  Release builds bundle their JS and never ask.
+- **Build one ABI while developing:** `./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a` compiles the
+  native code for the emulator's architecture only. A clean build drops from 25+ min to about 9 min (3 min for the second app).
+- Never run two Gradle builds of the same app at once (CMake's `.cxx` folder races), and `gradlew --stop` kills
+  *every* daemon of that Gradle version, including builds of the other app.
 
 ## Files you'll create
 ```

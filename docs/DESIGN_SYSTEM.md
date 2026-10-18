@@ -112,7 +112,7 @@ A **receipt with a torn edge carrying a bold Z**: the "Quittung" concept in one 
 - Android: adaptive icon (ember background, receipt foreground in the 66 dp safe zone) plus a monochrome layer for themed icons.
 - Splash: ink background with the ember tile, on both platforms.
 
-![App icon: light, dark, tinted](screenshots/app-icon.png)
+![App icons: Zahln light and dark, ZYSYGY light and dark](screenshots/app-icons.png)
 
 ### Icons
 **Phosphor** (MIT), one family, curated in `apps/mobile/src/ds/Icon.tsx`.

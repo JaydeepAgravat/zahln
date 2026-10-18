@@ -53,11 +53,10 @@
     "welcome": {
       "title": "Pay.\nWith zero fees.",
       "subtitle": "With your phone, straight from account to account. No card network, no hardware.",
-      "payer": "I pay",
-      "payerHint": "At the Mensa, the café, anywhere",
-      "merchant": "I get paid",
-      "merchantHint": "Accept payments without a terminal",
-      "trust": "SEPA Instant · Your data stays in Germany"
+      "trust": "SEPA Instant · Your data stays in Germany",
+      "start": "Get started",
+      "merchantTitle": "Get paid.\nNo terminal.",
+      "merchantSubtitle": "Your phone becomes the till. The money lands in your account instantly, with zero fees."
     },
     "phone": {
       "title": "Your mobile number",
@@ -85,7 +84,7 @@
     "merchant": {
       "title": "Your business",
       "subtitle": "This phone becomes the till for:",
-      "none": "This number doesn't belong to a business. For the demo: 0151 0000 0010 (Café Mila).",
+      "none": "This number doesn't belong to a business. ZYSYGY is the till for merchants; to pay, use the Zahln app. For the demo: 0151 0000 0010 (Café Mila).",
       "role": {
         "owner": "Owner",
         "manager": "Manager",

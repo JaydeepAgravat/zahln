@@ -53,11 +53,10 @@
     "welcome": {
       "title": "Bezahlen.\nOhne Gebühren.",
       "subtitle": "Mit dem Handy, direkt von Konto zu Konto. Kein Kartennetz, keine Hardware.",
-      "payer": "Ich bezahle",
-      "payerHint": "In der Mensa, im Café, überall",
-      "merchant": "Ich kassiere",
-      "merchantHint": "Zahlungen annehmen, ohne Terminal",
-      "trust": "SEPA Instant · Daten bleiben in Deutschland"
+      "trust": "SEPA Instant · Daten bleiben in Deutschland",
+      "start": "Loslegen",
+      "merchantTitle": "Kassieren.\nOhne Terminal.",
+      "merchantSubtitle": "Dein Handy wird zur Kasse. Das Geld ist sofort auf deinem Konto, ohne Gebühren."
     },
     "phone": {
       "title": "Deine Handynummer",
@@ -85,7 +84,7 @@
     "merchant": {
       "title": "Dein Geschäft",
       "subtitle": "Dieses Handy wird zur Kasse für:",
-      "none": "Diese Nummer gehört zu keinem Geschäft. Für die Demo: 0151 0000 0010 (Café Mila).",
+      "none": "Diese Nummer gehört zu keinem Geschäft. ZYSYGY ist die Kasse für Händler; zum Bezahlen gibt es die Zahln-App. Für die Demo: 0151 0000 0010 (Café Mila).",
       "role": {
         "owner": "Inhaber:in",
         "manager": "Manager:in",

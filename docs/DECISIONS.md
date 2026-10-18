@@ -229,8 +229,13 @@ Interviewers at a founding-team stage want to hear the trade-off, not a library 
 
 ### 7.1 Two mobile apps on shared packages (not one app with two modes)
 - **Chosen:** `apps/consumer` (Zahln, `de.zahln.app`) and `apps/merchant` (ZYSYGY, `de.zysygy.app`). What both
-  need lives in `packages/mobile-ui` (design system) and `packages/mobile-core` (API client, session, secure storage,
-  biometrics, prefs).
+  need lives in two layers. `packages/mobile-core` holds app identity, the API client, session/lock, keychain,
+  biometrics, prefs and i18n, with no UI. `packages/mobile-ui` holds the design system plus the shared flows
+  (onboarding, lock, settings, wallet) and depends on core. Biome's `noRestrictedImports` enforces the direction
+  (core → UI is an error, as is any package → app).
+- **The app *is* the role:** each app calls `configureApp('consumer' | 'merchant')` in `index.js`. Every request
+  carries `x-app`, and the API refuses to bind a ZYSYGY till to someone who isn't staff of a business
+  (`403 wrong_app`).
 - **Why:** they are two products for two audiences with different release risk. A till bug must not wait for a
   wallet release, and vice versa. Separate bundle IDs also mean separate store listings, permissions (only the
   consumer app asks for the camera) and app sizes. zysygy.de already markets them as two brands.

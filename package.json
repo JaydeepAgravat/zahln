@@ -9,17 +9,25 @@
     "dev": "turbo run dev",
     "api": "pnpm --filter @zahln/api dev",
     "web": "pnpm --filter @zahln/web dev",
-    "mobile": "pnpm --filter @zahln/mobile start",
     "db:up": "docker compose up -d --wait",
     "db:migrate": "pnpm --filter @zahln/api db:migrate",
     "db:seed": "pnpm --filter @zahln/api db:seed",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "consumer": "pnpm --filter @zahln/consumer start",
+    "consumer:ios": "pnpm --filter @zahln/consumer ios",
+    "consumer:android": "pnpm --filter @zahln/consumer android",
+    "merchant": "pnpm --filter @zahln/merchant start",
+    "merchant:ios": "pnpm --filter @zahln/merchant ios",
+    "merchant:android": "pnpm --filter @zahln/merchant android",
+    "pods": "pnpm --filter @zahln/consumer pods && pnpm --filter @zahln/merchant pods",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@resvg/resvg-js": "2.6.2",
     "turbo": "2.11.9",
     "typescript": "5.9.3"
   }

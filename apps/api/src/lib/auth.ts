@@ -113,6 +113,8 @@ export async function registerDevice(
     deviceId: string;
     platform: 'ios' | 'android';
     name?: string | undefined;
+    /** Which app is binding this device. A till (ZYSYGY) may only be bound by staff of a business. */
+    app?: 'consumer' | 'merchant';
   },
 ): Promise<SessionResponse> {
   return db.transaction(async (tx) => {
@@ -166,10 +168,16 @@ export async function registerDevice(
         },
       });
 
+    const memberships = await membershipsOf(tx, user.id);
+    // Throwing rolls back the whole transaction: the challenge stays unconsumed and no device is bound.
+    if (input.app === 'merchant' && memberships.length === 0) {
+      throw new ApiError(403, 'wrong_app', 'this number is not staff of any business');
+    }
+
     return {
       sessionToken,
       user: { id: user.id, name: user.name, phone: user.phone },
-      memberships: await membershipsOf(tx, user.id),
+      memberships,
     };
   });
 }

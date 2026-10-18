@@ -107,6 +107,32 @@ describe('device binding and sessions', () => {
     expect(row?.sessionTokenHash).toMatch(/^[0-9a-f]{64}$/);
   });
 
+  it('the merchant app (ZYSYGY) only binds staff of a business', async () => {
+    const lena = await verify(LENA_PHONE);
+    const body = {
+      verificationToken: lena.verified.body.verificationToken,
+      deviceId: randomUUID(),
+      platform: 'ios',
+    };
+    const refused = await t.call('POST', '/devices', { body, headers: { 'x-app': 'merchant' } });
+    expect(refused.status).toBe(403);
+    expect(refused.body.error).toBe('wrong_app');
+    // Nothing was consumed: the same verification still works in the consumer app.
+    expect((await t.call('POST', '/devices', { body, headers: { 'x-app': 'consumer' } })).status).toBe(201);
+
+    const mila = await verify(MILA_PHONE);
+    const till = await t.call('POST', '/devices', {
+      body: {
+        verificationToken: mila.verified.body.verificationToken,
+        deviceId: randomUUID(),
+        platform: 'android',
+      },
+      headers: { 'x-app': 'merchant' },
+    });
+    expect(till.status).toBe(201);
+    expect(till.body.memberships[0].merchantName).toBe('Café Mila');
+  });
+
   it('a verification token can be used once', async () => {
     const { verified } = await verify(LENA_PHONE);
     const body = {

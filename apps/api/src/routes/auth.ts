@@ -22,7 +22,9 @@ export async function authRoutes(fastify: FastifyInstance, deps: { db: Db; devOt
   });
 
   app.post('/devices', { schema: { body: RegisterDeviceSchema } }, async (req, reply) => {
-    return reply.status(201).send(await registerDevice(db, req.body));
+    // Sent by the mobile apps on every request; anything else is treated as the consumer app.
+    const appHeader = req.headers['x-app'] === 'merchant' ? 'merchant' : 'consumer';
+    return reply.status(201).send(await registerDevice(db, { ...req.body, app: appHeader }));
   });
 
   app.get('/me', async (req) => me(db, requireActor(req).userId));

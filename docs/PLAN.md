@@ -116,8 +116,8 @@ zahln/
     landing/       "The Zahln Edition": Next.js 16, Lenis + Motion, one OGL shader
   packages/
     shared/        zod schemas, API types, payment state machines, plans, tokens, i18n (de/en), money
-    mobile-ui/     RN design system: primitives, illustrations, theme (extracted from today's apps/mobile)
-    mobile-core/   RN plumbing: API client, session/lock, secure storage, biometrics, prefs, queries, haptics
+    mobile-core/   RN plumbing: app identity, API client, session/lock, keychain, biometrics, prefs, queries, i18n
+    mobile-ui/     RN design system + the flows both apps share (onboarding, lock, settings, wallet); depends on core
     web-ui/        web design system: Tailwind 4 preset from tokens, shadcn components restyled to Ember & ink
   docs/
     PLAN.md  DECISIONS.md  DESIGN_SYSTEM.md  LANDING.md  days/  adr/
@@ -132,9 +132,9 @@ cadences. A cashier never sees a consumer wallet, and a consumer never sees a ti
   and secure storage. Each app composes these into its own navigator.
 - **What each app owns:** its navigator, its feature screens, its native project (icon, launch screen, bundle
   ID, permissions) and its Info.plist / manifest strings.
-- **Brand:** both apps use Ember & ink. The consumer app (Zahln) leads with paper; the merchant app (ZYSYGY) leads
-  with ink (a dark-first till that is easier to read at a counter, with ember accents), and its own app icon is a
-  till-receipt mark.
+- **Brand:** both apps use Ember & ink and the same receipt mark. Zahln's icon is ember-first (paper receipt on an
+  ember tile). ZYSYGY's is ink-first (paper receipt with an ember Z on an ink tile). In the app, both follow the
+  system light/dark setting.
 - **Runtime:** bare RN 0.88 (New Architecture), React Navigation 7, NativeWind 4, TanStack Query, Zustand + MMKV,
   Reanimated 4, react-native-keychain, vision-camera (consumer only), FlashList.
 - **Payment state machines:** hand-written typed reducers in `packages/shared`, used by both apps and the web

@@ -11,7 +11,7 @@ Five front ends on one realistic payment backend:
 | 4 | **Zahln Web**: merchant dashboard, consumer web wallet, pay-link checkout | Next.js 16 |
 | 5 | **The Zahln Edition**: Editions-style landing page | Next.js 16 + Lenis + Motion + OGL |
 
-> Days 1–2 are built (today there's one RN app with two modes in `apps/mobile`; Day 3 splits it into two apps).
+> Days 1–3 are built: the API, both mobile apps and their shared packages. The web front ends come on Days 6–10.
 
 > Work in progress. The code is built day by day following the guides in [`docs/days`](docs/days/README.md).
 
@@ -20,12 +20,17 @@ Five front ends on one realistic payment backend:
 cp .env.example .env
 pnpm install
 pnpm db:up && pnpm db:migrate && pnpm db:seed
-pnpm api          # API on :4000 (OTP is always 123456 in dev)
-pnpm mobile       # Metro
-cd apps/mobile/ios && pod install && cd -
-pnpm --filter @zahln/mobile ios       # or: android
+pnpm api                 # API on :4000 (OTP is always 123456 in dev)
+pnpm pods                # CocoaPods for both apps
+pnpm consumer            # Metro for Zahln on :8081, then: pnpm consumer:ios | consumer:android
+pnpm merchant            # Metro for ZYSYGY on :8082, then: pnpm merchant:ios | merchant:android
 ```
-Demo logins: `0151 0000 0001` (Lena, student) · `0151 0000 0010` (Mila, Café Mila).
+On Android 16, allow "nearby devices" on first launch of a debug build (it's the local-network access Metro needs).
+For faster Android dev builds: `./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a`.
+
+Demo logins: `0151 0000 0001` (Lena, student, in **Zahln**) · `0151 0000 0010` (Mila, Café Mila, in **ZYSYGY**).
+
+![App icons: Zahln and ZYSYGY](docs/screenshots/app-icons.png)
 
 ![Onboarding](docs/screenshots/showcase-onboarding.png)
 ![App](docs/screenshots/showcase-app.png)
