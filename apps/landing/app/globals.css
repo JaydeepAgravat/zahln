@@ -1,0 +1,414 @@
+@import "tailwindcss";
+
+/*
+ * Theme: every colour points at a --z-* variable that lib/tokens.ts renders on <html> from @zahln/shared/tokens.
+ * `inline` makes utilities use the variable directly, so there is one source of truth for every value.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-paper: var(--z-paper);
+  --color-paper-raised: var(--z-paper-raised);
+  --color-paper-muted: var(--z-paper-muted);
+  --color-ink: var(--z-ink);
+  --color-on-ink: var(--z-on-ink);
+  --color-on-ink-muted: var(--z-on-ink-muted);
+  --color-ember: var(--z-ember);
+  --color-on-ember: var(--z-on-ember);
+  --color-ember-text: var(--z-ember-text);
+  --color-ember-subtle: var(--z-ember-subtle);
+  --color-line: var(--z-line);
+  --color-line-strong: var(--z-line-strong);
+  --color-text-2: var(--z-text-2);
+  --color-text-3: var(--z-text-3);
+  --color-success: var(--z-success);
+  --color-flood-paid: var(--z-flood-paid);
+  --color-flood-not-charged: var(--z-flood-not-charged);
+  --color-on-flood: var(--z-on-flood);
+  --color-pending: var(--z-pending);
+  --color-pending-subtle: var(--z-pending-subtle);
+  --color-saffron: var(--z-saffron);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-script: var(--font-pinyon-script), cursive;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --ease-standard: var(--z-ease);
+  --ease-enter: var(--z-ease-enter);
+}
+
+/* ---------- Base ---------- */
+@layer base {
+  html {
+    background: var(--z-ink);
+    color: var(--z-ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: 72px;
+  }
+  body {
+    /* The display grotesk is the page's default voice; Inter (font-sans) is opted into for small UI below the
+       fold, so it isn't fetched before first paint. */
+    font-family: var(--font-display);
+    background: var(--z-ink);
+    /* No overflow on html/body: it breaks Lenis and position: sticky. Clip horizontally on <main> instead. */
+  }
+  :focus-visible {
+    outline: 2px solid var(--z-ember);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  .on-paper :focus-visible {
+    outline-color: var(--z-ink);
+  }
+  ::selection {
+    background: var(--z-ember);
+    color: var(--z-on-ember);
+  }
+}
+
+/* Lenis (only active with JS, motion on, non-touch). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Things that only work with JS stay out of the no-JS page. */
+html:not(.js) .needs-js {
+  display: none !important;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  transition:
+    background-color 240ms var(--z-ease),
+    color 240ms var(--z-ease),
+    box-shadow 240ms var(--z-ease);
+  background: color-mix(in srgb, var(--z-ink) 82%, transparent);
+  color: var(--z-on-ink);
+  backdrop-filter: blur(10px);
+}
+html.js .topbar[data-nav="art"] {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--z-ink) 55%, transparent), transparent);
+  backdrop-filter: none;
+}
+html.js .topbar[data-nav="paper"] {
+  background: var(--z-paper);
+  color: var(--z-ink);
+  box-shadow: 0 1px 0 var(--z-line);
+}
+
+/* Chapter menu (details/summary: works without JS). */
+.chapter-menu > summary {
+  list-style: none;
+}
+.chapter-menu > summary::-webkit-details-marker {
+  display: none;
+}
+.chapter-menu[open] > summary .chev {
+  transform: rotate(180deg);
+}
+
+/* ---------- Intro frame ---------- */
+.frame-rect {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.construction {
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="paused"]) .frame-rect {
+    animation: draw 900ms var(--z-ease-enter) 150ms both;
+  }
+  html:not([data-motion="paused"]) .construction {
+    animation: extend 1100ms var(--z-ease-enter) 500ms both;
+  }
+  html:not([data-motion="paused"]) .letter-word {
+    animation: rise 700ms var(--z-ease-enter) both;
+  }
+  html:not([data-motion="paused"]) .letter-word:nth-of-type(2) {
+    animation-delay: 160ms;
+  }
+  html:not([data-motion="paused"]) .letter-word:nth-of-type(3) {
+    animation-delay: 320ms;
+  }
+  html:not([data-motion="paused"]) .swash {
+    stroke-dasharray: 1;
+    animation: draw 1000ms var(--z-ease) 700ms both;
+  }
+  html:not([data-motion="paused"]) .intro-fade {
+    animation: fade 700ms var(--z-ease-enter) 600ms both;
+  }
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes extend {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Chapter index (one element, two states) ---------- */
+/*
+ * Mobile: the index is a static list inside the intro frame (the top bar's "Kapitel" menu navigates).
+ * Desktop: the index is fixed in the left column. With JS and motion on, the runtime first places it inside
+ * the intro frame (html.morph) and then interpolates it to the column with transforms only.
+ */
+@media (min-width: 1024px) {
+  .chapter-index {
+    position: fixed;
+    left: 24px;
+    top: 50%;
+    width: 216px;
+    margin-top: -170px;
+    z-index: 40;
+  }
+  html.morph .chapter-index {
+    opacity: 0;
+  }
+  html.morph.morph-ready .chapter-index {
+    opacity: 1;
+    transition: opacity 300ms var(--z-ease);
+  }
+  .frame-slot {
+    display: none;
+  }
+  html.morph .frame-slot {
+    display: block;
+  }
+  .frame-list-static {
+    display: none;
+  }
+}
+.chapter-index a[aria-current="true"] .idx-dot {
+  background: var(--z-ember);
+  transform: scale(1);
+}
+.chapter-index a[aria-current="true"] {
+  color: var(--z-ink);
+}
+
+/* ---------- Heroes ---------- */
+.hero {
+  height: 230svh;
+}
+.hero-art {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  contain: paint;
+}
+.hero-art {
+  /* Off-screen heroes skip rendering, which also keeps their lazy images from loading before first paint. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 100svh;
+}
+.hero-art img {
+  will-change: transform;
+}
+.grain {
+  /* Static grain: an SVG turbulence tile, used on its own when the shader is off (fallback). */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px;
+  mix-blend-mode: overlay;
+  opacity: 0.45;
+}
+[data-shader="on"] > .grain {
+  opacity: 0;
+}
+.shader-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.hero-title {
+  font-size: clamp(3.25rem, 11.5vw, 10rem);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+  hyphens: manual;
+}
+.statement-block {
+  /* Skipped while off-screen, so the decorative script face is only fetched when the first statement nears. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
+}
+.statement::first-letter {
+  font-family: var(--font-script);
+  font-style: normal;
+  color: var(--z-ember);
+  float: left;
+  font-size: 4.6em;
+  line-height: 0.72;
+  padding: 0.12em 0.1em 0 0;
+}
+
+/* ---------- Paper ---------- */
+.paper {
+  background: var(--z-paper);
+  color: var(--z-ink);
+  position: relative;
+  z-index: 10;
+  margin-top: -18svh;
+}
+.tear {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--tear-h, 26px);
+  background: var(--z-paper);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  pointer-events: none;
+}
+.tear-top {
+  bottom: calc(100% - 1px);
+}
+.tear-bottom {
+  top: calc(100% - 1px);
+  transform: scaleY(-1);
+}
+@media (max-width: 767px) {
+  .tear {
+    --tear-h: 14px;
+  }
+}
+.paper-body {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1400px;
+}
+
+/* Paper texture: a faint fibre noise so the cream isn't flat digital colour. */
+.paper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6 .08' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .25 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Device frame ---------- */
+.device {
+  aspect-ratio: 9 / 19.5;
+  border-radius: 13% / 6%;
+  padding: 3.2%;
+  background: linear-gradient(145deg, #2c2a26, var(--z-ink) 40%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--z-ink) 80%, white),
+    0 30px 60px -20px rgba(27, 26, 23, 0.45),
+    0 12px 24px -12px rgba(27, 26, 23, 0.35);
+}
+.device-screen {
+  border-radius: 10.5% / 4.9%;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  background: var(--z-paper);
+}
+.device-ios .device-screen::after {
+  /* Dynamic Island */
+  content: "";
+  position: absolute;
+  top: 1.6%;
+  left: 50%;
+  width: 30%;
+  height: 3.4%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #000;
+}
+.device-android .device-screen::after {
+  content: "";
+  position: absolute;
+  top: 1.6%;
+  left: 50%;
+  width: 3.6%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #000;
+}
+
+/* ---------- Plan fan ---------- */
+.plan-card {
+  transition: transform 400ms var(--z-ease);
+}
+@media (min-width: 900px) {
+  .plan-fan {
+    perspective: 1200px;
+  }
+  .plan-card[data-plan="free"] {
+    transform: translate(18px, 22px) rotate(-6deg);
+  }
+  .plan-card[data-plan="pro"] {
+    transform: translateY(-6px);
+    z-index: 2;
+  }
+  .plan-card[data-plan="business"] {
+    transform: translate(-18px, 22px) rotate(6deg);
+  }
+  .plan-card:hover,
+  .plan-card:focus-within {
+    z-index: 3;
+  }
+}
+
+/* ---------- Reduced motion: calm, complete ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+html[data-motion="paused"] *,
+html[data-motion="paused"] *::before,
+html[data-motion="paused"] *::after {
+  transition-duration: 0.01ms !important;
+}

@@ -1,4 +1,12 @@
-# Day 9: The Zahln Edition I: content, art and static layout
+# Day 9: The Zahln Edition I: content, art and static layout ✅ Done
+
+> **Status: complete (2026-10-18).** `apps/landing` is a Next.js 16 static export (`/` German, `/en/` English) that
+> reads completely with JavaScript off: ten chapters of real copy, twelve licence-recorded CC0 / public-domain
+> paintings graded into AVIF + WebP, our own title lettering, torn-receipt paper sections, CSS device frames with
+> real app screens, fanned plan cards, closing CTA and footer. **Lighthouse (mobile): Accessibility 100,
+> Best Practices 100, SEO 100, CLS 0.** 26 unit tests (torn edge, copy parity, token contrast).
+>
+> ![The Zahln Edition](../screenshots/landing-edition.png)
 
 ## Goal
 "The landing page reads beautifully with JavaScript turned off. It has ten chapters with real copy in German and
@@ -77,6 +85,29 @@ screenshot of a frame.
 - [ ] Mobile layout: index → menu sheet; heroes 9:16 crops; shallower tears
 
 ---
+
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| Tailwind 4 + `packages/web-ui` theme | Tailwind 4 themed straight from `@zahln/shared/tokens`: `lib/tokens.ts` renders the palette as `--z-*` variables on `<html>`, `app/globals.css` maps them with `@theme inline` (and resets Tailwind's default colours, so only token colours exist) | `packages/web-ui` belongs to the console stream running in parallel; the tokens are the single source either way |
+| Copy keys in `@zahln/shared/i18n/landing.*` | `apps/landing/content/{de,en}.ts` with a shared `Copy` type, plus `test/content.test.ts` (same keys and array lengths, same ids/anchors/media, no empty strings, links point at real chapters, plan prices) | Long-form editorial copy only this page uses; the shared i18n package was off-limits for this stream |
+| Port `tornEdge` into `@zahln/shared` | `apps/landing/lib/tornEdge.ts` (mulberry32 PRNG + two-octave value noise + jittered blade teeth), 9 unit tests. The masks are generated once into `app/tears.gen.css` (`scripts/tears.mjs`, 3 seeded shapes, the bottom tear is the same mask mirrored) | `packages/*` were off-limits. Inline masks put ~20 KB of path data into every page *and* its RSC payload (HTML was 53 KB); as CSS they cost 3 KB gzipped once. The mobile `ReceiptEdge` still has its own zigzag: moving both into shared is a follow-up |
+| 11 paintings (intro + 10) | **12** (a closing painting too), 5 from The Met (CC0) and 7 from the Rijksmuseum (Public Domain Mark), fetched only from the museums' own APIs by `scripts/fetch-art.mjs`, which rejects anything the API doesn't mark public domain. Rows and raw API evidence: [ASSETS.md](../../apps/landing/ASSETS.md), `art-src/records.json` | No Matsys or Reymerswaele money-changer is available as a CC0 file from our three sources, so Petrus Christus' *A Goldsmith in his Shop* (1449, scales and coins) opens the page. One Rijksmuseum "money-changer" was rejected on taste (see ASSETS.md) |
+| `scripts/grade-art.ts` | `scripts/grade-art.mjs` (+ `fetch-art`, `screens`, `letter-title`, `tears`, `check-bundle`), all plain Node | Runs with `node` and no TS runner. Grading: trim, focal-point crops 16:10 and 9:16, desaturate, soft-light ember highlight + ink vignette, grain, AVIF + WebP at 640/960/1280/2048 (portrait 640/960/1280), 16 px blur placeholder. ~10 min for all 12 (AVIF effort 5) |
+| Record 6–8 app clips (ffmpeg, posters) | **Not done.** Devices show stills cropped from `docs/screenshots` (`scripts/screens.mjs`, 15 screens) in a CSS iPhone/Pixel frame. `DeviceFrame` has a `video` prop (MP4 + WebM + poster, sources attached only in view) ready for the clips | No simulator session in this stream; the slot is marked in the component and in ASSETS.md |
+| `aria-current` "via CSS scroll-driven styling where supported" | `IntersectionObserver` sets `aria-current="true"` on the index, the mobile list and the top-bar menu | CSS can't set ARIA attributes; with JS off the index simply has no current marker |
+| Mobile: index → menu sheet | The top bar's **Kapitel** menu is a `<details>` (works without JS, closes on Escape and on navigation); on small screens the index sits inside the intro frame | No JS needed for navigation |
+| Lettering via opentype.js | Done (`scripts/letter-title.mjs` → `lib/lettering.gen.ts`, "Die/The Zahln Edition", Inter Tight 800, −3.5 % tracking, kerning) plus a hand-drawn ember swash out of the Z's base | opentype.js 2.0 throws on Inter Tight's `ccmp` lookups, so glyphs are looked up per character (the title needs no ligatures) |
+| Impressum + Datenschutz | Placeholder pages at `/impressum/` and `/datenschutz/` (clearly marked "Platzhalter") | A German site legally needs both; the real text needs a lawyer, not a prototype |
+| Copy: "confident, warm, never cute" | Written in German first, then English. Things that aren't built are marked **Bald / Soon** (DATEV export, cloud TSE); the campus "< 3 s" is labelled a *target*; "254 ms" is the Day 4 measurement | Honest claims; a native-speaker review is still worth doing before sending the link |
+| Lighthouse BP 100, SEO 100, CLS 0 | Met (see DAY-10 / LANDING.md for the full table) | |
+
+Small things worth knowing:
+- `metadataBase` is a placeholder (`https://edition.zahln.example`) until there is a real domain.
+- Art is decorative (`alt=""`, `aria-hidden` layers); each hero prints a museum-label caption and the footer lists
+  every painting with its licence.
+- `content-visibility: auto` on the paper bodies: full-page screenshot tools show them blank until scrolled; real
+  scrolling renders them normally.
 
 ## Files you'll create
 ```

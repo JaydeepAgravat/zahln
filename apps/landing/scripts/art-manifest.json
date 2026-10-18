@@ -1,0 +1,110 @@
+[
+  {
+    "slug": "goldsmith",
+    "use": "intro",
+    "source": "met",
+    "id": 459052,
+    "trim": 0.035,
+    "land": [0.55, 0.62],
+    "port": [0.62, 0.55]
+  },
+  {
+    "slug": "matthew",
+    "use": "bezahlen",
+    "source": "met",
+    "id": 436643,
+    "trim": 0.02,
+    "land": [0.5, 0.5],
+    "port": [0.42, 0.55]
+  },
+  {
+    "slug": "fishmarket",
+    "use": "kasse",
+    "source": "met",
+    "id": 679844,
+    "trim": 0.01,
+    "land": [0.5, 0.45],
+    "port": [0.2, 0.45]
+  },
+  {
+    "slug": "coinage",
+    "use": "wallet",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/20027197",
+    "trim": 0.01,
+    "land": [0.5, 0.4],
+    "port": [0.5, 0.4]
+  },
+  {
+    "slug": "nightmarket",
+    "use": "auszahlung",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/20026050",
+    "trim": 0.01,
+    "land": [0.6, 0.6],
+    "port": [0.62, 0.6]
+  },
+  {
+    "slug": "cannonshot",
+    "use": "funkloch",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/200108360",
+    "trim": 0.01,
+    "land": [0.6, 0.62],
+    "port": [0.62, 0.55]
+  },
+  {
+    "slug": "sassetti",
+    "use": "plaene",
+    "source": "met",
+    "id": 436489,
+    "trim": 0.09,
+    "land": [0.5, 0.42],
+    "port": [0.45, 0.5]
+  },
+  {
+    "slug": "staalmeesters",
+    "use": "ordnung",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/200107929",
+    "trim": 0.01,
+    "land": [0.5, 0.55],
+    "port": [0.52, 0.6]
+  },
+  {
+    "slug": "dam",
+    "use": "campus",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/200108218",
+    "trim": 0.01,
+    "land": [0.5, 0.55],
+    "port": [0.5, 0.55]
+  },
+  {
+    "slug": "notary",
+    "use": "sicherheit",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/20026987",
+    "trim": 0.01,
+    "land": [0.45, 0.5],
+    "port": [0.4, 0.5]
+  },
+  {
+    "slug": "lavoisier",
+    "use": "entwickler",
+    "source": "met",
+    "id": 436106,
+    "trim": 0.01,
+    "land": [0.5, 0.42],
+    "port": [0.52, 0.45]
+  },
+  {
+    "slug": "waag",
+    "use": "closing",
+    "source": "rijks",
+    "id": "https://id.rijksmuseum.nl/200108216",
+    "trim": 0.01,
+    "land": [0.5, 0.55],
+    "port": [0.45, 0.55]
+  }
+]

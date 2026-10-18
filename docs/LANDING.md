@@ -149,7 +149,7 @@ German first, with an EN toggle in the top bar (the same i18n keys as the apps).
 - Video: H.264 MP4 + WebM, 1080p at around 2.5 Mbps (the same budget Shopify uses), with posters, lazy-attached
   `src`.
 
-### Budgets (checked by CI with Lighthouse CI on the built site)
+### Budgets (checked with Lighthouse CI on the built site: `apps/landing/lighthouserc.json`)
 | Metric | Budget |
 |---|---|
 | LCP (mobile, 4G) | < 2.0 s |
@@ -170,3 +170,54 @@ German first, with an EN toggle in the top bar (the same i18n keys as the apps).
 "Their own page is a promise of craft. I reverse-engineered how Shopify's Editions page is built (Remix SSR,
 Lenis, one WebGL layer, sticky chapters, torn-paper transitions, `content-visibility`), then rebuilt the
 *mechanics* with our own brand, licence-clean art, and a performance budget enforced in CI."
+
+---
+
+## Part 3: As built (Days 9–10, 2026-10-18)
+
+`apps/landing`: Next.js 16.4.2 (App Router, `output: 'export'`, Turbopack), React 19.3.0 (the workspace's single
+React; Next accepted it), Tailwind 4.3 themed from `@zahln/shared/tokens`, Lenis 1.3.27, Motion 14.3.0, OGL 1.0.11.
+German at `/`, English at `/en/`. Full deviation lists: [DAY-9](days/DAY-9.md#as-built-deviations-and-honest-caveats),
+[DAY-10](days/DAY-10.md#as-built-deviations-and-honest-caveats); licences: [apps/landing/ASSETS.md](../apps/landing/ASSETS.md).
+
+![The Zahln Edition: intro, chapter hero, paper with device frames, plan fan; mobile intro and live status demo](screenshots/landing-edition.png)
+
+What changed against Part 2, in one line each:
+- **Art:** 12 public-domain paintings (5 Met CC0, 7 Rijksmuseum PDM), fetched only from the museums' APIs with the
+  licence checked by script. No CC0 Matsys/Reymerswaele money-changer exists in our sources, so Petrus Christus'
+  *A Goldsmith in his Shop* (1449) opens the page.
+- **Motion:** Motion's framework-free API (`scroll`, `inView`, `frame`, `motion/mini` `animate`) instead of the React
+  hooks, to stay inside the JS budget; the morph is in the first-load chunk, everything else loads on first intent.
+- **Shader:** one OGL WebGL2 context that moves into the hero in view; static CSS grain otherwise.
+- **Torn edge:** `apps/landing/lib/tornEdge.ts` (not yet shared with the app's `ReceiptEdge`), compiled once into CSS masks.
+- **Not done:** screen-recorded device videos (slot ready), OG image, Lighthouse GitHub Actions workflow, Safari/Firefox passes.
+
+### Measured (2026-10-18)
+Lighthouse 13 via `lhci autorun` on the static export, **mobile** (simulated Moto G Power, slow 4G, 4× CPU),
+3 runs each, served by lhci's static server (gzip, no CDN). Medians:
+
+| Metric | Budget | `/` (de) | `/en/` | Verdict |
+|---|---|---|---|---|
+| LCP | < 2.0 s | **3.1 s** (runs 2.5 / 3.2 / 3.1) | **3.2 s** (3.2 / 3.2 / 3.1) | ✘ missed |
+| CLS | < 0.02 | 0 | 0 | ✔ |
+| TBT (INP proxy) | < 200 ms | 60–140 ms | 60 ms | ✔ |
+| FCP / Speed Index | | 0.9–1.0 s / 0.9–1.0 s | 0.9 s / 0.9 s | |
+| JS transferred (Lighthouse) | < 150 KB | 142 KB | 142 KB | ✔ |
+| First-load JS, gzip -9 (`check:bundle`) | < 150 KB | 139.7 KB | 139.7 KB | ✔ |
+| JS after first interaction (motion 9.2 KB + shader 14.0 KB) | | 163 KB | 163 KB | over 150 for a visitor who scrolls |
+| Accessibility | 100 | 100 | 100 | ✔ |
+| Best Practices / SEO | | 100 / 100 | 100 / 100 | ✔ |
+| Performance score | | 0.92–0.97 | 0.93–0.94 | |
+| Page weight before interaction | | 345 KB (JS 142, images 86, fonts 75, HTML 29, CSS 13) | 344 KB | |
+
+**Why LCP misses.** The LCP element is chapter-index text (Chrome does not count the full-viewport intro
+painting), painted 160–245 ms after navigation unthrottled. Lighthouse's simulator charges every request started
+before that paint, which includes ~136 KB of Next.js + React runtime. The same HTML with every script stripped
+measures **2.0–2.1 s**: fonts + the first two paintings alone sit at the budget. What got it from 4.4 s to 3.1 s:
+`display: 'optional'` text faces, Inter and the script face kept off the first paint (`content-visibility`),
+grain removed from the AVIFs and q48 → q40, 960 px crops, torn-edge masks moved from inline styles (HTML 53 → 29 KB)
+into CSS. Closing the rest needs dropping the App Router runtime for this page or a Brotli CDN; see DAY-10.
+
+**Reduced motion / JS off**, checked in Chrome: no Lenis, morph, parallax or shader with
+`prefers-reduced-motion: reduce`; with JS disabled all ten chapters, the index, the chapter menu (`<details>`),
+the plan fan and the footer read completely at 1280 px and 375 px.

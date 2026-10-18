@@ -1,0 +1,7 @@
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.lighthouseci/
+# Original museum downloads are large; scripts/fetch-art.mjs re-downloads them. records.json (licence evidence) is kept.
+art-src/*.jpg
