@@ -1,0 +1,19 @@
+node_modules
+dist
+build
+.turbo
+*.log
+.DS_Store
+.env
+.env.local
+
+# React Native
+apps/mobile/ios/Pods
+apps/mobile/ios/build
+apps/mobile/android/.gradle
+apps/mobile/android/app/build
+apps/mobile/android/build
+apps/mobile/android/local.properties
+*.keystore
+!debug.keystore
+.metro-health-check*

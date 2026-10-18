@@ -1,0 +1,12 @@
+{
+  "name": "zahln",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "api": "pnpm --filter @zahln/api dev",
+    "web": "pnpm --filter @zahln/web dev",
+    "mobile": "pnpm --filter @zahln/mobile start",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}
