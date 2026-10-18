@@ -183,7 +183,7 @@ own line instead of truncating.
 - The screen-reader label reads the amount naturally ("sechs Euro dreißig"), not "6 comma 3 0".
 
 ### Keypad
-- 3×4 grid: 1–9, `,`, 0, ⌫. Keys at least 64 pt; a light haptic on every press.
+- 3×4 grid: 1–9, `00`, 0, ⌫ (no comma key: entry is cents-first). Keys at least 64 pt; a light haptic on every press.
 - **Fills from the cents side:** typing 6 → 3 → 0 gives `0,06 → 0,63 → 6,30 €`, so there are no comma mistakes. Long-press ⌫ clears.
 - Primary button below: **"6,30 € kassieren"**, disabled at 0.
 - The till has **Katalog / Betrag** tabs.

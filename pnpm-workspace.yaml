@@ -1,3 +1,13 @@
 packages:
   - apps/*
   - packages/*
+
+# React Native's Metro and native autolinking expect a flat node_modules.
+nodeLinker: hoisted
+
+# Only these dependencies may run install scripts (supply-chain hygiene).
+allowBuilds:
+  esbuild: true
+
+# Don't auto-run `pnpm install` before every script (it can block on prompts in CI and agents).
+verifyDepsBeforeRun: false

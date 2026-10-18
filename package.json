@@ -1,12 +1,26 @@
 {
   "name": "zahln",
   "private": true,
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
+    "dev": "turbo run dev",
     "api": "pnpm --filter @zahln/api dev",
     "web": "pnpm --filter @zahln/web dev",
     "mobile": "pnpm --filter @zahln/mobile start",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "db:up": "docker compose up -d --wait",
+    "db:migrate": "pnpm --filter @zahln/api db:migrate",
+    "db:seed": "pnpm --filter @zahln/api db:seed",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "turbo": "2.11.9",
+    "typescript": "5.9.3"
   }
 }

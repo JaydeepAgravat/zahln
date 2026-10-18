@@ -121,7 +121,7 @@ pnpm dlx shadcn@latest add table button dialog input select badge switch sheet
 
 ## Done when
 - [ ] **Act 3 works live:**
-  - [ ] Free → Pro unlocks dynamic QR on the till within 2 s
+  - [ ] Döner Ali Free → Pro unlocks dynamic QR on the till within 2 s
   - [ ] The `nfc_pay` switch hides Tap to Pay
   - [ ] Raising `minSupportedVersion` blocks the app
   - [ ] Lowering it recovers

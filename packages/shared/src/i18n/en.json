@@ -1,0 +1,38 @@
+{
+  "payment": {
+    "status": {
+      "paid": "Paid",
+      "checking": "Checking",
+      "notCharged": "Not charged",
+      "expired": "Expired",
+      "insufficientBalance": "Not enough balance",
+      "failed": "Failed",
+      "refunded": "Refunded",
+      "partiallyRefunded": "Partially refunded"
+    },
+    "explain": {
+      "paid": "You paid {{amount}} to {{merchant}}.",
+      "checking": "We're checking with your bank. This usually takes 3 seconds.",
+      "notCharged": "No money was taken.",
+      "expired": "This code has expired. No money was taken.",
+      "insufficientBalance": "Your balance doesn't cover {{amount}}. No money was taken.",
+      "failed": "Something went wrong. No money was taken."
+    },
+    "actions": {
+      "payWithFaceId": "Pay with Face ID · {{amount}}",
+      "retry": "Try again",
+      "topUp": "Top up",
+      "newCode": "Show new code"
+    }
+  },
+  "till": {
+    "charge": "Charge {{amount}}",
+    "createQr": "Create QR",
+    "waitingForScan": "Waiting for scan",
+    "customerReviewing": "Customer is reviewing…",
+    "timeLeft": "{{time}} left",
+    "uniqueCode": "Unique to this payment",
+    "catalogue": "Catalogue",
+    "amount": "Amount"
+  }
+}

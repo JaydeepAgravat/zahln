@@ -235,7 +235,7 @@ Interviewers at a founding-team stage want to hear the trade-off, not a library 
 ## 8. Tooling
 
 ### 8.1 pnpm + Turborepo
-- pnpm workspaces with `node-linker=hoisted` (Metro and native autolinking prefer a flat `node_modules`);
+- pnpm workspaces with `nodeLinker: hoisted` in `pnpm-workspace.yaml` (Metro and native autolinking prefer a flat `node_modules`);
   Turborepo caches `typecheck`, `test` and `build` per package.
 - **If they ask** *"Monorepo pain with React Native?"*: "Metro needs `watchFolders` for the shared package, there must be a single
   copy of `react`/`react-native`, and autolinking has to resolve from the app folder. Hoisting solves most of it."

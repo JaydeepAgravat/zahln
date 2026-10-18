@@ -77,7 +77,7 @@ student twice, and how this is the honest version of "the app holds the payment"
 
 **Act 3: Change the app without a release (90 s)**
 In the console:
-1. Switch Café Mila from **Free → Pro**: dynamic QR appears on the till (on Free it only had the static @handle QR).
+1. Switch **Döner Ali** from **Free → Pro**: dynamic QR appears on the till (on Free it only had the static @handle QR). Café Mila is on Business because the catalogue is a Business feature.
 2. Toggle the `nfc_pay` kill switch: the "Tap to Pay" button disappears within seconds.
 3. Raise `min_supported_version`: a blocking "Update required" screen. Lower it again: the app recovers.
 

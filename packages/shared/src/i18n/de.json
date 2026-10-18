@@ -1,0 +1,38 @@
+{
+  "payment": {
+    "status": {
+      "paid": "Bezahlt",
+      "checking": "Wird geprüft",
+      "notCharged": "Nicht belastet",
+      "expired": "Abgelaufen",
+      "insufficientBalance": "Guthaben reicht nicht",
+      "failed": "Fehlgeschlagen",
+      "refunded": "Erstattet",
+      "partiallyRefunded": "Teilweise erstattet"
+    },
+    "explain": {
+      "paid": "{{amount}} an {{merchant}} bezahlt.",
+      "checking": "Wir fragen bei deiner Bank nach. Dauert meist 3 Sekunden.",
+      "notCharged": "Kein Geld abgebucht.",
+      "expired": "Dieser Code ist abgelaufen. Es wurde kein Geld abgebucht.",
+      "insufficientBalance": "Dein Guthaben reicht für {{amount}} nicht. Es wurde kein Geld abgebucht.",
+      "failed": "Etwas ist schiefgelaufen. Es wurde kein Geld abgebucht."
+    },
+    "actions": {
+      "payWithFaceId": "Mit Face ID bezahlen · {{amount}}",
+      "retry": "Erneut versuchen",
+      "topUp": "Aufladen",
+      "newCode": "Neuen Code anzeigen"
+    }
+  },
+  "till": {
+    "charge": "{{amount}} kassieren",
+    "createQr": "QR erstellen",
+    "waitingForScan": "Warten auf Scan",
+    "customerReviewing": "Kunde prüft…",
+    "timeLeft": "Noch {{time}}",
+    "uniqueCode": "Einmalig für diese Zahlung",
+    "catalogue": "Katalog",
+    "amount": "Betrag"
+  }
+}
