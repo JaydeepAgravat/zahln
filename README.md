@@ -5,6 +5,22 @@ It has a merchant till with a one-time QR code, a student wallet, a realistic pa
 
 > Work in progress. The code is built day by day following the guides in [`docs/days`](docs/days/README.md).
 
+## Run it
+```bash
+cp .env.example .env
+pnpm install
+pnpm db:up && pnpm db:migrate && pnpm db:seed
+pnpm api          # API on :4000 (OTP is always 123456 in dev)
+pnpm mobile       # Metro
+cd apps/mobile/ios && pod install && cd -
+pnpm --filter @zahln/mobile ios       # or: android
+```
+Demo logins: `0151 0000 0001` (Lena, student) · `0151 0000 0010` (Mila, Café Mila).
+
+| | |
+|---|---|
+| ![Welcome](docs/screenshots/day2-ios-welcome.png) | ![Wallet dark](docs/screenshots/day2-ios-wallet-dark.png) |
+
 ## Docs
 - [Plan](docs/PLAN.md): product understanding, demo script, architecture, schedule
 - [Tech decisions](docs/DECISIONS.md): every library choice, its trade-offs, and the interview questions it answers

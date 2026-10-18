@@ -34,5 +34,110 @@
     "uniqueCode": "Einmalig für diese Zahlung",
     "catalogue": "Katalog",
     "amount": "Betrag"
+  },
+  "a11y": {
+    "amountHidden": "Betrag ausgeblendet",
+    "delete": "Löschen",
+    "useBiometrics": "Mit Biometrie entsperren",
+    "pinProgress": "{{count}} von {{total}} Ziffern eingegeben"
+  },
+  "common": {
+    "continue": "Weiter",
+    "back": "Zurück",
+    "skip": "Überspringen",
+    "tryAgain": "Erneut versuchen",
+    "networkError": "Keine Verbindung. Bitte prüfe dein Internet.",
+    "devHint": "Demo: Code {{code}}"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bezahlen ohne Gebühren.",
+      "subtitle": "Direkt von Konto zu Konto über SEPA Instant. Kein Kartennetz, keine Hardware.",
+      "payer": "Ich bezahle",
+      "payerHint": "Mit dem Handy in der Mensa, im Café, überall.",
+      "merchant": "Ich kassiere",
+      "merchantHint": "Zahlungen annehmen, ohne Terminal."
+    },
+    "phone": {
+      "title": "Deine Handynummer",
+      "subtitle": "Wir schicken dir einen Code per SMS.",
+      "label": "Handynummer",
+      "placeholder": "0151 2345 6789",
+      "invalid": "Bitte gib eine deutsche Handynummer ein."
+    },
+    "otp": {
+      "title": "Code eingeben",
+      "subtitle": "Gesendet an {{phone}}",
+      "label": "6-stelliger Code",
+      "invalid": "Der Code stimmt nicht.",
+      "expired": "Der Code ist abgelaufen. Fordere einen neuen an.",
+      "tooMany": "Zu viele Versuche. Fordere einen neuen Code an.",
+      "resend": "Neuen Code senden"
+    },
+    "name": {
+      "title": "Wie heißt du?",
+      "label": "Vor- und Nachname",
+      "invalid": "Bitte gib deinen Namen ein."
+    },
+    "merchant": {
+      "title": "Dein Geschäft",
+      "subtitle": "Dieses Handy wird zur Kasse für:",
+      "none": "Diese Nummer gehört zu keinem Geschäft. Für die Demo: 0151 0000 0010 (Café Mila).",
+      "role": {
+        "owner": "Inhaber:in",
+        "manager": "Manager:in",
+        "staff": "Mitarbeiter:in"
+      }
+    },
+    "pin": {
+      "createTitle": "PIN festlegen",
+      "createSubtitle": "6 Ziffern. Damit schützt du Zahlungen und die App.",
+      "confirmTitle": "PIN wiederholen",
+      "weak": "Diese PIN ist zu leicht zu erraten.",
+      "mismatch": "Die PINs stimmen nicht überein."
+    },
+    "biometrics": {
+      "title": "{{type}} aktivieren?",
+      "subtitle": "Entsperre die App und bestätige Zahlungen mit {{type}}. Deine PIN bleibt der Ersatz.",
+      "enable": "{{type}} aktivieren",
+      "notAvailable": "Auf diesem Gerät ist keine Biometrie eingerichtet. Du nutzt deine PIN.",
+      "prompt": "Zahln entsperren"
+    },
+    "finishing": "Gerät wird eingerichtet…"
+  },
+  "lock": {
+    "title": "Willkommen zurück",
+    "subtitle": "Gib deine PIN ein",
+    "wrong": "Falsche PIN. Noch {{left}} Versuche vor der Sperre.",
+    "locked": "Zu viele Versuche. Warte {{seconds}} Sekunden.",
+    "usePin": "PIN verwenden",
+    "prompt": "Zahln entsperren",
+    "cancel": "Abbrechen"
+  },
+  "home": {
+    "balance": "Guthaben",
+    "hello": "Hallo, {{name}}",
+    "merchantBalance": "Heute eingenommen",
+    "tillComingSoon": "Die Kasse kommt an Tag 3.",
+    "scanComingSoon": "Bezahlen per QR kommt an Tag 3.",
+    "showBalance": "Guthaben anzeigen",
+    "hideBalance": "Guthaben ausblenden"
+  },
+  "tabs": {
+    "wallet": "Wallet",
+    "till": "Kasse",
+    "settings": "Einstellungen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "theme": "Darstellung",
+    "themeSystem": "System",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "lockNow": "Jetzt sperren",
+    "signOut": "Abmelden",
+    "biometrics": "Entsperren mit Biometrie",
+    "account": "Konto"
   }
 }

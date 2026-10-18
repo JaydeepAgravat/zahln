@@ -88,24 +88,38 @@ export const spacing = {
 export const layout = { gutter: 20, minTouch: 48, keypadKey: 64, payButton: 56 } as const;
 export const radius = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, full: 999 } as const;
 
+/**
+ * Font files are named after their PostScript names, so the same string works on iOS and Android.
+ * Weight is chosen by family (Android can't synthesise weights for custom fonts).
+ * Inter Display isn't served as a static file by Google Fonts, so amounts use Inter SemiBold + tight tracking.
+ */
 export const fontFamily = {
-  ui: 'Inter',
-  display: 'InterDisplay',
+  regular: 'Inter-Regular',
+  medium: 'Inter-Medium',
+  semibold: 'Inter-SemiBold',
 } as const;
+export type FontWeightName = keyof typeof fontFamily;
 
 export const typeScale = {
-  amountHero: { size: 56, lineHeight: 60, weight: '600', tabular: true, tracking: -0.02, family: 'display' },
-  amountLg: { size: 40, lineHeight: 44, weight: '600', tabular: true, tracking: 0, family: 'display' },
-  display: { size: 32, lineHeight: 38, weight: '600', tabular: false, tracking: 0, family: 'display' },
-  title: { size: 24, lineHeight: 30, weight: '600', tabular: false, tracking: 0, family: 'ui' },
-  headline: { size: 20, lineHeight: 26, weight: '600', tabular: false, tracking: 0, family: 'ui' },
-  body: { size: 17, lineHeight: 24, weight: '400', tabular: false, tracking: 0, family: 'ui' },
-  callout: { size: 15, lineHeight: 20, weight: '400', tabular: false, tracking: 0, family: 'ui' },
-  footnote: { size: 13, lineHeight: 18, weight: '400', tabular: false, tracking: 0, family: 'ui' },
-  caption: { size: 12, lineHeight: 16, weight: '500', tabular: false, tracking: 0.02, family: 'ui' },
-  keypadDigit: { size: 28, lineHeight: 32, weight: '500', tabular: true, tracking: 0, family: 'ui' },
+  amountHero: { size: 56, lineHeight: 60, weight: 'semibold', tabular: true, tracking: -0.02 },
+  amountLg: { size: 40, lineHeight: 44, weight: 'semibold', tabular: true, tracking: -0.01 },
+  display: { size: 32, lineHeight: 38, weight: 'semibold', tabular: false, tracking: -0.01 },
+  title: { size: 24, lineHeight: 30, weight: 'semibold', tabular: false, tracking: 0 },
+  headline: { size: 20, lineHeight: 26, weight: 'semibold', tabular: false, tracking: 0 },
+  body: { size: 17, lineHeight: 24, weight: 'regular', tabular: false, tracking: 0 },
+  callout: { size: 15, lineHeight: 20, weight: 'regular', tabular: false, tracking: 0 },
+  footnote: { size: 13, lineHeight: 18, weight: 'regular', tabular: false, tracking: 0 },
+  caption: { size: 12, lineHeight: 16, weight: 'medium', tabular: false, tracking: 0.02 },
+  keypadDigit: { size: 28, lineHeight: 32, weight: 'medium', tabular: true, tracking: 0 },
 } as const;
 export type TypeStyle = keyof typeof typeScale;
+export type TypeSpec = {
+  size: number;
+  lineHeight: number;
+  weight: FontWeightName;
+  tabular: boolean;
+  tracking: number;
+};
 
 /** Max Dynamic Type multiplier for amounts; beyond this they wrap instead of growing. */
 export const AMOUNT_MAX_FONT_SCALE = 1.5;

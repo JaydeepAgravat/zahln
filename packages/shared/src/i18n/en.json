@@ -34,5 +34,110 @@
     "uniqueCode": "Unique to this payment",
     "catalogue": "Catalogue",
     "amount": "Amount"
+  },
+  "a11y": {
+    "amountHidden": "Amount hidden",
+    "delete": "Delete",
+    "useBiometrics": "Unlock with biometrics",
+    "pinProgress": "{{count}} of {{total}} digits entered"
+  },
+  "common": {
+    "continue": "Continue",
+    "back": "Back",
+    "skip": "Skip",
+    "tryAgain": "Try again",
+    "networkError": "No connection. Please check your internet.",
+    "devHint": "Demo: code {{code}}"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Pay with zero fees.",
+      "subtitle": "Straight from account to account over SEPA Instant. No card network, no hardware.",
+      "payer": "I pay",
+      "payerHint": "With your phone at the Mensa, the café, anywhere.",
+      "merchant": "I get paid",
+      "merchantHint": "Accept payments without a terminal."
+    },
+    "phone": {
+      "title": "Your mobile number",
+      "subtitle": "We'll text you a code.",
+      "label": "Mobile number",
+      "placeholder": "0151 2345 6789",
+      "invalid": "Please enter a German mobile number."
+    },
+    "otp": {
+      "title": "Enter the code",
+      "subtitle": "Sent to {{phone}}",
+      "label": "6-digit code",
+      "invalid": "That code is not right.",
+      "expired": "That code has expired. Request a new one.",
+      "tooMany": "Too many attempts. Request a new code.",
+      "resend": "Send a new code"
+    },
+    "name": {
+      "title": "What's your name?",
+      "label": "First and last name",
+      "invalid": "Please enter your name."
+    },
+    "merchant": {
+      "title": "Your business",
+      "subtitle": "This phone becomes the till for:",
+      "none": "This number doesn't belong to a business. For the demo: 0151 0000 0010 (Café Mila).",
+      "role": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "staff": "Staff"
+      }
+    },
+    "pin": {
+      "createTitle": "Choose a PIN",
+      "createSubtitle": "6 digits. It protects payments and the app.",
+      "confirmTitle": "Repeat your PIN",
+      "weak": "That PIN is too easy to guess.",
+      "mismatch": "The PINs don't match."
+    },
+    "biometrics": {
+      "title": "Turn on {{type}}?",
+      "subtitle": "Unlock the app and confirm payments with {{type}}. Your PIN stays as the fallback.",
+      "enable": "Turn on {{type}}",
+      "notAvailable": "No biometrics are set up on this device. You'll use your PIN.",
+      "prompt": "Unlock Zahln"
+    },
+    "finishing": "Setting up this device…"
+  },
+  "lock": {
+    "title": "Welcome back",
+    "subtitle": "Enter your PIN",
+    "wrong": "Wrong PIN. {{left}} attempts left before a pause.",
+    "locked": "Too many attempts. Wait {{seconds}} seconds.",
+    "usePin": "Use PIN",
+    "prompt": "Unlock Zahln",
+    "cancel": "Cancel"
+  },
+  "home": {
+    "balance": "Balance",
+    "hello": "Hi, {{name}}",
+    "merchantBalance": "Taken today",
+    "tillComingSoon": "The till arrives on Day 3.",
+    "scanComingSoon": "Paying by QR arrives on Day 3.",
+    "showBalance": "Show balance",
+    "hideBalance": "Hide balance"
+  },
+  "tabs": {
+    "wallet": "Wallet",
+    "till": "Till",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Appearance",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "lockNow": "Lock now",
+    "signOut": "Sign out",
+    "biometrics": "Unlock with biometrics",
+    "account": "Account"
   }
 }

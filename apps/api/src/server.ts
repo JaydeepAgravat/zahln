@@ -7,9 +7,10 @@ const { db, close } = createDb(env.DATABASE_URL);
 const app = await buildApp({
   db,
   chaosEnabled: env.CHAOS_ENABLED,
+  devAuth: env.DEV_AUTH,
   logger: {
     level: env.LOG_LEVEL,
-    redact: ['req.headers.authorization', 'req.headers["x-user-id"]'],
+    redact: ['req.headers.authorization', 'req.headers["x-user-id"]', 'req.headers["x-device-id"]'],
     transport: process.stdout.isTTY ? { target: 'pino-pretty' } : undefined,
   },
 });

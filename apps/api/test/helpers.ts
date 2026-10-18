@@ -21,7 +21,14 @@ export function setupTestApp() {
   const chaos = new Chaos();
   chaos.slowMs = [300, 400];
   const rail = new SimulatedSepaInstantRail(chaos, 0);
-  const appPromise = buildApp({ db: handle.db, chaos, rail, chaosEnabled: true, logger: false });
+  const appPromise = buildApp({
+    db: handle.db,
+    chaos,
+    rail,
+    chaosEnabled: true,
+    devAuth: true,
+    logger: false,
+  });
 
   beforeEach(async () => {
     chaos.set('ok');
@@ -42,18 +49,18 @@ export function setupTestApp() {
   });
 
   const call = async (
-    method: 'GET' | 'POST',
+    method: 'GET' | 'POST' | 'DELETE',
     url: string,
-    opts: { user?: string; key?: string; body?: unknown } = {},
+    opts: { user?: string; key?: string; body?: unknown; headers?: Record<string, string> } = {},
   ) => {
     const app = await appPromise;
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = { ...opts.headers };
     if (opts.user) headers['x-user-id'] = opts.user;
     if (opts.key) headers['idempotency-key'] = opts.key;
     const request: InjectOptions = { method, url, headers };
     if (opts.body !== undefined) request.payload = opts.body as InjectOptions['payload'];
     const res = await app.inject(request);
-    return { status: res.statusCode, body: res.json(), headers: res.headers };
+    return { status: res.statusCode, body: res.body ? res.json() : null, headers: res.headers };
   };
 
   const api = {

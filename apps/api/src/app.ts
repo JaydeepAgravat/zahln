@@ -12,11 +12,17 @@ import { Chaos } from './rail/chaos';
 import { SimulatedSepaInstantRail } from './rail/simulatedSepaInstant';
 import type { PaymentRail } from './rail/types';
 import { routes } from './routes';
+import { authRoutes } from './routes/auth';
 
 /** Never log credentials, account identifiers or balances. */
 const REDACT = [
   'req.headers.authorization',
   'req.headers["x-user-id"]',
+  'req.headers["x-device-id"]',
+  '*.sessionToken',
+  '*.verificationToken',
+  '*.code',
+  '*.devCode',
   '*.iban',
   '*.balanceCents',
   '*.pin',
@@ -28,6 +34,8 @@ export type AppOptions = {
   rail?: PaymentRail;
   chaos?: Chaos;
   chaosEnabled?: boolean;
+  /** Allow the `x-user-id` shortcut and fixed OTP codes. Never in production. */
+  devAuth?: boolean;
   logger?: FastifyServerOptions['logger'];
 };
 
@@ -53,7 +61,9 @@ export async function buildApp(options: AppOptions) {
   });
 
   await app.register(cors, { origin: true });
-  await app.register(authPlugin, { db: options.db });
+  const devAuth = options.devAuth ?? false;
+  await app.register(authPlugin, { db: options.db, devAuth });
+  await app.register(authRoutes, { db: options.db, devOtp: devAuth });
   await app.register(routes, { db: options.db, rail, chaos, chaosEnabled: options.chaosEnabled ?? false });
 
   return Object.assign(app, { chaos });

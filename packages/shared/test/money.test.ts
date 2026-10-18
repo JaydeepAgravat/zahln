@@ -50,3 +50,13 @@ describe('sumCents', () => {
     expect(() => sumCents([0.1, 0.2])).toThrow(TypeError);
   });
 });
+
+describe('spokenMoney', () => {
+  it('gives screen readers a natural label', async () => {
+    const { spokenMoney } = await import('../src/money');
+    expect(spokenMoney(630, 'de')).toBe('6 Euro 30 Cent');
+    expect(spokenMoney(500, 'de')).toBe('5 Euro');
+    expect(spokenMoney(101, 'en')).toBe('1 euro 1 cent');
+    expect(spokenMoney(-630, 'en')).toBe('minus 6 euros 30 cents');
+  });
+});

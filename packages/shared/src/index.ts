@@ -1,3 +1,4 @@
+export * from './auth';
 export * from './money';
 export * from './plans';
 export * from './schemas';

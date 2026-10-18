@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./tokens": "./src/tokens/index.ts",
-    "./i18n": "./src/i18n/index.ts"
+    "./i18n": "./src/i18n/index.ts",
+    "./tokens/tailwind": "./src/tokens/tailwind.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

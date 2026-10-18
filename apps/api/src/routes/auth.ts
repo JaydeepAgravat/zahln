@@ -1,0 +1,36 @@
+import { RegisterDeviceSchema, RequestOtpSchema, VerifyOtpSchema } from '@zahln/shared';
+import type { FastifyInstance } from 'fastify';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
+import type { Db } from '../db/client';
+import { me, registerDevice, requestOtp, revokeDevice, verifyOtp } from '../lib/auth';
+import { ApiError } from '../lib/errors';
+import { requireActor } from '../plugins/auth';
+
+export async function authRoutes(fastify: FastifyInstance, deps: { db: Db; devOtp: boolean }) {
+  const app = fastify.withTypeProvider<ZodTypeProvider>();
+  const { db } = deps;
+
+  app.post('/auth/otp', { schema: { body: RequestOtpSchema } }, async (req, reply) => {
+    return reply.status(201).send(await requestOtp(db, req.body.phone, { devOtp: deps.devOtp }));
+  });
+
+  app.post('/auth/verify', { schema: { body: VerifyOtpSchema } }, async (req) => {
+    const result = await verifyOtp(db, req.body.challengeId, req.body.code);
+    if (!result.ok) throw new ApiError(400, 'otp_invalid', 'wrong code');
+    const { ok: _ok, ...body } = result;
+    return body;
+  });
+
+  app.post('/devices', { schema: { body: RegisterDeviceSchema } }, async (req, reply) => {
+    return reply.status(201).send(await registerDevice(db, req.body));
+  });
+
+  app.get('/me', async (req) => me(db, requireActor(req).userId));
+
+  /** Sign out: revoke this device's session. */
+  app.delete('/devices/current', async (req, reply) => {
+    const actor = requireActor(req);
+    if (actor.deviceId) await revokeDevice(db, actor.deviceId);
+    return reply.status(204).send();
+  });
+}

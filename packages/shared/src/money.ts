@@ -77,3 +77,18 @@ export function sumCents(values: readonly Cents[]): Cents {
     return total + value;
   }, 0);
 }
+
+/**
+ * What a screen reader should say. VoiceOver reads "6,30 €" inconsistently ("6 comma 3 0"),
+ * so amounts get an explicit label: "6 Euro 30 Cent" / "6 euros 30 cents".
+ */
+export function spokenMoney(cents: Cents, locale: AppLocale = 'de'): string {
+  assertCents(cents);
+  const sign = cents < 0 ? 'minus ' : '';
+  const abs = Math.abs(cents);
+  const euros = Math.floor(abs / 100);
+  const rest = abs % 100;
+  if (locale === 'de') return `${sign}${euros} Euro${rest ? ` ${rest} Cent` : ''}`;
+  const e = `${euros} ${euros === 1 ? 'euro' : 'euros'}`;
+  return `${sign}${e}${rest ? ` ${rest} ${rest === 1 ? 'cent' : 'cents'}` : ''}`;
+}

@@ -228,3 +228,41 @@ export const events = pgTable(
   },
   (t) => [index().on(t.aggregateId, t.id)],
 );
+
+// ---------- Auth (Day 2) ----------
+
+export const platformEnum = pgEnum('platform', ['ios', 'android']);
+
+/** SMS one-time codes. The code and the verification token are stored hashed. */
+export const authChallenges = pgTable(
+  'auth_challenges',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    phone: text().notNull(),
+    codeHash: text().notNull(),
+    attempts: integer().notNull().default(0),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    verifiedAt: timestamp({ withTimezone: true }),
+    verificationTokenHash: text().unique(),
+    consumedAt: timestamp({ withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.phone, t.createdAt)],
+);
+
+/** One row per bound device. The session token is only stored as a SHA-256 hash. */
+export const devices = pgTable(
+  'devices',
+  {
+    id: uuid().primaryKey(),
+    userId: text()
+      .notNull()
+      .references(() => users.id),
+    platform: platformEnum().notNull(),
+    sessionTokenHash: text().notNull().unique(),
+    createdAt: createdAt(),
+    lastSeenAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    revokedAt: timestamp({ withTimezone: true }),
+  },
+  (t) => [index().on(t.userId)],
+);

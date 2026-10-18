@@ -58,6 +58,8 @@ const MENSA_CATALOGUE = [
 ];
 
 const TABLES = [
+  'devices',
+  'auth_challenges',
   'events',
   'idempotency_keys',
   'refunds',
