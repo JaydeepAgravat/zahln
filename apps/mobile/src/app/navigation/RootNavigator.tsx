@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DarkTheme, DefaultTheme, NavigationContainer, type Theme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { fontFamily } from '@zahln/shared/tokens';
 import { useMemo } from 'react';
 import { useTheme } from '../../ds';
 import { WalletScreen } from '../../features/consumer/WalletScreen';
@@ -17,6 +16,7 @@ import { SettingsScreen } from '../../features/settings/SettingsScreen';
 import { useT } from '../../lib/i18n';
 import { usePrefs } from '../../lib/prefs';
 import { useSession } from '../../lib/session';
+import { TabBar } from './TabBar';
 import type { ConsumerTabParamList, MerchantTabParamList, OnboardingStackParamList } from './types';
 
 const Onboarding = createNativeStackNavigator<OnboardingStackParamList>();
@@ -30,6 +30,7 @@ function OnboardingStack() {
     <Onboarding.Navigator
       screenOptions={{
         headerTitle: '',
+        animation: 'slide_from_right',
         headerShadowVisible: false,
         headerBackButtonDisplayMode: 'minimal',
         headerTintColor: colors.brand,
@@ -53,29 +54,17 @@ function OnboardingStack() {
   );
 }
 
-function useTabOptions() {
-  const { colors } = useTheme();
-  return {
-    headerShown: false,
-    tabBarActiveTintColor: colors.brand,
-    tabBarInactiveTintColor: colors.textTertiary,
-    tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-    tabBarLabelStyle: { fontFamily: fontFamily.medium, fontSize: 12 },
-    tabBarIcon: () => null,
-    tabBarIconStyle: { display: 'none' as const },
-  };
-}
+const tabOptions = { headerShown: false } as const;
 
 function ConsumerApp() {
   const { t } = useT();
-  const options = useTabOptions();
   return (
-    <ConsumerTabs.Navigator screenOptions={options}>
+    <ConsumerTabs.Navigator screenOptions={tabOptions} tabBar={(props) => <TabBar {...props} />}>
       <ConsumerTabs.Screen name="Wallet" component={WalletScreen} options={{ title: t('tabs.wallet') }} />
       <ConsumerTabs.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: t('tabs.settings') }}
+        options={{ title: t('tabs.profile') }}
       />
     </ConsumerTabs.Navigator>
   );
@@ -83,9 +72,8 @@ function ConsumerApp() {
 
 function MerchantApp() {
   const { t } = useT();
-  const options = useTabOptions();
   return (
-    <MerchantTabs.Navigator screenOptions={options}>
+    <MerchantTabs.Navigator screenOptions={tabOptions} tabBar={(props) => <TabBar {...props} />}>
       <MerchantTabs.Screen name="Till" component={TillScreen} options={{ title: t('tabs.till') }} />
       <MerchantTabs.Screen
         name="MerchantWallet"
@@ -95,7 +83,7 @@ function MerchantApp() {
       <MerchantTabs.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ title: t('tabs.settings') }}
+        options={{ title: t('tabs.profile') }}
       />
     </MerchantTabs.Navigator>
   );

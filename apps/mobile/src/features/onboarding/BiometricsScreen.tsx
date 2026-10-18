@@ -1,15 +1,17 @@
 import { SessionResponseSchema } from '@zahln/shared';
 import { useState } from 'react';
 import { Platform, View } from 'react-native';
-import { Button, Card, Screen, Text } from '../../ds';
+import { Button, FaceScanIllustration, Icon, ShieldIllustration, Text } from '../../ds';
 import { api } from '../../lib/api';
 import { useBiometry } from '../../lib/biometrics';
+import { haptic } from '../../lib/haptics';
 import { useT } from '../../lib/i18n';
 import { usePrefs } from '../../lib/prefs';
 import { randomSecret } from '../../lib/random';
 import { enableBiometricUnlock, savePin, saveSession, unlockWithBiometrics } from '../../lib/secure';
 import { useSession } from '../../lib/session';
 import { useDraft } from './draft';
+import { OnboardingLayout } from './OnboardingLayout';
 
 /**
  * Last step: optionally enable biometrics, then bind this device to the account.
@@ -54,14 +56,17 @@ export function BiometricsScreen() {
       await savePin(draft.pin);
       await saveSession({ token: session.sessionToken, userId: session.user.id });
       prefs.setBiometricsEnabled(biometricsOn);
+      prefs.setFirstName(session.user.name.split(' ')[0] ?? null);
       prefs.setRole(draft.role, draft.role === 'merchant' ? draft.merchantId : null);
       draft.clear();
+      haptic.success();
       completeOnboarding(
         { token: session.sessionToken, userId: session.user.id },
         session.user,
         session.memberships,
       );
     } catch {
+      haptic.error();
       setError(t('common.networkError'));
       setBusy(false);
     }
@@ -71,19 +76,32 @@ export function BiometricsScreen() {
   const type = biometry.label;
 
   return (
-    <Screen
+    <OnboardingLayout
+      step="biometrics"
+      illustration={
+        biometry.available ? <FaceScanIllustration size={120} /> : <ShieldIllustration size={104} />
+      }
+      title={
+        biometry.available ? t('onboarding.biometrics.title', { type }) : t('onboarding.biometrics.doneTitle')
+      }
+      subtitle={
+        biometry.available
+          ? t('onboarding.biometrics.subtitle', { type })
+          : t('onboarding.biometrics.notAvailable')
+      }
       footer={
         biometry.available ? (
-          <View className="gap-3">
+          <View className="gap-2">
             <Button
               title={t('onboarding.biometrics.enable', { type })}
-              icon={biometry.glyph}
+              icon={biometry.icon ?? undefined}
               onPress={() => finish(true)}
               loading={busy}
             />
             <Button
               title={t('common.skip')}
               variant="tertiary"
+              size="md"
               onPress={() => finish(false)}
               disabled={busy}
             />
@@ -93,29 +111,17 @@ export function BiometricsScreen() {
         )
       }
     >
-      <View className="flex-1 justify-center gap-3">
-        <Text variant="display" className="text-center" importantForAccessibility="no">
-          {biometry.glyph || '•'}
-        </Text>
-        <Text variant="title" accessibilityRole="header" className="text-center">
-          {t('onboarding.biometrics.title', { type })}
-        </Text>
-        <Text tone="secondary" className="text-center">
-          {biometry.available
-            ? t('onboarding.biometrics.subtitle', { type })
-            : t('onboarding.biometrics.notAvailable')}
-        </Text>
-        {busy ? (
-          <Text variant="footnote" tone="tertiary" className="text-center">
-            {t('onboarding.finishing')}
+      {error ? (
+        <View
+          className="flex-row items-center gap-2 rounded-md bg-danger-subtle p-3"
+          accessibilityLiveRegion="polite"
+        >
+          <Icon name="warning" size={18} color="danger" weight="fill" />
+          <Text tone="danger" className="flex-1">
+            {error}
           </Text>
-        ) : null}
-        {error ? (
-          <Card className="bg-danger-subtle">
-            <Text className="text-danger">{error}</Text>
-          </Card>
-        ) : null}
-      </View>
-    </Screen>
+        </View>
+      ) : null}
+    </OnboardingLayout>
   );
 }

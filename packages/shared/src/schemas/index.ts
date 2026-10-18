@@ -123,6 +123,8 @@ export const WalletTransactionSchema = z.object({
   kind: z.enum(['payment', 'refund', 'topup', 'payout']),
   amountCents: z.number().int(), // signed from the wallet's point of view
   counterparty: z.string(),
+  /** Display name: merchant or person on the other side, or empty for system accounts (top-up, payout). */
+  counterpartyName: z.string(),
   reference: z.string(),
   createdAt: z.iso.datetime({ offset: true }),
 });

@@ -422,12 +422,18 @@ export async function getWallet(db: DbOrTx, account: string, limit = 20): Promis
     reference: string;
     created_at: Date | string;
     counterparty: string | null;
+    counterparty_name: string;
   }>(sql`
-    SELECT lt.id, lt.kind, p.amount_cents, lt.reference, lt.created_at,
-           (SELECT p2.account_id FROM postings p2
-             WHERE p2.transaction_id = p.transaction_id AND p2.account_id <> p.account_id LIMIT 1) AS counterparty
+    SELECT lt.id, lt.kind, p.amount_cents, lt.reference, lt.created_at, cp.account_id AS counterparty,
+           -- Data minimisation: people are shown as "Lena H.", merchants by their business name.
+           COALESCE(m.name, split_part(u.name, ' ', 1) || COALESCE(' ' || left(NULLIF(split_part(u.name, ' ', 2), ''), 1) || '.', ''), '') AS counterparty_name
       FROM postings p
       JOIN ledger_transactions lt ON lt.id = p.transaction_id
+      LEFT JOIN LATERAL (SELECT p2.account_id FROM postings p2
+             WHERE p2.transaction_id = p.transaction_id AND p2.account_id <> p.account_id LIMIT 1) cp ON true
+      LEFT JOIN accounts a ON a.id = cp.account_id
+      LEFT JOIN merchants m ON a.kind = 'merchant_wallet' AND m.id = a.owner_id
+      LEFT JOIN users u ON a.kind = 'consumer_wallet' AND u.id = a.owner_id
      WHERE p.account_id = ${account}
      ORDER BY p.id DESC
      LIMIT ${limit}
@@ -441,6 +447,7 @@ export async function getWallet(db: DbOrTx, account: string, limit = 20): Promis
       kind: r.kind,
       amountCents: Number(r.amount_cents),
       counterparty: r.counterparty ?? '',
+      counterpartyName: r.counterparty_name,
       reference: r.reference,
       createdAt: new Date(r.created_at).toISOString(),
     })),

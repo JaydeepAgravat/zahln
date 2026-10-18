@@ -1,13 +1,14 @@
 import { MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN } from '@zahln/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { Keypad, type KeypadKey, PinDots, Screen, Text } from '../../ds';
+import { Avatar, type KeypadKey, Logo } from '../../ds';
 import { useBiometry } from '../../lib/biometrics';
+import { haptic } from '../../lib/haptics';
 import { useT } from '../../lib/i18n';
 import { usePrefs } from '../../lib/prefs';
 import { checkPin, pinLockedForMs, unlockWithBiometrics } from '../../lib/secure';
 import { useSession } from '../../lib/session';
-import { usePinEntry } from '../onboarding/PinScreens';
+import { PinLayout, usePinEntry } from '../onboarding/PinScreens';
 
 /**
  * Shown on every cold start and after 60 s in the background.
@@ -16,7 +17,7 @@ import { usePinEntry } from '../onboarding/PinScreens';
 export function LockScreen() {
   const { t } = useT();
   const unlock = useSession((s) => s.unlock);
-  const user = useSession((s) => s.user);
+  const firstName = usePrefs((s) => s.firstName);
   const biometricsEnabled = usePrefs((s) => s.biometricsEnabled);
   const biometry = useBiometry();
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,10 @@ export function LockScreen() {
 
   const tryBiometrics = useCallback(async () => {
     const result = await unlockWithBiometrics({ title: t('lock.prompt'), cancel: t('lock.usePin') });
-    if (result === 'ok') await unlock();
+    if (result === 'ok') {
+      haptic.success();
+      await unlock();
+    }
   }, [t, unlock]);
 
   useEffect(() => {
@@ -46,12 +50,14 @@ export function LockScreen() {
     entry.reset();
     if (result.ok) {
       setError(null);
+      haptic.success();
       await unlock();
       return;
     }
+    haptic.error();
     if (result.lockedForMs > 0) {
       setLockedMs(result.lockedForMs);
-      setError(null);
+      setError(t('lock.locked', { seconds: Math.ceil(result.lockedForMs / 1000) }));
     } else {
       setError(t('lock.wrong', { left: MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN - result.failed }));
     }
@@ -59,37 +65,22 @@ export function LockScreen() {
 
   const onKey = (key: KeypadKey) => {
     if (key === 'biometric') return void tryBiometrics();
-    if (error) setError(null);
+    if (error && lockedMs <= 0) setError(null);
     entry.onKey(key);
   };
 
-  const message = lockedMs > 0 ? t('lock.locked', { seconds: Math.ceil(lockedMs / 1000) }) : (error ?? '');
-
   return (
-    <Screen scroll={false}>
-      <View className="flex-1 justify-center gap-3">
-        <Text variant="title" accessibilityRole="header" className="text-center">
-          {user ? t('home.hello', { name: user.name.split(' ')[0] }) : t('lock.title')}
-        </Text>
-        <Text tone="secondary" className="text-center">
-          {t('lock.subtitle')}
-        </Text>
-        <PinDots length={entry.pin.length} error={!!error} />
-        <Text
-          variant="footnote"
-          tone="danger"
-          className="min-h-[18px] text-center"
-          accessibilityLiveRegion="assertive"
-        >
-          {message}
-        </Text>
-      </View>
-      <Keypad
-        mode="pin"
-        onKey={onKey}
-        disabled={lockedMs > 0}
-        biometricGlyph={biometricsEnabled && biometry?.available ? biometry.glyph : null}
-      />
-    </Screen>
+    <PinLayout
+      header={
+        <View className="pb-1">{firstName ? <Avatar name={firstName} size={64} /> : <Logo size={64} />}</View>
+      }
+      title={firstName ? t('lock.hello', { name: firstName }) : t('lock.title')}
+      subtitle={t('lock.subtitle')}
+      error={lockedMs > 0 ? t('lock.locked', { seconds: Math.ceil(lockedMs / 1000) }) : error}
+      pin={entry.pin}
+      onKey={onKey}
+      disabled={lockedMs > 0}
+      biometricIcon={biometricsEnabled && biometry?.available ? biometry.icon : null}
+    />
   );
 }

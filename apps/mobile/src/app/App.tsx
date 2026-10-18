@@ -6,6 +6,7 @@ import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../ds';
+import { ToastHost } from '../ds/Toast';
 import { queryClient } from '../lib/queries';
 import { uuid } from '../lib/random';
 import { getOrCreateDeviceId } from '../lib/secure';
@@ -30,6 +31,7 @@ export function App() {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <RootNavigator />
+            <ToastHost />
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

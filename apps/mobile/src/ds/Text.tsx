@@ -9,19 +9,26 @@ export type TextTone =
   | 'success'
   | 'warning'
   | 'danger'
+  | 'accent'
   | 'on-brand'
-  | 'on-flood';
+  | 'on-flood'
+  | 'on-ink'
+  | 'on-ink-muted';
 
 const toneClass: Record<TextTone, string> = {
   primary: 'text-text-primary',
   secondary: 'text-text-secondary',
   tertiary: 'text-text-tertiary',
-  brand: 'text-brand',
+  // Ember is too light for small text on paper; brand-coloured text uses the deeper brandText token.
+  brand: 'text-brand-text',
   success: 'text-success',
   warning: 'text-warning',
   danger: 'text-danger',
+  accent: 'text-accent-text',
   'on-brand': 'text-on-brand',
   'on-flood': 'text-on-flood',
+  'on-ink': 'text-on-ink',
+  'on-ink-muted': 'text-on-ink-muted',
 };
 
 export type TextProps = RNTextProps & {
@@ -36,7 +43,7 @@ export type TextProps = RNTextProps & {
  */
 export function Text({ variant = 'body', tone = 'primary', className, style, ...rest }: TextProps) {
   const spec = typeScale[variant];
-  const isAmount = variant === 'amountHero' || variant === 'amountLg';
+  const isAmount = variant === 'amountHero' || variant === 'amountLg' || variant === 'hero';
   return (
     <RNText
       className={`${toneClass[tone]} ${className ?? ''}`}

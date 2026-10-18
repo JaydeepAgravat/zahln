@@ -16,6 +16,7 @@
 		BEA8F33960A647DC9FDDF61F /* Inter-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D245514DCB0E49A9B7653A71 /* Inter-Regular.ttf */; };
 		C8F5D09FF48450DF7509E6C7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		EA44E3D6D9544859A1B42357 /* Inter-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8D792C59EB954794A5B6D1F4 /* Inter-SemiBold.ttf */; };
+		56DC86D75B564EE5AB4AA50D /* Inter-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24EC6448196F462B97133CEB /* Inter-Bold.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		8D792C59EB954794A5B6D1F4 /* Inter-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-SemiBold.ttf"; path = "../assets/fonts/Inter-SemiBold.ttf"; sourceTree = "<group>"; };
 		D245514DCB0E49A9B7653A71 /* Inter-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Inter-Regular.ttf"; path = "../assets/fonts/Inter-Regular.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		24EC6448196F462B97133CEB /* Inter-Bold.ttf */ = {isa = PBXFileReference; name = "Inter-Bold.ttf"; path = "../assets/fonts/Inter-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +55,7 @@
 				647EFA5F8B29407B98377EC1 /* Inter-Medium.ttf */,
 				D245514DCB0E49A9B7653A71 /* Inter-Regular.ttf */,
 				8D792C59EB954794A5B6D1F4 /* Inter-SemiBold.ttf */,
+				24EC6448196F462B97133CEB /* Inter-Bold.ttf */,
 			);
 			name = Resources;
 			path = "";
@@ -185,6 +188,7 @@
 				BEA8F33960A647DC9FDDF61F /* Inter-Regular.ttf in Resources */,
 				EA44E3D6D9544859A1B42357 /* Inter-SemiBold.ttf in Resources */,
 				C8F5D09FF48450DF7509E6C7 /* PrivacyInfo.xcprivacy in Resources */,
+				56DC86D75B564EE5AB4AA50D /* Inter-Bold.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

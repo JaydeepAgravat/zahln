@@ -12,6 +12,9 @@ type Prefs = {
   role: Role | null;
   merchantId: string | null;
   biometricsEnabled: boolean;
+  /** First name only, for the lock screen greeting. Not a secret; no balances or IDs here. */
+  firstName: string | null;
+  setFirstName: (name: string | null) => void;
   setLocale: (locale: AppLocale) => void;
   setTheme: (theme: Prefs['theme']) => void;
   setRole: (role: Role | null, merchantId?: string | null) => void;
@@ -33,12 +36,14 @@ const defaults = {
   role: null,
   merchantId: null,
   biometricsEnabled: false,
+  firstName: null,
 };
 
 export const usePrefs = create<Prefs>()(
   persist(
     (set) => ({
       ...defaults,
+      setFirstName: (firstName) => set({ firstName }),
       setLocale: (locale) => set({ locale }),
       setTheme: (theme) => set({ theme }),
       setRole: (role, merchantId = null) => set({ role, merchantId }),

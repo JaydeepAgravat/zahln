@@ -1,7 +1,17 @@
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { accountId, postTransaction } from '../lib/ledger';
 import { createDb, type Db } from './client';
-import { accounts, catalogueItems, merchants, staff, users } from './schema';
+import {
+  accounts,
+  catalogueItems,
+  events,
+  ledgerTransactions,
+  merchants,
+  paymentAttempts,
+  paymentIntents,
+  staff,
+  users,
+} from './schema';
 
 export const SEED = {
   users: {
@@ -57,6 +67,21 @@ const MENSA_CATALOGUE = [
   { sku: 'kaffee', name: 'Kaffee', priceCents: 120, vatRate: 7 },
 ];
 
+/** Realistic recent history for the demo: what Lena paid over the last days. */
+const HISTORY: {
+  merchant: string;
+  sku: string;
+  name: string;
+  cents: number;
+  vat: 0 | 7 | 19;
+  hoursAgo: number;
+}[] = [
+  { merchant: 'mensa-augsburg', sku: 'tagesgericht', name: 'Tagesgericht', cents: 320, vat: 7, hoursAgo: 2 },
+  { merchant: 'cafe-mila', sku: 'flat-white', name: 'Flat White', cents: 350, vat: 7, hoursAgo: 22 },
+  { merchant: 'mensa-augsburg', sku: 'vegan-bowl', name: 'Vegane Bowl', cents: 410, vat: 7, hoursAgo: 26 },
+  { merchant: 'cafe-mila', sku: 'cappuccino', name: 'Cappuccino', cents: 380, vat: 7, hoursAgo: 50 },
+];
+
 const TABLES = [
   'devices',
   'auth_challenges',
@@ -79,7 +104,8 @@ export async function resetDatabase(db: Db) {
   await db.execute(sql.raw(`TRUNCATE ${TABLES.join(', ')} RESTART IDENTITY CASCADE`));
 }
 
-export async function seed(db: Db) {
+/** `history: true` adds a few days of realistic payments for the demo; tests start from a clean slate. */
+export async function seed(db: Db, options: { history?: boolean } = {}) {
   await resetDatabase(db);
 
   await db.transaction(async (tx) => {
@@ -114,8 +140,9 @@ export async function seed(db: Db) {
     ]);
 
     for (const [who, cents] of Object.entries(SEED.startingBalanceCents)) {
+      const createdAt = who === 'lena' ? sql`now() - interval '5 days'` : sql`now()`;
       const user = U[who as keyof typeof SEED.startingBalanceCents];
-      await postTransaction(tx, {
+      const ledgerId = await postTransaction(tx, {
         kind: 'topup',
         reference: `seed:${user.id}`,
         postings: [
@@ -123,6 +150,61 @@ export async function seed(db: Db) {
           { accountId: accountId.consumer(user.id), amountCents: cents },
         ],
       });
+      await tx.update(ledgerTransactions).set({ createdAt }).where(eq(ledgerTransactions.id, ledgerId));
+    }
+
+    if (!options.history) return;
+    // Past payments go through the same tables as real ones (intent → paid attempt → balanced postings).
+    // Oldest first, so ids and timestamps agree; receipt numbers count per merchant.
+    const receipts = new Map<string, number>();
+    const ordered = [...HISTORY].sort((a, b) => b.hoursAgo - a.hoursAgo);
+    for (const [i, h] of ordered.entries()) {
+      const receiptNumber = (receipts.get(h.merchant) ?? 0) + 1;
+      receipts.set(h.merchant, receiptNumber);
+      const at = sql`now() - make_interval(hours => ${h.hoursAgo})`;
+      const [intent] = await tx
+        .insert(paymentIntents)
+        .values({
+          merchantId: h.merchant,
+          createdByUserId: h.merchant === 'cafe-mila' ? U.mila.id : U.sabine.id,
+          amountCents: h.cents,
+          items: [{ sku: h.sku, name: h.name, qty: 1, unitPriceCents: h.cents, vatRate: h.vat }],
+          status: 'paid',
+          receiptNumber,
+          expiresAt: at,
+          paidAt: at,
+          createdAt: at,
+        })
+        .returning({ id: paymentIntents.id });
+      if (!intent) throw new Error('seed intent failed');
+      const [attempt] = await tx
+        .insert(paymentAttempts)
+        .values({
+          intentId: intent.id,
+          payerUserId: U.lena.id,
+          idempotencyKey: `seed-${i}`,
+          status: 'paid',
+          amountCents: h.cents,
+          settledAt: at,
+          createdAt: at,
+        })
+        .returning({ id: paymentAttempts.id });
+      if (!attempt) throw new Error('seed attempt failed');
+      const ledgerId = await postTransaction(tx, {
+        kind: 'payment',
+        reference: attempt.id,
+        postings: [
+          { accountId: accountId.consumer(U.lena.id), amountCents: -h.cents },
+          { accountId: accountId.merchant(h.merchant), amountCents: h.cents },
+        ],
+      });
+      await tx.update(ledgerTransactions).set({ createdAt: at }).where(eq(ledgerTransactions.id, ledgerId));
+      await tx
+        .insert(events)
+        .values({ aggregateId: intent.id, type: 'intent.paid', data: { seeded: true }, createdAt: at });
+    }
+    for (const [merchantId, seq] of receipts) {
+      await tx.update(merchants).set({ receiptSeq: seq }).where(eq(merchants.id, merchantId));
     }
   });
 }
@@ -131,9 +213,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('DATABASE_URL is not set');
   const { db, close } = createDb(url, { max: 1 });
-  await seed(db);
+  await seed(db, { history: true });
   await close();
   process.stdout.write(
-    'seeded: Lena 50,00 €, Jonas 10,00 €, Café Mila (Business), Mensa (Business), Döner Ali (Free)\n',
+    'seeded: Lena 35,40 € (50 € top-up, 4 payments), Jonas 10,00 €, Café Mila (Business), Mensa (Business), Döner Ali (Free)\n',
   );
 }

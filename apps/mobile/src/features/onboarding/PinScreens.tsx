@@ -1,42 +1,50 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { isWeakPin, PIN_LENGTH } from '@zahln/shared';
-import { useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { View } from 'react-native';
 import type { OnboardingStackParamList } from '../../app/navigation/types';
-import { Keypad, type KeypadKey, PinDots, Screen, Text } from '../../ds';
+import { Keypad, type KeypadKey, PinDots, Screen, ShieldIllustration, Text } from '../../ds';
+import { haptic } from '../../lib/haptics';
 import { useT } from '../../lib/i18n';
 import { useDraft } from './draft';
 
-/** Collects 6 digits with the shared keypad and calls `onComplete` once. */
+/** Collects 6 digits with the shared keypad and calls `onComplete` once per full entry. */
 export function usePinEntry(onComplete: (pin: string) => void) {
   const [pin, setPin] = useState('');
+  const done = useRef(onComplete);
+  done.current = onComplete;
   const onKey = (key: KeypadKey) => {
     if (key === 'backspace') return setPin((p) => p.slice(0, -1));
     if (key === 'biometric' || key === '00') return;
     setPin((p) => {
-      const next = (p + key).slice(0, PIN_LENGTH);
-      if (next.length === PIN_LENGTH) setTimeout(() => onComplete(next), 120);
+      if (p.length >= PIN_LENGTH) return p;
+      const next = p + key;
+      if (next.length === PIN_LENGTH) setTimeout(() => done.current(next), 140);
       return next;
     });
   };
   return { pin, onKey, reset: () => setPin('') };
 }
 
-function PinLayout(props: {
+export function PinLayout(props: {
+  header?: ReactNode;
   title: string;
   subtitle?: string;
   error?: string | null;
   pin: string;
   onKey: (k: KeypadKey) => void;
+  biometricIcon?: 'faceId' | 'fingerprint' | null;
+  disabled?: boolean;
 }) {
   return (
     <Screen scroll={false}>
-      <View className="flex-1 justify-center gap-3">
-        <Text variant="title" accessibilityRole="header" className="text-center">
+      <View className="flex-1 items-center justify-center gap-3">
+        {props.header ?? <ShieldIllustration size={96} />}
+        <Text variant="title" accessibilityRole="header" className="pt-2 text-center">
           {props.title}
         </Text>
         {props.subtitle ? (
-          <Text tone="secondary" className="text-center">
+          <Text tone="secondary" className="px-4 text-center">
             {props.subtitle}
           </Text>
         ) : null}
@@ -44,13 +52,13 @@ function PinLayout(props: {
         <Text
           variant="footnote"
           tone="danger"
-          className="min-h-[18px] text-center"
+          className="min-h-[20px] text-center"
           accessibilityLiveRegion="assertive"
         >
           {props.error ?? ''}
         </Text>
       </View>
-      <Keypad mode="pin" onKey={props.onKey} />
+      <Keypad mode="pin" onKey={props.onKey} biometricIcon={props.biometricIcon} disabled={props.disabled} />
     </Screen>
   );
 }
@@ -62,14 +70,14 @@ export function PinCreateScreen({
   const setDraft = useDraft((s) => s.set);
   const [error, setError] = useState<string | null>(null);
   const entry = usePinEntry((pin) => {
+    entry.reset();
     if (isWeakPin(pin)) {
+      haptic.error();
       setError(t('onboarding.pin.weak'));
-      entry.reset();
       return;
     }
     setError(null);
     setDraft({ pin });
-    entry.reset();
     navigation.navigate('PinConfirm');
   });
   return (
@@ -93,11 +101,13 @@ export function PinConfirmScreen({
   const draft = useDraft();
   const [error, setError] = useState<string | null>(null);
   const entry = usePinEntry((pin) => {
+    entry.reset();
     if (pin !== draft.pin) {
+      haptic.error();
       setError(t('onboarding.pin.mismatch'));
-      entry.reset();
       return;
     }
+    haptic.success();
     navigation.navigate('Biometrics');
   });
   return (

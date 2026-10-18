@@ -31,6 +31,7 @@ export const tailwindTheme = {
     inter: [fontFamily.regular],
     'inter-medium': [fontFamily.medium],
     'inter-semibold': [fontFamily.semibold],
+    'inter-bold': [fontFamily.bold],
   },
   fontSize: Object.fromEntries(
     Object.entries(typeScale).map(([k, v]) => [kebab(k), [px(v.size), { lineHeight: px(v.lineHeight) }]]),

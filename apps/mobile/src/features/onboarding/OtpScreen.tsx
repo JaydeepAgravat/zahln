@@ -1,23 +1,36 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { OTP_LENGTH, RequestOtpResponseSchema, VerifyOtpResponseSchema } from '@zahln/shared';
-import { useState } from 'react';
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import type { OnboardingStackParamList } from '../../app/navigation/types';
-import { Button, Card, Screen, Text, TextField } from '../../ds';
+import { Button, Icon, OtpInput, Text, useTheme } from '../../ds';
 import { ApiRequestError, api } from '../../lib/api';
+import { prettyPhone } from '../../lib/format';
+import { haptic } from '../../lib/haptics';
 import { useT } from '../../lib/i18n';
 import { useDraft } from './draft';
+import { OnboardingLayout } from './OnboardingLayout';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Otp'>;
 
+const RESEND_AFTER_S = 30;
+
 export function OtpScreen({ navigation }: Props) {
   const { t } = useT();
+  const { colors } = useTheme();
   const draft = useDraft();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
+  const [wait, setWait] = useState(RESEND_AFTER_S);
 
-  const verify = async (value = code) => {
+  useEffect(() => {
+    if (wait <= 0) return;
+    const timer = setTimeout(() => setWait((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [wait]);
+
+  const verify = async (value: string) => {
     if (value.length !== OTP_LENGTH || !draft.challengeId) return;
     setLoading(true);
     setError(undefined);
@@ -26,6 +39,7 @@ export function OtpScreen({ navigation }: Props) {
         method: 'POST',
         body: { challengeId: draft.challengeId, code: value },
       });
+      haptic.success();
       draft.set({
         verificationToken: res.verificationToken,
         isNewUser: res.isNewUser,
@@ -36,13 +50,14 @@ export function OtpScreen({ navigation }: Props) {
       else if (draft.role === 'merchant') navigation.navigate('Merchant');
       else navigation.navigate('PinCreate');
     } catch (e) {
-      const code = e instanceof ApiRequestError ? e.code : 'network';
+      haptic.error();
+      const reason = e instanceof ApiRequestError ? e.code : 'network';
       setError(
-        code === 'otp_expired'
+        reason === 'otp_expired'
           ? t('onboarding.otp.expired')
-          : code === 'otp_too_many_attempts'
+          : reason === 'otp_too_many_attempts'
             ? t('onboarding.otp.tooMany')
-            : code === 'network'
+            : reason === 'network'
               ? t('common.networkError')
               : t('onboarding.otp.invalid'),
       );
@@ -60,49 +75,53 @@ export function OtpScreen({ navigation }: Props) {
     draft.set({ challengeId: res.challengeId, devCode: res.devCode ?? null });
     setError(undefined);
     setCode('');
+    setWait(RESEND_AFTER_S);
   };
 
   return (
-    <Screen
+    <OnboardingLayout
+      step="otp"
+      title={t('onboarding.otp.title')}
+      subtitle={t('onboarding.otp.subtitle', { phone: prettyPhone(draft.phone) })}
       footer={
-        <View className="gap-3">
-          <Button
-            title={t('common.continue')}
-            onPress={() => verify()}
-            loading={loading}
-            disabled={code.length !== OTP_LENGTH}
-          />
-          <Button title={t('onboarding.otp.resend')} variant="tertiary" onPress={resend} />
-        </View>
+        <Button
+          variant="secondary"
+          size="md"
+          title={wait > 0 ? t('onboarding.otp.resendIn', { seconds: wait }) : t('onboarding.otp.resend')}
+          disabled={wait > 0}
+          onPress={resend}
+        />
       }
     >
-      <Text variant="title" accessibilityRole="header">
-        {t('onboarding.otp.title')}
-      </Text>
-      <Text tone="secondary">{t('onboarding.otp.subtitle', { phone: draft.phone })}</Text>
-      <TextField
+      <OtpInput
         label={t('onboarding.otp.label')}
         value={code}
-        onChangeText={(v) => {
-          const digits = v.replace(/\D/g, '').slice(0, OTP_LENGTH);
+        error={!!error}
+        onChange={(digits) => {
           setCode(digits);
+          if (error) setError(undefined);
           if (digits.length === OTP_LENGTH) void verify(digits);
         }}
-        keyboardType="number-pad"
-        textContentType="oneTimeCode"
-        autoComplete="sms-otp"
-        autoFocus
-        maxLength={OTP_LENGTH}
-        error={error}
-        style={{ fontFamily: 'Inter-Medium', fontSize: 28, letterSpacing: 8, fontVariant: ['tabular-nums'] }}
       />
+      <View className="min-h-[24px] flex-row items-center gap-2" accessibilityLiveRegion="polite">
+        {loading ? <ActivityIndicator color={colors.brandText} /> : null}
+        {error ? (
+          <>
+            <Icon name="warning" size={16} color="danger" weight="fill" />
+            <Text variant="footnote" tone="danger">
+              {error}
+            </Text>
+          </>
+        ) : null}
+      </View>
       {draft.devCode ? (
-        <Card className="bg-info-subtle">
-          <Text variant="footnote" className="text-info">
+        <View className="flex-row items-center gap-2 self-start rounded-full bg-accent-subtle px-3 py-1.5">
+          <Icon name="sparkle" size={14} color="accentText" weight="fill" />
+          <Text variant="footnote" tone="accent" style={{ fontFamily: 'Inter-SemiBold' }}>
             {t('common.devHint', { code: draft.devCode })}
           </Text>
-        </Card>
+        </View>
       ) : null}
-    </Screen>
+    </OnboardingLayout>
   );
 }

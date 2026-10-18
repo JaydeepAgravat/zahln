@@ -203,7 +203,7 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
       return { mode: chaos.mode };
     });
     app.post('/dev/reset', async () => {
-      await seed(db);
+      await seed(db, { history: true });
       chaos.set('ok');
       return { ok: true };
     });

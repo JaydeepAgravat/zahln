@@ -13,23 +13,23 @@ generated into NativeWind (Tailwind 3) for mobile and CSS variables (Tailwind 4)
 
 ## 1. Concept
 
-**Quittung** (German for "receipt") treats every screen like a clean, honest receipt. Warm paper-white background, a
-deep **ink-indigo** brand colour, and one decisive **green that only appears when money has actually moved**.
+**Quittung** (German for "receipt") treats every screen like a clean, honest receipt: warm paper background, near-black
+**ink**, one bold **ember** brand colour (v2, see §4), and a decisive **green that only appears when money has actually moved**.
 
 Why it fits Zahln:
 - **Trust-first and European.** It borrows from the things Germans already trust about money: the Kassenbon, the
   Mensa card, the bank statement. Precise, typographic, calm. There's no flashy "premium fintech" gradient for a
   zero-fee product to explain.
 - **Different from everyone nearby.** Wero is yellow, TWINT black, Wise green, Monzo coral, N26 teal, Nubank purple.
-  Indigo ink reads as "signed and settled".
-- **Campus warmth without noise.** One warm **apricot** accent, used only for decoration (onboarding, illustrations,
+  Ember on ink is warm, confident and unmistakable on a home screen.
+- **Campus warmth without noise.** One **saffron** accent, used only for decoration (onboarding, illustrations,
   Mensa promos), never for status. So students learn that colour always means something.
 
 ---
 
 ## 2. Principles (say these in the interview)
 
-1. **Green means money moved, nothing else.** The brand colour is indigo, so it can never be mistaken for "paid".
+1. **Green means money moved, nothing else.** The brand colour is ember, so it can never be mistaken for "paid".
 2. **The amount is the hero.** It's the largest text on every payment screen, uses tabular figures, and is
    locale-correct: `6,30 €`, not `€6.30`.
 3. **Readable from an arm's length in a Mensa queue.** The merchant confirmation must be readable at a glance from about a metre away,
@@ -47,7 +47,7 @@ Why it fits Zahln:
 
 | Product | Pattern worth borrowing | How Quittung uses it |
 |---|---|---|
-| **Wise** | Semantic token layer on top of base colours; a brand colour that is *not* the success colour | Base → semantic tokens; indigo brand, green for success only |
+| **Wise** | Semantic token layer on top of base colours; a brand colour that is *not* the success colour | Base → semantic tokens; ember brand, green for success only |
 | **Monzo** | Expressive brand in marketing, calm product UI | Principle 8 |
 | **N26** | Dark mode follows the system; a "discreet mode" that hides balances | `AmountDisplay` discreet mask (`•••,•• €`) for queues where people stand close together |
 | **TWINT** | QR codes on its web checkout expire after 5 minutes; the confirm screen always shows amount, merchant and time | 5-minute QR with countdown; confirmation always shows all three |
@@ -63,68 +63,84 @@ Why it fits Zahln:
 
 ---
 
-## 4. Colour tokens
+## 4. Colour tokens: v2 "Ember and ink"
 
-"subtle" = tinted background for badges and banners; the solid colour is the text on it.
+> **v2 (2026-10-18):** the palette moved from ink-indigo to **Ember and ink**: bolder, warmer, and distinct
+> from every EU neobank (Wise green, N26 teal, Revolut black, Monzo coral). The principles above are unchanged.
+> Source of truth: `packages/shared/src/tokens/index.ts`. Every text pair below is enforced by a unit test
+> (`packages/shared/test/plans-tokens.test.ts`), so a token change that breaks AA fails CI.
+
+**Decisions worth saying out loud:**
+- **Text on ember is ink, not white.** White on `#FF4F1F` is 3.3:1 (fails AA); ink is 5.3:1. It also looks more modern.
+- **Ember is never a text colour on paper.** Small brand-coloured text uses `brandText` `#B8340A` (5.4:1).
+- **Danger is raspberry `#C2183B`**, deliberately far from ember, so the brand never reads as an error.
+- **Green still only means "money moved"** (`success`, `floodPaid`).
+- **The ink card stays dark in both themes.** It's the "receipt" object of the brand.
 
 ### Light
-
-| Token | Hex | Contrast (verified) |
+| Token | Hex | Notes |
 |---|---|---|
-| `bg` | `#F6F5F2` | — |
-| `surface` | `#FFFFFF` | — |
-| `surface-raised` | `#FFFFFF` + shadow e1/e2 | — |
-| `border` (decorative) | `#DEDBD4` | — |
-| `border-strong` (inputs) | `#8A8C93` | 3.36 on surface (≥ 3:1 for UI) |
-| `text-primary` | `#15161A` | 16.58 on bg · 18.08 on surface |
-| `text-secondary` | `#4F5159` | 7.26 on bg |
-| `text-tertiary` | `#6B6D76` | 4.73 on bg · 5.15 on surface |
-| `brand` | `#3A35B8` | `on-brand #FFFFFF` = 8.82 |
-| `brand-subtle` | `#ECEBFB` | brand on it = 7.49 |
-| `accent` (decorative only) | `#D9542B` | 4.00, so **not for text** |
-| `accent-text` | `#A63D19` | 6.36 on surface · 5.54 on accent-subtle |
-| `accent-subtle` | `#FDECE4` | — |
-| `success` / `success-subtle` | `#12784A` / `#E3F3EA` | 5.51 · 4.79 |
-| `warning` / `warning-subtle` | `#9A5800` / `#FCF0D9` | 5.57 · 4.94 |
-| `danger` / `danger-subtle` | `#C0262F` / `#FCE8E8` | 5.90 · 5.01 |
-| `info` / `info-subtle` | `#1F68AD` / `#E5EFFA` | 5.77 · 4.96 |
-| `pending` / `pending-subtle` | `#56607A` / `#ECEEF3` | 6.27 · 5.40 |
-| `flood-paid` | `#12784A`, white text | 5.51 |
-| `flood-not-charged` | `#C0262F`, white text | 5.90 |
+| `bg` | `#F7F3EE` | warm paper |
+| `surface` / `surfaceRaised` | `#FFFDFA` / `#FFFFFF` | |
+| `surfaceMuted` | `#EFE7DD` | key caps, icon tiles, skeletons |
+| `border` / `borderStrong` | `#E6DED3` / `#8F877C` | borderStrong ≥ 3:1 |
+| `textPrimary` / `Secondary` / `Tertiary` | `#1B1A17` / `#5E574E` / `#736B60` | 15.8 / 6.5 / 4.75 on bg |
+| `brand` (ember) / `onBrand` | `#FF4F1F` / `#1B1A17` | 5.3:1 |
+| `brandText` / `brandSubtle` | `#B8340A` / `#FFE2D6` | |
+| `ink` / `onInk` / `onInkMuted` | `#1B1A17` / `#F7F3EE` / `#B3ACA2` | balance card, profile header |
+| `accent` (saffron) / `accentText` / `accentSubtle` | `#F5A524` / `#8A5300` / `#FCEFD6` | sparkles, dev hints |
+| `success` / `successSubtle` | `#16784A` / `#DDF3E6` | 4.7:1 |
+| `warning` / `warningSubtle` | `#8F5100` / `#FBEBD3` | |
+| `danger` / `dangerSubtle` | `#C2183B` / `#FCE4E8` | 5.0:1 |
+| `info` / `infoSubtle` | `#2357C9` / `#E3EBFB` | |
+| `pending` / `pendingSubtle` | `#6B6458` / `#EFE9E0` | |
+| `floodPaid` / `floodNotCharged` (white text) | `#137A45` / `#B3203F` | 5.4 / 6.6 |
 
 ### Dark
+| Token | Hex |
+|---|---|
+| `bg` / `surface` / `surfaceRaised` / `surfaceMuted` | `#121110` / `#1B1A18` / `#252320` / `#2C2925` |
+| `border` / `borderStrong` | `#34312C` / `#7A736C` |
+| `textPrimary` / `Secondary` / `Tertiary` | `#F5F0E9` / `#BEB6AB` / `#9A9286` |
+| `brand` / `onBrand` / `brandText` / `brandSubtle` | `#FF6A3D` / `#1B1A17` / `#FF8A63` / `#3A2118` |
+| `ink` / `onInk` / `onInkMuted` | `#252320` / `#F5F0E9` / `#BEB6AB` |
+| `success` / `danger` / `warning` / `info` / `pending` | `#3DD68C` / `#FF6B81` / `#F2B54A` / `#7AA7FF` / `#B4AC9F` |
 
-Near-black, not true black: it avoids OLED smear while scrolling and leaves room for lighter elevated surfaces.
+### Brand mark and app icon
+A **receipt with a torn edge carrying a bold Z**: the "Quittung" concept in one shape.
+- iOS: ember tile + paper receipt (light), ink tile + ember receipt (dark), white receipt (tinted).
+- Android: adaptive icon (ember background, receipt foreground in the 66 dp safe zone) plus a monochrome layer for themed icons.
+- Splash: ink background with the ember tile, on both platforms.
 
-| Token | Hex | Contrast (verified) |
-|---|---|---|
-| `bg` | `#111214` | — |
-| `surface` | `#1A1B1F` | — |
-| `surface-raised` | `#24252A` | — |
-| `border` | `#3A3C43` | — |
-| `border-strong` | `#6F727B` | 3.58 on surface |
-| `text-primary` | `#F2F1EE` | 16.59 on bg · 13.54 on raised |
-| `text-secondary` | `#B6B7BE` | 7.65 on raised |
-| `text-tertiary` | `#8E9099` | 5.89 on bg · 4.81 on raised |
-| `brand` | `#A9A5FF` | `on-brand #17134D` = 7.69 |
-| `brand-subtle` | `#25234D` | brand on it = 6.67 |
-| `accent` / `accent-subtle` | `#FF9670` / `#3B2319` | 8.07 on surface · 6.84 |
-| `success` / `success-subtle` | `#52CF8F` / `#11301F` | 8.75 · 7.28 |
-| `warning` / `warning-subtle` | `#F2B54A` / `#352810` | 7.85 on subtle |
-| `danger` / `danger-subtle` | `#FF7F7F` / `#3D1B1D` | 7.04 · 6.26 |
-| `info` / `info-subtle` | `#72B5F0` / `#132A3E` | 6.71 on subtle |
-| `pending` / `pending-subtle` | `#A9B2C6` / `#23262E` | 7.11 on subtle |
-| `flood-paid` | `#146B45`, white text | 6.52 (deep green, so it doesn't glare in a dim Mensa) |
-| focus ring | brand `#A9A5FF` | 8.49 on bg |
+![App icon: light, dark, tinted](screenshots/app-icon.png)
 
-Every text pair passes WCAG AA (4.5:1). The only token under 4.5 is the light `accent`, and it's never used for text.
+### Icons
+**Phosphor** (MIT), one family, curated in `apps/mobile/src/ds/Icon.tsx`.
+- Each icon is imported by file path, so only the ~37 icons used are in the bundle, not 1,500.
+- Weights carry meaning: `regular` for navigation and inactive states, `fill` for active tabs and status, `duotone` for category tiles and quick actions, `bold` inside buttons.
 
----
+### Illustrations
+Custom geometric SVG drawn in code from the tokens (`apps/mobile/src/ds/illustrations.tsx`), so they re-theme in dark mode
+and are never stock art. The shared vocabulary:
+- an ink phone with a one-time QR
+- a paper receipt with a torn edge
+- the ember coin or sun
+- saffron sparkles
+
+Animated, all with Reduce Motion support: a gentle float on Welcome and OTP, and a scan line on Face ID.
+
+### Motion and haptics
+- **Spring press scale on every tappable surface** (`PressableScale`). It runs on the UI thread via Reanimated.
+- **Staggered fade-up** for screen content and list rows.
+- **PIN dots:** a pop on fill and a shake on error. With Reduce Motion on, they just turn red.
+- **Skeletons** pulse instead of showing spinners.
+- **Haptics map to outcomes:** a tap for keys, selection for tabs and segments, success when money moves or a step completes, error for refusals.
 
 ## 5. Typography
 
-- **UI font: Inter** (SIL OFL 1.1, free). Full German coverage, tabular figures (`tnum`), and an Inter Display cut for large sizes.
-- **Amounts: Inter Display**, always with tabular numerals, so digits don't jump while typing.
+- **UI font: Inter** (SIL OFL 1.1, free): Regular, Medium, SemiBold, Bold. Full German coverage, tabular figures.
+- **Headlines and amounts: Inter Bold** with tight tracking (`hero` 36/40, `amountHero` 48/54), always with tabular numerals
+  for amounts. (Google Fonts doesn't serve a static Inter Display cut.)
 - **Formatting:** always `Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })` → `6,30 €` (no-break
   space); English → `€6.30`. Never build the string by hand.
 - **Cents:** the same size as euros on the till and in confirmations; the consumer wallet balance may show cents

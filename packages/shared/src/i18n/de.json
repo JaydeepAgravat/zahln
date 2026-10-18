@@ -51,19 +51,21 @@
   },
   "onboarding": {
     "welcome": {
-      "title": "Bezahlen ohne Gebühren.",
-      "subtitle": "Direkt von Konto zu Konto über SEPA Instant. Kein Kartennetz, keine Hardware.",
+      "title": "Bezahlen.\nOhne Gebühren.",
+      "subtitle": "Mit dem Handy, direkt von Konto zu Konto. Kein Kartennetz, keine Hardware.",
       "payer": "Ich bezahle",
-      "payerHint": "Mit dem Handy in der Mensa, im Café, überall.",
+      "payerHint": "In der Mensa, im Café, überall",
       "merchant": "Ich kassiere",
-      "merchantHint": "Zahlungen annehmen, ohne Terminal."
+      "merchantHint": "Zahlungen annehmen, ohne Terminal",
+      "trust": "SEPA Instant · Daten bleiben in Deutschland"
     },
     "phone": {
       "title": "Deine Handynummer",
       "subtitle": "Wir schicken dir einen Code per SMS.",
       "label": "Handynummer",
-      "placeholder": "0151 2345 6789",
-      "invalid": "Bitte gib eine deutsche Handynummer ein."
+      "placeholder": "151 2345 6789",
+      "invalid": "Bitte gib eine deutsche Handynummer ein.",
+      "prefix": "+49"
     },
     "otp": {
       "title": "Code eingeben",
@@ -72,7 +74,8 @@
       "invalid": "Der Code stimmt nicht.",
       "expired": "Der Code ist abgelaufen. Fordere einen neuen an.",
       "tooMany": "Zu viele Versuche. Fordere einen neuen Code an.",
-      "resend": "Neuen Code senden"
+      "resend": "Neuen Code senden",
+      "resendIn": "Neuer Code in {{seconds}} s"
     },
     "name": {
       "title": "Wie heißt du?",
@@ -101,9 +104,11 @@
       "subtitle": "Entsperre die App und bestätige Zahlungen mit {{type}}. Deine PIN bleibt der Ersatz.",
       "enable": "{{type}} aktivieren",
       "notAvailable": "Auf diesem Gerät ist keine Biometrie eingerichtet. Du nutzt deine PIN.",
-      "prompt": "Zahln entsperren"
+      "prompt": "Zahln entsperren",
+      "doneTitle": "Fast geschafft"
     },
-    "finishing": "Gerät wird eingerichtet…"
+    "finishing": "Gerät wird eingerichtet…",
+    "step": "Schritt {{current}} von {{total}}"
   },
   "lock": {
     "title": "Willkommen zurück",
@@ -112,7 +117,8 @@
     "locked": "Zu viele Versuche. Warte {{seconds}} Sekunden.",
     "usePin": "PIN verwenden",
     "prompt": "Zahln entsperren",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "hello": "Hallo, {{name}}"
   },
   "home": {
     "balance": "Guthaben",
@@ -121,12 +127,32 @@
     "tillComingSoon": "Die Kasse kommt an Tag 3.",
     "scanComingSoon": "Bezahlen per QR kommt an Tag 3.",
     "showBalance": "Guthaben anzeigen",
-    "hideBalance": "Guthaben ausblenden"
+    "hideBalance": "Guthaben ausblenden",
+    "greeting": {
+      "morning": "Guten Morgen",
+      "day": "Hallo",
+      "evening": "Guten Abend"
+    },
+    "feesChip": "0 € Gebühren · immer",
+    "recent": "Letzte Zahlungen",
+    "emptyTitle": "Noch keine Zahlungen",
+    "emptyBody": "Scanne an der Kasse einen QR-Code. Bezahlt in drei Sekunden.",
+    "topup": "Aufladung",
+    "soon": "Bald verfügbar",
+    "actions": {
+      "pay": "Bezahlen",
+      "topUp": "Aufladen",
+      "send": "Senden",
+      "receipts": "Belege"
+    },
+    "today": "Heute",
+    "yesterday": "Gestern"
   },
   "tabs": {
     "wallet": "Wallet",
     "till": "Kasse",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "profile": "Profil"
   },
   "settings": {
     "title": "Einstellungen",
@@ -138,6 +164,17 @@
     "lockNow": "Jetzt sperren",
     "signOut": "Abmelden",
     "biometrics": "Entsperren mit Biometrie",
-    "account": "Konto"
+    "account": "Konto",
+    "sectionApp": "App",
+    "sectionSecurity": "Sicherheit",
+    "version": "Zahln 0.1 · Gebaut in Augsburg"
+  },
+  "merchant": {
+    "tillTitle": "Kasse bereit",
+    "tillBody": "Betrag eingeben oder Artikel wählen. Für jede Zahlung entsteht ein eigener QR-Code.",
+    "newPayment": "Neue Zahlung",
+    "payout": "Auszahlung täglich 23:00 · SEPA Instant",
+    "todayRevenue": "Heute eingenommen",
+    "noSales": "Noch keine Einnahmen heute."
   }
 }

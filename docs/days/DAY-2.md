@@ -9,7 +9,8 @@
 >
 > Deviations and honest caveats are at the bottom.
 
-![Welcome](../screenshots/day2-ios-welcome.png) ![PIN](../screenshots/day2-ios-pin.png) ![Wallet light](../screenshots/day2-ios-wallet-light.png) ![Wallet dark](../screenshots/day2-ios-wallet-dark.png)
+![Onboarding](../screenshots/showcase-onboarding.png)
+![App](../screenshots/showcase-app.png)
 
 ## Goal
 "Bare React Native runs on iOS and Android from one codebase, themed with my own design system in light and dark,
@@ -172,9 +173,7 @@ The API side, all in `apps/api/src/lib/auth.ts` and `routes/auth.ts`, with **11 
 | Screen-reader labels | — | ✅ accessibility tree shows labels like "Ich bezahle. Mit dem Handy in der Mensa…", "0 von 6 Ziffern eingegeben", "Löschen" |
 | Footer above keyboard | ✅ | ✅ after the fix below |
 
-Android screenshots: [phone + keyboard](../screenshots/day2-android-phone-keyboard.png) ·
-[merchant](../screenshots/day2-android-merchant.png) · [weak PIN](../screenshots/day2-android-weak-pin.png) ·
-[till](../screenshots/day2-android-till.png) · [wrong PIN](../screenshots/day2-android-wrong-pin.png)
+All screenshots: [docs/screenshots](../screenshots/).
 
 ---
 
@@ -210,6 +209,27 @@ Demo logins (OTP 123456):
 | 0151 0000 0020 | Ali, Döner Ali (Free) |
 
 ---
+
+## Design upgrade: "Ember and ink" (same day, second pass)
+The first pass was functional but "very decent". The second pass aimed at founder-level craft:
+
+| Area | What changed |
+|---|---|
+| Palette | **Ember and ink**: warm paper `#F7F3EE`, ink `#1B1A17`, ember `#FF4F1F`, saffron accent, raspberry danger. Contrast unit-tested in both themes |
+| Brand mark | A receipt with a torn edge carrying a bold Z, the "Quittung" idea in one shape. Used in-app, as the app icon (iOS light/dark/tinted, Android adaptive + monochrome) and on the splash |
+| Icons | **Phosphor**, curated registry of ~37 icons imported by path (no 1,500-icon bundle). Weights carry meaning: regular / fill (active) / duotone (tiles) / bold (buttons) |
+| Illustrations | Custom geometric SVG from the tokens (welcome, OTP, shield, Face ID scan, empty receipts, till). They re-theme in dark mode. Gentle finite animations |
+| Signature motif | **Torn-receipt edge** under the ink balance card |
+| Motion | `PressableScale` spring on every tappable; staggered fade-up; PIN dots pop and shake; skeleton pulse; all respect Reduce Motion |
+| Haptics | Mapped to outcomes: tap, selection, success, error. **Never blocks the action** (wrapped and fired after `onPress`) |
+| Screens | Welcome hero; onboarding progress bar computed from the real steps; +49 phone field; 6-box OTP with resend timer; ink balance card; quick actions; transaction list with category tiles, relative dates, skeletons and an illustrated empty state; till hero; grouped Profile; custom tab bar |
+| Data | Seeded realistic history (Mensa, Café Mila); merchants see **"Lena H."** (data minimisation, tested); the till shows **today's** takings, not the balance |
+| Launch | Ink splash on both platforms; the iOS React root view is ink too, so there's no white flash |
+
+Craft bugs found in this pass:
+- The custom spacing scale lacked `1.5`, `11` and `px`, so `h-1.5`, `h-11` and `h-px` silently rendered nothing.
+- Infinite decorative animations blocked Android UI automation's idle detection (Maestro too). They're now finite.
+- The first icon idea (a zigzag Z) read as a squiggle; it was replaced after rendering four variants side by side.
 
 ## Bugs found and fixed while verifying
 1. **Android: primary button hidden behind the keyboard.** RN 0.88 runs Android **edge-to-edge**, where

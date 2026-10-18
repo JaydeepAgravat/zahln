@@ -58,6 +58,13 @@ describe('paying', () => {
     expect(await t.api.balance(LENA)).toBe(5000 - 630);
     expect(await t.api.merchantBalance()).toBe(630);
 
+    const wallet = (await t.call('GET', '/wallets/me', { user: LENA })).body;
+    expect(wallet.transactions[0]).toMatchObject({
+      kind: 'payment',
+      amountCents: -630,
+      counterpartyName: 'Café Mila',
+    });
+
     const second = (await t.api.createIntent({ amountCents: 220 })).body;
     expect((await t.api.pay(second.id)).body.intent.receiptNumber).toBe(2);
   });

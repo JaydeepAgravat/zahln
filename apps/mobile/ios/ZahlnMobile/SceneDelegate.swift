@@ -38,6 +38,11 @@ class SceneDelegate: RCTDefaultReactNativeFactoryDelegate, UIWindowSceneDelegate
    
   }
 
+  /// Same ink as the launch screen, so launch → first JS frame never flashes white.
+  override func customize(_ rootView: RCTRootView) {
+    rootView.backgroundColor = UIColor(red: 0x1B / 255, green: 0x1A / 255, blue: 0x17 / 255, alpha: 1)
+  }
+
   func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
     RCTLinkingManager.scene(scene, openURLContexts: URLContexts)
   }

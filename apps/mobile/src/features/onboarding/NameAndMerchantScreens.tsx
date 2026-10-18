@@ -1,10 +1,11 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import type { OnboardingStackParamList } from '../../app/navigation/types';
-import { Button, Card, Screen, StatusBadge, Text, TextField } from '../../ds';
+import { Button, Icon, PressableScale, StatusBadge, Text, TextField, TillIllustration } from '../../ds';
 import { useT } from '../../lib/i18n';
 import { useDraft } from './draft';
+import { OnboardingLayout } from './OnboardingLayout';
 
 export function NameScreen({ navigation }: NativeStackScreenProps<OnboardingStackParamList, 'Name'>) {
   const { t } = useT();
@@ -22,10 +23,11 @@ export function NameScreen({ navigation }: NativeStackScreenProps<OnboardingStac
   };
 
   return (
-    <Screen footer={<Button title={t('common.continue')} onPress={submit} disabled={!name.trim()} />}>
-      <Text variant="title" accessibilityRole="header">
-        {t('onboarding.name.title')}
-      </Text>
+    <OnboardingLayout
+      step="name"
+      title={t('onboarding.name.title')}
+      footer={<Button title={t('common.continue')} onPress={submit} disabled={!name.trim()} />}
+    >
       <TextField
         label={t('onboarding.name.label')}
         value={name}
@@ -36,7 +38,7 @@ export function NameScreen({ navigation }: NativeStackScreenProps<OnboardingStac
         error={error}
         onSubmitEditing={submit}
       />
-    </Screen>
+    </OnboardingLayout>
   );
 }
 
@@ -51,21 +53,27 @@ export function MerchantScreen({ navigation }: NativeStackScreenProps<Onboarding
 
   if (draft.memberships.length === 0) {
     return (
-      <Screen
+      <OnboardingLayout
+        step="merchant"
+        title={t('onboarding.merchant.title')}
         footer={<Button title={t('common.back')} variant="secondary" onPress={() => navigation.popToTop()} />}
       >
-        <Text variant="title" accessibilityRole="header">
-          {t('onboarding.merchant.title')}
-        </Text>
-        <Card className="bg-warning-subtle">
-          <Text className="text-warning">{t('onboarding.merchant.none')}</Text>
-        </Card>
-      </Screen>
+        <View className="flex-row gap-3 rounded-lg bg-warning-subtle p-4">
+          <Icon name="info" size={22} color="warning" weight="fill" />
+          <Text className="flex-1" tone="warning">
+            {t('onboarding.merchant.none')}
+          </Text>
+        </View>
+      </OnboardingLayout>
     );
   }
 
   return (
-    <Screen
+    <OnboardingLayout
+      step="merchant"
+      illustration={<TillIllustration width={220} />}
+      title={t('onboarding.merchant.title')}
+      subtitle={t('onboarding.merchant.subtitle')}
       footer={
         <Button
           title={t('common.continue')}
@@ -77,30 +85,38 @@ export function MerchantScreen({ navigation }: NativeStackScreenProps<Onboarding
         />
       }
     >
-      <Text variant="title" accessibilityRole="header">
-        {t('onboarding.merchant.title')}
-      </Text>
-      <Text tone="secondary">{t('onboarding.merchant.subtitle')}</Text>
-      <View className="gap-3">
-        {draft.memberships.map((m) => {
-          const active = m.merchantId === selected;
-          return (
-            <Pressable
-              key={m.merchantId}
-              onPress={() => setSelected(m.merchantId)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: active }}
-              className={`gap-2 rounded-lg border-2 bg-surface p-4 ${active ? 'border-brand' : 'border-border'}`}
-            >
-              <Text variant="headline">{m.merchantName}</Text>
+      {draft.memberships.map((m) => {
+        const active = m.merchantId === selected;
+        return (
+          <PressableScale
+            key={m.merchantId}
+            onPress={() => setSelected(m.merchantId)}
+            hapticOnPress
+            accessibilityRole="radio"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={`${m.merchantName}, ${t(`onboarding.merchant.role.${m.role}`)}, ${m.plan}`}
+            className={`flex-row items-center gap-4 rounded-lg border-2 bg-surface p-4 ${active ? 'border-brand' : 'border-border'}`}
+          >
+            <View className="h-12 w-12 items-center justify-center rounded-md bg-ink">
+              <Icon name="store" size={24} color="onInk" weight="duotone" />
+            </View>
+            <View className="flex-1 gap-1.5">
+              <Text variant="headline" style={{ fontFamily: 'Inter-Bold' }}>
+                {m.merchantName}
+              </Text>
               <View className="flex-row gap-2">
                 <StatusBadge tone="neutral" label={t(`onboarding.merchant.role.${m.role}`)} />
-                <StatusBadge tone="info" label={m.plan.toUpperCase()} />
+                <StatusBadge tone="info" icon={null} label={m.plan[0]?.toUpperCase() + m.plan.slice(1)} />
               </View>
-            </Pressable>
-          );
-        })}
-      </View>
-    </Screen>
+            </View>
+            <View
+              className={`h-6 w-6 items-center justify-center rounded-full border-2 ${active ? 'border-brand bg-brand' : 'border-border-strong'}`}
+            >
+              {active ? <View className="h-2.5 w-2.5 rounded-full bg-on-brand" /> : null}
+            </View>
+          </PressableScale>
+        );
+      })}
+    </OnboardingLayout>
   );
 }

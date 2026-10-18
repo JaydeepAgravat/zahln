@@ -17,9 +17,11 @@ pnpm --filter @zahln/mobile ios       # or: android
 ```
 Demo logins: `0151 0000 0001` (Lena, student) · `0151 0000 0010` (Mila, Café Mila).
 
-| | |
-|---|---|
-| ![Welcome](docs/screenshots/day2-ios-welcome.png) | ![Wallet dark](docs/screenshots/day2-ios-wallet-dark.png) |
+![Onboarding](docs/screenshots/showcase-onboarding.png)
+![App](docs/screenshots/showcase-app.png)
+
+Design system **"Ember and ink"**: warm paper, near-black ink, one ember accent, a torn-receipt motif, Phosphor icons,
+custom SVG illustrations, spring motion and haptics. See [DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
 ## Docs
 - [Plan](docs/PLAN.md): product understanding, demo script, architecture, schedule

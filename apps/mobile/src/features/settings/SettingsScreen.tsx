@@ -1,12 +1,15 @@
-import { Pressable, ScrollView, Switch, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { ScrollView, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
-import { Button, Card, Text, useTheme } from '../../ds';
+import { Avatar, ListRow, Logo, PressableScale, Text, useTheme } from '../../ds';
 import { api } from '../../lib/api';
 import { useBiometry } from '../../lib/biometrics';
+import { prettyPhone } from '../../lib/format';
+import { haptic } from '../../lib/haptics';
 import { useT } from '../../lib/i18n';
 import { usePrefs } from '../../lib/prefs';
-import { queryClient } from '../../lib/queries';
+import { queryClient, useMe } from '../../lib/queries';
 import { randomSecret } from '../../lib/random';
 import { enableBiometricUnlock } from '../../lib/secure';
 import { useSession } from '../../lib/session';
@@ -17,34 +20,66 @@ function Segmented<T extends string>(props: {
   onChange: (v: T) => void;
 }) {
   return (
-    <View className="flex-row gap-2">
-      {props.options.map((o) => (
-        <Pressable
-          key={o.value}
-          onPress={() => props.onChange(o.value)}
-          accessibilityRole="radio"
-          accessibilityState={{ selected: o.value === props.value }}
-          className={`min-h-[44px] flex-1 items-center justify-center rounded-full border ${
-            o.value === props.value ? 'border-brand bg-brand-subtle' : 'border-border bg-surface'
-          }`}
-        >
-          <Text variant="callout" tone={o.value === props.value ? 'brand' : 'secondary'}>
-            {o.label}
-          </Text>
-        </Pressable>
-      ))}
+    <View className="flex-row rounded-full bg-surface-muted p-1">
+      {props.options.map((o) => {
+        const active = o.value === props.value;
+        return (
+          <PressableScale
+            key={o.value}
+            onPress={() => {
+              haptic.select();
+              props.onChange(o.value);
+            }}
+            scaleTo={0.95}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={o.label}
+            className={`min-h-[36px] items-center justify-center rounded-full px-3 ${active ? 'bg-surface-raised' : ''}`}
+          >
+            <Text
+              variant="footnote"
+              tone={active ? 'primary' : 'secondary'}
+              style={{ fontFamily: 'Inter-SemiBold' }}
+            >
+              {o.label}
+            </Text>
+          </PressableScale>
+        );
+      })}
     </View>
   );
 }
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <View className="gap-1">
+      <Text
+        variant="caption"
+        tone="tertiary"
+        className="px-1 uppercase"
+        style={{ letterSpacing: 0.8 }}
+        accessibilityRole="header"
+      >
+        {title}
+      </Text>
+      <View className="rounded-lg border border-border bg-surface px-4">{children}</View>
+    </View>
+  );
+}
+
+const Divider = () => <View className="ml-14 h-px bg-border" />;
 
 export function SettingsScreen() {
   const { t } = useT();
   const prefs = usePrefs();
   const session = useSession();
+  const me = useMe();
   const biometry = useBiometry();
   const { colors } = useTheme();
+  const user = me.data?.user ?? session.user;
 
   const toggleBiometrics = async (on: boolean) => {
+    haptic.select();
     // Turning it on stores a fresh secret behind BIOMETRY_CURRENT_SET; turning it off just stops asking.
     prefs.setBiometricsEnabled(on ? await enableBiometricUnlock(randomSecret()) : false);
   };
@@ -57,58 +92,89 @@ export function SettingsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
-      <ScrollView contentContainerClassName="gap-6 px-5 py-4">
-        <Text variant="title" accessibilityRole="header">
-          {t('settings.title')}
+      <ScrollView contentContainerClassName="gap-6 px-5 pb-12 pt-2">
+        <Text variant="display" accessibilityRole="header">
+          {t('tabs.profile')}
         </Text>
-        <Card>
-          <Text variant="callout" tone="secondary">
-            {t('settings.account')}
-          </Text>
-          <Text variant="headline">{session.user?.name ?? ''}</Text>
-          <Text tone="secondary">{session.user?.phone ?? ''}</Text>
-        </Card>
-        <View className="gap-2">
-          <Text variant="callout" tone="secondary">
-            {t('settings.language')}
-          </Text>
-          <Segmented
-            value={prefs.locale}
-            onChange={prefs.setLocale}
-            options={[
-              { value: 'de', label: 'Deutsch' },
-              { value: 'en', label: 'English' },
-            ]}
-          />
+
+        <View className="flex-row items-center gap-4 rounded-xl bg-ink p-5">
+          <Avatar name={user?.name ?? ''} size={56} />
+          <View className="flex-1 gap-0.5">
+            <Text variant="headline" tone="on-ink" style={{ fontFamily: 'Inter-Bold' }}>
+              {user?.name ?? ''}
+            </Text>
+            <Text variant="footnote" tone="on-ink-muted">
+              {user?.phone ? prettyPhone(user.phone) : ''}
+            </Text>
+          </View>
         </View>
-        <View className="gap-2">
-          <Text variant="callout" tone="secondary">
-            {t('settings.theme')}
-          </Text>
-          <Segmented
-            value={prefs.theme}
-            onChange={prefs.setTheme}
-            options={[
-              { value: 'system', label: t('settings.themeSystem') },
-              { value: 'light', label: t('settings.themeLight') },
-              { value: 'dark', label: t('settings.themeDark') },
-            ]}
+
+        <Section title={t('settings.sectionApp')}>
+          <ListRow
+            icon="language"
+            title={t('settings.language')}
+            trailing={
+              <Segmented
+                value={prefs.locale}
+                onChange={prefs.setLocale}
+                options={[
+                  { value: 'de', label: 'DE' },
+                  { value: 'en', label: 'EN' },
+                ]}
+              />
+            }
           />
-        </View>
-        {biometry?.available ? (
-          <View className="min-h-[48px] flex-row items-center justify-between">
-            <Text>{t('settings.biometrics')}</Text>
-            <Switch
-              value={prefs.biometricsEnabled}
-              onValueChange={(on) => void toggleBiometrics(on)}
-              trackColor={{ true: colors.brand, false: colors.borderStrong }}
-              accessibilityLabel={t('settings.biometrics')}
+          <Divider />
+          <ListRow icon={prefs.theme === 'dark' ? 'moon' : 'sun'} title={t('settings.theme')} />
+          <View className="pb-3 pl-14">
+            <Segmented
+              value={prefs.theme}
+              onChange={prefs.setTheme}
+              options={[
+                { value: 'system', label: t('settings.themeSystem') },
+                { value: 'light', label: t('settings.themeLight') },
+                { value: 'dark', label: t('settings.themeDark') },
+              ]}
             />
           </View>
-        ) : null}
-        <View className="gap-3">
-          <Button title={t('settings.lockNow')} variant="secondary" onPress={session.lock} />
-          <Button title={t('settings.signOut')} variant="destructive" onPress={signOut} />
+        </Section>
+
+        <Section title={t('settings.sectionSecurity')}>
+          {biometry?.available ? (
+            <>
+              <ListRow
+                icon={biometry.icon ?? 'fingerprint'}
+                title={t('settings.biometrics')}
+                trailing={
+                  <Switch
+                    value={prefs.biometricsEnabled}
+                    onValueChange={(on) => void toggleBiometrics(on)}
+                    trackColor={{ true: colors.brand, false: colors.borderStrong }}
+                    thumbColor={colors.surfaceRaised}
+                    accessibilityLabel={t('settings.biometrics')}
+                  />
+                }
+              />
+              <Divider />
+            </>
+          ) : null}
+          <ListRow icon="lock" title={t('settings.lockNow')} chevron onPress={session.lock} />
+          <Divider />
+          <ListRow
+            icon="signOut"
+            iconColor="danger"
+            iconBackground="bg-danger-subtle"
+            title={t('settings.signOut')}
+            chevron
+            onPress={() => void signOut()}
+          />
+        </Section>
+
+        <View className="items-center gap-2 pt-2">
+          <Logo size={36} />
+          <Text variant="caption" tone="tertiary">
+            {t('settings.version')}
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>

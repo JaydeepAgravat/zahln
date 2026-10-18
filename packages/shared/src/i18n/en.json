@@ -51,19 +51,21 @@
   },
   "onboarding": {
     "welcome": {
-      "title": "Pay with zero fees.",
-      "subtitle": "Straight from account to account over SEPA Instant. No card network, no hardware.",
+      "title": "Pay.\nWith zero fees.",
+      "subtitle": "With your phone, straight from account to account. No card network, no hardware.",
       "payer": "I pay",
-      "payerHint": "With your phone at the Mensa, the café, anywhere.",
+      "payerHint": "At the Mensa, the café, anywhere",
       "merchant": "I get paid",
-      "merchantHint": "Accept payments without a terminal."
+      "merchantHint": "Accept payments without a terminal",
+      "trust": "SEPA Instant · Your data stays in Germany"
     },
     "phone": {
       "title": "Your mobile number",
       "subtitle": "We'll text you a code.",
       "label": "Mobile number",
-      "placeholder": "0151 2345 6789",
-      "invalid": "Please enter a German mobile number."
+      "placeholder": "151 2345 6789",
+      "invalid": "Please enter a German mobile number.",
+      "prefix": "+49"
     },
     "otp": {
       "title": "Enter the code",
@@ -72,7 +74,8 @@
       "invalid": "That code is not right.",
       "expired": "That code has expired. Request a new one.",
       "tooMany": "Too many attempts. Request a new code.",
-      "resend": "Send a new code"
+      "resend": "Send a new code",
+      "resendIn": "New code in {{seconds}} s"
     },
     "name": {
       "title": "What's your name?",
@@ -101,9 +104,11 @@
       "subtitle": "Unlock the app and confirm payments with {{type}}. Your PIN stays as the fallback.",
       "enable": "Turn on {{type}}",
       "notAvailable": "No biometrics are set up on this device. You'll use your PIN.",
-      "prompt": "Unlock Zahln"
+      "prompt": "Unlock Zahln",
+      "doneTitle": "Almost done"
     },
-    "finishing": "Setting up this device…"
+    "finishing": "Setting up this device…",
+    "step": "Step {{current}} of {{total}}"
   },
   "lock": {
     "title": "Welcome back",
@@ -112,7 +117,8 @@
     "locked": "Too many attempts. Wait {{seconds}} seconds.",
     "usePin": "Use PIN",
     "prompt": "Unlock Zahln",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "hello": "Hi, {{name}}"
   },
   "home": {
     "balance": "Balance",
@@ -121,12 +127,32 @@
     "tillComingSoon": "The till arrives on Day 3.",
     "scanComingSoon": "Paying by QR arrives on Day 3.",
     "showBalance": "Show balance",
-    "hideBalance": "Hide balance"
+    "hideBalance": "Hide balance",
+    "greeting": {
+      "morning": "Good morning",
+      "day": "Hi",
+      "evening": "Good evening"
+    },
+    "feesChip": "€0 fees · always",
+    "recent": "Recent payments",
+    "emptyTitle": "No payments yet",
+    "emptyBody": "Scan a QR code at the till. Paid in three seconds.",
+    "topup": "Top-up",
+    "soon": "Coming soon",
+    "actions": {
+      "pay": "Pay",
+      "topUp": "Top up",
+      "send": "Send",
+      "receipts": "Receipts"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "tabs": {
     "wallet": "Wallet",
     "till": "Till",
-    "settings": "Settings"
+    "settings": "Settings",
+    "profile": "Profile"
   },
   "settings": {
     "title": "Settings",
@@ -138,6 +164,17 @@
     "lockNow": "Lock now",
     "signOut": "Sign out",
     "biometrics": "Unlock with biometrics",
-    "account": "Account"
+    "account": "Account",
+    "sectionApp": "App",
+    "sectionSecurity": "Security",
+    "version": "Zahln 0.1 · Built in Augsburg"
+  },
+  "merchant": {
+    "tillTitle": "Till ready",
+    "tillBody": "Enter an amount or pick items. Every payment gets its own QR code.",
+    "newPayment": "New payment",
+    "payout": "Paid out daily at 23:00 · SEPA Instant",
+    "todayRevenue": "Taken today",
+    "noSales": "No sales yet today."
   }
 }
