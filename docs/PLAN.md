@@ -1,7 +1,17 @@
 # Zahln MVP — Plan
 
 Interview MVP for the two Zahln founding mobile roles (Germany EXIST + India RN).
-One week, full-time. Shown three ways: live screen share, GitHub repo, 2-minute video.
+Full-time, quality over speed (about 13 build days). Shown three ways: live screen share, GitHub repo, 2-minute video.
+
+**Five front ends on one API:**
+
+| # | Front end | Who uses it | Where |
+|---|---|---|---|
+| 1 | **Zahln**: consumer mobile app | Students and shoppers who pay | `apps/consumer` (bare RN, iOS + Android) |
+| 2 | **ZYSYGY**: merchant mobile app | Cashiers, staff and managers at the counter | `apps/merchant` (bare RN, iOS + Android) |
+| 3 | **Console**: internal web | Zahln ops and support | `apps/console` (Vite + React) |
+| 4 | **Zahln Web**: customer-facing web | Merchant owners (dashboard) and consumers (web wallet + pay-link checkout) | `apps/web` (Next.js) |
+| 5 | **The Zahln Edition**: landing page | Everyone, first impression | `apps/landing` (Next.js, Editions-style; see [LANDING.md](LANDING.md)) |
 
 ---
 
@@ -57,17 +67,23 @@ One week, full-time. Shown three ways: live screen share, GitHub repo, 2-minute 
 | "Logging that never puts a token or a balance in a crash report" | Log/crash scrubber, keychain storage, cert pinning, screenshot protection |
 | "Accessibility from the first screen", German + English | Screen-reader labels, Dynamic Type, de/en strings from day one |
 | Plans: Free / Pro / Business | Plan tiers as server-driven feature flags |
-| India JD: "internal tools that resolve an issue in minutes" | Web console: find a payment, see its timeline, refund it, export CSV |
+| India JD: "internal tools that resolve an issue in minutes" | Internal console: find a payment, see its timeline, refund it, export CSV |
+| "Craft" (what the founders care about) | An Editions-style landing page with a CI-enforced performance and accessibility budget |
+| One product, many surfaces | Two native apps + three web apps sharing one design system, one schema package and one i18n source |
 
 ---
 
 ## The demo (5 minutes, three acts)
 
+**Opening (20 s):** start on the landing page. Scroll from the intro frame into chapter I, then click
+"Kostenlos starten". That lands on the merchant dashboard in Zahln Web, signed in as Café Mila, and you say:
+"Everything on this page is live. Let's make a payment."
+
 **Act 1: Café Mila checkout (90 s)**
 Two simulators side by side. On the till: Cappuccino + Croissant → €6.30 → "Generate QR". The QR shows
 "Valid for 5 minutes · Waiting for scan" with a countdown. The customer scans: "Café Mila · €6.30", amount prefilled,
-Face ID, paid. The till turns green and the merchant wallet balance ticks up at the same moment. Show the
-time-to-confirmation number on screen. Optional: tip prompt, then a partial refund by a manager.
+Face ID, paid. The till turns green, the merchant wallet balance ticks up, and the row appears on the Zahln Web
+dashboard in the browser, all at the same moment. Show the time-to-confirmation number on screen. Optional: tip prompt, then a partial refund by a manager.
 
 **Act 2: Wifi drops after the money moved (2 min)**
 In the console, turn on chaos "drop response after settlement". Pay again. The app does not show "failed" and
@@ -87,81 +103,123 @@ Close with: "Everything you just saw is a decision I'd make in week one, and her
 
 ## Architecture
 
-pnpm TypeScript monorepo.
+pnpm TypeScript monorepo. Five front ends, one API, shared packages so the five never drift apart.
 
 ```
 zahln/
   apps/
-    mobile/      bare React Native 0.88 (iOS + Android), consumer + merchant modes
-    api/         Node + Fastify, Postgres, ledger, simulated SEPA Instant rail
-    web/         React + Vite + Tailwind admin console
+    consumer/      Zahln: bare React Native 0.88 consumer wallet (iOS + Android), de.zahln.app
+    merchant/      ZYSYGY: bare React Native 0.88 merchant till (iOS + Android), de.zysygy.app
+    api/           Node + Fastify, Postgres, ledger, simulated SEPA Instant rail
+    console/       internal ops console: Vite + React + Tailwind 4 + shadcn/ui
+    web/           customer web app: Next.js 16 (merchant dashboard, consumer web wallet, pay-link checkout)
+    landing/       "The Zahln Edition": Next.js 16, Lenis + Motion, one OGL shader
   packages/
-    shared/      zod schemas, API types, payment state machine, plan/feature definitions,
-                 design tokens, i18n strings (de/en)
+    shared/        zod schemas, API types, payment state machines, plans, tokens, i18n (de/en), money
+    mobile-ui/     RN design system: primitives, illustrations, theme (extracted from today's apps/mobile)
+    mobile-core/   RN plumbing: API client, session/lock, secure storage, biometrics, prefs, queries, haptics
+    web-ui/        web design system: Tailwind 4 preset from tokens, shadcn components restyled to Ember & ink
   docs/
-    PLAN.md
-    adr/         short architecture decision records (the interview talking points)
+    PLAN.md  DECISIONS.md  DESIGN_SYSTEM.md  LANDING.md  days/  adr/
 ```
 
-### Mobile (`apps/mobile`)
-- **Bare React Native 0.88**, TypeScript, React Navigation (native stack).
-- **Styling:** NativeWind (Zahln's stack) driven by design tokens from `packages/shared`.
-- **Data:** TanStack Query for server state, Zustand for small local state (session, app mode).
-- **Payment state machine:** a hand-written typed reducer (discriminated unions) in `packages/shared`, not XState,
-  so every line is easy to explain.
-  Consumer: `idle → scanned → confirming → authorising → submitting → checking → paid | not_charged | failed |
-  expired | insufficient_balance`.
-  Merchant intent: `draft → awaiting_scan (5 min) → scanned → paid | expired | cancelled`, then
-  `partially_refunded | refunded`.
-- **Two modes in one app** (chosen at onboarding; two simulators = two phones):
-  - **Consumer (Zahln):** wallet + balance, top-up (mock), scan to pay (dynamic or static QR), receipts, history,
-    search, transaction detail, report a problem.
-  - **Merchant (ZYSYGY):** catalogue grid + keypad, dynamic QR with countdown, static @handle QR, live
-    "payment received", tips, full/partial refund (manager only), shift report, wallet with withdraw and
-    "settles daily at 23:00".
+### Mobile: two apps, shared packages
+Two real apps, as Zahln and ZYSYGY would ship them: separate bundle IDs, icons, store listings and release
+cadences. A cashier never sees a consumer wallet, and a consumer never sees a till.
+
+- **What's shared (`packages/mobile-ui` + `packages/mobile-core`):** everything built on Days 1–2. That covers the
+  design system, onboarding steps (phone → OTP → PIN → biometrics), lock screen, settings, session, API client
+  and secure storage. Each app composes these into its own navigator.
+- **What each app owns:** its navigator, its feature screens, its native project (icon, launch screen, bundle
+  ID, permissions) and its Info.plist / manifest strings.
+- **Brand:** both apps use Ember & ink. The consumer app (Zahln) leads with paper; the merchant app (ZYSYGY) leads
+  with ink (a dark-first till that is easier to read at a counter, with ember accents), and its own app icon is a
+  till-receipt mark.
+- **Runtime:** bare RN 0.88 (New Architecture), React Navigation 7, NativeWind 4, TanStack Query, Zustand + MMKV,
+  Reanimated 4, react-native-keychain, vision-camera (consumer only), FlashList.
+- **Payment state machines:** hand-written typed reducers in `packages/shared`, used by both apps and the web
+  checkout.
+  - Consumer: `idle → scanned → confirming → authorising → submitting → checking → paid | not_charged | failed |
+    expired | insufficient_balance`.
+  - Merchant intent: `draft → awaiting_scan (5 min) → scanned → paid | expired | cancelled`, then
+    `partially_refunded | refunded`.
+- **Consumer app (Zahln):** wallet + balance, top-up (mock), scan to pay (dynamic or static QR), receipts,
+  history, search, transaction detail, report a problem.
+- **Merchant app (ZYSYGY):** catalogue grid + keypad, dynamic QR with countdown, static @handle QR, live
+  "payment received", tips, full/partial refund (manager only), shift report, wallet with withdraw and
+  "settles daily at 23:00", staff vs manager roles.
 - **Device layer:**
-  - QR: `react-native-vision-camera` code scanner.
+  - QR scan: `react-native-vision-camera` code scanner (consumer).
   - Biometrics + secure storage: `react-native-keychain` (biometry-protected item, so Face ID gates the key rather
     than just being a UI prompt).
   - **Native module 1, `SecureScreen` (Swift + Kotlin):** `FLAG_SECURE` on Android; on iOS, blur the app-switcher
-    snapshot and detect screen capture. Used on PIN, balance and receipt screens.
-  - **Native module 2, `NfcPay` (Kotlin, Android only):** Host Card Emulation prototype; the till reads the payment
-    intent by phone-to-phone tap. On iOS, a QR fallback and an ADR on what Apple allows (EEA HCE entitlement).
-- **Release safety:** `/config` fetched on launch and on foreground → feature flags, kill switches, plan features,
-  `min_supported_version` → forced-update gate. Cached, with a safe default if the fetch fails.
+    snapshot and detect screen capture. Used on PIN, balance and receipt screens in both apps.
+  - **Native module 2, `NfcPay` (Kotlin, Android only):** Host Card Emulation prototype. The till reads the payment
+    intent from the consumer phone by tap. On iOS there's a QR fallback and an ADR on what Apple allows (the EEA HCE
+    entitlement).
+- **Release safety:** `/config` is fetched on launch and on foreground. It carries feature flags, kill switches,
+  plan features and a **per-app** `min_supported_version` that drives the forced-update gate. It is cached, with a
+  safe default if the fetch fails.
 - **Security:** cert pinning, log scrubber (no tokens, IBANs or balances), re-auth rules (pay over €X, refund,
   change PIN, export data), session lock after N seconds in the background.
-- **i18n + a11y:** i18next with de (default) and en, `accessibilityLabel`/`Role` on every control, Dynamic Type safe
-  layouts.
-- **Onboarding (mocked KYC/KYB):** phone → OTP (fake) → PIN → biometrics → device binding (keypair in the keychain,
-  public key sent to the API). The merchant path adds business name, @handle and role.
+- **i18n + a11y:** i18next with de (default) and en; `accessibilityLabel`/`Role` on every control; layouts that
+  survive Dynamic Type.
 
 ### API (`apps/api`)
-- **Fastify + Postgres** (Docker Compose), Drizzle ORM, zod validation shared with the app.
-- **Double-entry ledger:** consumer wallet, merchant wallet, settlement and refund accounts; balances are derived
+- **Fastify + Postgres** (Docker Compose), Drizzle ORM, zod validation shared with every client.
+- **Double-entry ledger:** consumer wallet, merchant wallet, settlement and refund accounts. Balances are derived
   from postings, never stored as one mutable number.
-- **Idempotency:** `Idempotency-Key` header required on every money-moving POST; the stored response is replayed.
-- **`PaymentRail` interface** with `SimulatedSepaInstantRail` (configurable latency and failure modes). A real
-  provider plugs in behind the same interface later.
-- **Payment intents:** the merchant creates an intent (amount, line items, 5-min expiry) → the QR encodes a signed
-  intent reference → the consumer confirms → the rail settles → status is pushed over SSE to both phones and the console.
+- **Idempotency:** an `Idempotency-Key` header is required on every money-moving POST, and the stored response is
+  replayed.
+- **`PaymentRail` interface** with `SimulatedSepaInstantRail` (configurable latency and failure modes).
+- **Payment intents:** the merchant creates an intent → the QR (or a pay link) encodes a signed reference → the
+  consumer confirms in the app *or on the web checkout* → the rail settles → status is pushed over SSE to the
+  phones, the dashboard and the console.
+- **Auth for three audiences:**
+  - mobile: OTP + device-bound bearer (done)
+  - web: OTP → httpOnly, `SameSite=Lax` session cookie + CSRF token, scoped to consumer or merchant-owner
+  - console: a separate staff identity with roles (support, finance, admin), every write audited
 - **Merchants:** plan (free/pro/business), staff with roles, catalogue, @handle, GoBD-style receipt numbering,
-  scheduled daily settlement job.
-- **Remote config:** global flags + kill switches + min version + per-merchant plan features.
+  scheduled daily settlement job, DATEV-style CSV export.
+- **Remote config:** global flags + kill switches + per-app min version + per-merchant plan features.
 - **Chaos controls** (dev only): drop the response after settlement, rail rejects, slow rail, insufficient funds.
 
-### Web console (`apps/web`)
-- React + Vite + Tailwind 4 + shadcn/ui + TanStack Table, sharing tokens and types.
-- Search users, merchants and payments; a payment detail page with a full event timeline
-  (created → scanned → authorised → submitted → settled → refunded); refund.
-- Merchant page: change plan, staff, today's volume, DATEV-style CSV export.
-- Control room: feature flags, kill switches, minimum version, chaos toggles (drives Acts 2 and 3).
+### Internal console (`apps/console`)
+- Vite + React + Tailwind 4 + `packages/web-ui` (shadcn, restyled) + TanStack Table/Query.
+- Search users, merchants and payments. A payment detail page shows the full event timeline (created → scanned →
+  authorised → submitted → settled → refunded) and the ledger postings, with a refund action and a mandatory
+  reason.
+- Merchant page: change plan, staff, today's volume, CSV export.
+- Control room: feature flags, kill switches, per-app minimum version, chaos toggles (drives Acts 2 and 3).
+- Audit log of every staff action. Data-dense, keyboard-first (⌘K search), ink-first dark UI.
+
+### Customer web app (`apps/web`)
+One Next.js app with two signed-in areas and one public page.
+- **Merchant dashboard (`/business`):** for the owner, at a desk, on a laptop. Today's takings with a live feed
+  (SSE), payouts and the settlement calendar, transactions with filters and receipt view, refunds (owner only),
+  staff and roles, catalogue editor, plan & billing (Free → Pro → Business), DATEV/CSV export, @handle and
+  printable static QR poster (PDF).
+- **Consumer web wallet (`/wallet`):** balance, history, receipts and a GDPR data export, for when you're at a
+  laptop.
+- **Pay-link checkout (`/i/<intentId>.<sig>`, public):** the page a pay link or a QR opens on a phone without
+  the app. It shows the merchant, amount and line items from the server (never from the URL), then "Open in Zahln"
+  (universal link) or "Pay on the web" via OTP sign-in, using the same consumer state machine with the same
+  `checking` reconciliation. This is how "online merchants: payment links" from zysygy.de works.
+- Next.js 16 App Router, server components for data, `packages/web-ui`, Ember & ink with light/dark, de/en.
+
+### Landing page (`apps/landing`)
+"Die Zahln Edition · Herbst '26": an Editions-style, chaptered scroll story with public-domain Old Master art
+of money-changers, torn-receipt transitions, real app videos in device frames, and a performance budget enforced
+in CI. Full teardown and spec: [LANDING.md](LANDING.md).
 
 ### Testing and tooling
 Full rationale in [DECISIONS.md](DECISIONS.md); design system in [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md).
 - Vitest for the shared state machines, ledger, idempotency and refunds (the logic that costs money).
-- Jest + RN Testing Library for payment status screens; Maestro flows for the happy path and the network-drop path.
-- React Native Storybook for every primitive in light and dark.
+- Jest + RN Testing Library for payment status screens; Maestro flows (both apps) for the happy path and the
+  network-drop path.
+- Playwright for the web apps: dashboard login → live payment row; pay-link checkout; console refund.
+- Lighthouse CI on the landing page and the checkout (performance, accessibility, CLS budgets).
+- React Native Storybook for every primitive in light and dark; Ladle/Storybook for `web-ui`.
 - pnpm + Turborepo, Biome, GitHub Actions (typecheck, lint, test).
 - Sentry is not in the MVP; the log scrubber is built so it drops into `beforeSend` later.
 
@@ -172,26 +230,34 @@ Full rationale in [DECISIONS.md](DECISIONS.md); design system in [DESIGN_SYSTEM.
 4. NFC on iOS vs Android: what Apple and Google allow a third-party app to do.
 5. Swappable `PaymentRail`; why no real sandbox in week one.
 6. EU data residency for crash and analytics data; GoBD/receipt data model.
+7. Two apps on shared packages instead of one app with modes.
+8. Web auth: httpOnly cookie + CSRF for the browser, device-bound bearer for mobile, separate staff identity for the console.
+9. The landing page's performance budget: why one OGL shader and not Three.js, and how the budget is enforced in CI.
 
 ---
 
 ## Schedule
 
-Step-by-step guides for each day: [docs/days](days/README.md).
+Step-by-step guides for each day: [docs/days](days/README.md). The rule is quality over speed, but each day
+still ends with a check that passes before the next day starts.
 
 | Day | Build | End-of-day check |
 |---|---|---|
-| 1 | Monorepo, shared package (schemas, state machines, plans), API skeleton, Postgres, ledger, idempotency, rail simulator + tests | `curl` a payment end to end; tests green |
-| 2 | RN app on iOS + Android, navigation, tokens, i18n, onboarding (consumer + merchant), PIN, keychain biometrics | Onboard both modes on two simulators |
-| 3 | Merchant catalogue + keypad, 5-min dynamic QR, consumer scan → confirm → pay, SSE live status, receipts, wallets | **Act 1 works** |
-| 4 | Every payment state, `checking` reconciliation, chaos modes, static @handle QR, tips, refunds, history | **Act 2 works** |
-| 5 | Remote config, plan gating, kill switches, forced update, web console (search, timeline, refund, plans, flags, CSV) | **Act 3 works** |
-| 6 | Native modules (SecureScreen, NFC HCE), cert pinning, scrubber, Storybook, a11y pass, Maestro | Security checklist done |
-| 7 | ADRs, README with GIFs, record the video, rehearse the demo twice | Full 5-minute run with no surprises |
+| 1 ✅ | Monorepo, shared package, API, Postgres, ledger, idempotency, rail simulator + tests | `curl` a payment end to end; tests green |
+| 2 ✅ | RN app on iOS + Android, Ember & ink design system, i18n, onboarding, PIN, keychain biometrics | Onboard both modes on two simulators |
+| 3 | **Split into two apps:** extract `mobile-ui` + `mobile-core`, create `apps/consumer` + `apps/merchant` with their own native projects, icons and bundle IDs | Both apps build, launch and onboard on iOS + Android; all tests green |
+| 4 | Merchant till: catalogue + keypad, 5-min dynamic QR; consumer scan → confirm → pay; SSE; receipts; wallets | **Act 1 works** |
+| 5 | Every payment state, `checking` reconciliation, chaos modes, static @handle QR, tips, refunds, history | **Act 2 works** |
+| 6 | Remote config, plan gating, kill switches, per-app forced update, internal console | **Act 3 works** |
+| 7 | Zahln Web I: web auth (cookie + CSRF), `web-ui` package, merchant dashboard (live takings, transactions, payouts, refunds, staff, plan, export) | Act 1 payment appears live on the dashboard |
+| 8 | Zahln Web II: pay-link checkout, consumer web wallet, static QR poster PDF, Playwright | Pay a link from a browser on a phone; Playwright green |
+| 9 | Landing I: content, art sourcing (CC0, recorded), lettering, typography, layout of all 10 chapters, static, no motion | Reads beautifully with JS off; Lighthouse a11y 100 |
+| 10 | Landing II: Lenis + Motion, frame → index, sticky heroes, torn-paper transitions, shader, app videos | Budgets green on Lighthouse CI; reduced motion verified |
+| 11 | Below RN + security: SecureScreen, NFC HCE, cert pinning, scrubber, re-auth, GDPR export/delete | Security checklist done |
+| 12 | Quality: Storybook (mobile + web), a11y pass on all five front ends, Maestro, CI pipeline, deploy previews | CI green on a clean clone |
+| 13 | ADRs, README with GIFs, record the video, rehearse the demo twice | Full 5-minute run with no surprises |
 
-Day 7 is not optional. A rehearsed demo beats one more feature.
-
----
+Day 13 is not optional. A rehearsed demo beats one more feature.
 
 ## Interview prep (alongside the build)
 
@@ -209,13 +275,13 @@ Day 7 is not optional. A rehearsed demo beats one more feature.
   hands over the coffee before the money has settled?
 - Phone-to-phone NFC on iPhone: are you planning on Apple's EEA HCE entitlement, or QR-only on iOS at launch?
 - Is KYC in-house or a partner like IDnow / WebID? (The JD's "stuck in someone else's system" problem.)
-- Is the merchant app (ZYSYGY) and the consumer app (Zahln) one codebase or two apps?
+- The MVP ships ZYSYGY and Zahln as two apps on shared packages. Is that how you see it, or one app with modes?
 - Why does the India listing say "first frontend engineer" when the Germany one describes a second seat?
 - How does the EXIST timeline affect the start date and pay?
 
 ---
 
 ## Out of scope
-Real KYC/eID, real banks, QR menu ordering, inventory sync, promotions, recurring mandates, P2P and split bills,
+Real KYC/eID, real banks, real payments on the web checkout (it uses the simulated rail), QR menu ordering, inventory sync, promotions, recurring mandates, P2P and split bills,
 student ID, transport/utilities, real Fiskaltrust/TSE, app store submission.
 Mention them as "next", with a sentence on how the current architecture makes room for each.

@@ -54,7 +54,7 @@ Accounts:
 - `consumer_wallet:<userId>`
 - `merchant_wallet:<merchantId>`
 - `topup_source` (system account, may go negative)
-- `settlement_outbound` (system account, for Day 3 payouts)
+- `settlement_outbound` (system account, for Day 4 payouts)
 
 ### 3. Idempotency keys
 The client generates a UUID **before** sending a money-moving request and sends it as `Idempotency-Key`.
@@ -77,7 +77,7 @@ would pay again".
 Request hash = SHA-256 of `route + canonical JSON` (keys sorted), so `{a,b}` and `{b,a}` match.
 
 ### 4. Payment intent (merchant side)
-The merchant creates an intent first; the QR (Day 3) only carries a reference to it.
+The merchant creates an intent first; the QR (Day 4) only carries a reference to it.
 Shared transition table in `packages/shared/src/state/paymentIntent.ts`, used by the API before every status update:
 
 ```
@@ -86,7 +86,7 @@ awaiting_scan (expires in 5 min) → scanned → paid → partially_refunded →
 ```
 
 ### 5. Payment attempt (consumer side)
-`packages/shared/src/state/paymentAttempt.ts`: a pure reducer, ready for the app on Day 3:
+`packages/shared/src/state/paymentAttempt.ts`: a pure reducer, ready for the app on Day 4:
 ```
 idle → scanned → confirming → authorising → submitting → checking → paid
                                                        ↘ not_charged | failed | expired | insufficient_balance
@@ -149,7 +149,7 @@ So **Döner Ali (Free) gets `403 plan_required`** when creating a dynamic QR.
 - [x] `money.ts`: `formatMoney`, `applyKeypadKey` (cents-first), `includedVat`, `sumCents`, `assertCents`
 - [x] `schemas/index.ts`: Zod 4 schemas for intents, attempts, refunds, wallets, remote config, API errors
 - [x] `state/paymentAttempt.ts`: consumer reducer (pure; illegal events are ignored, never thrown)
-- [x] `state/paymentIntent.ts`: transition table + `statusAfterRefund` + `tillReducer` for the Day 3 till
+- [x] `state/paymentIntent.ts`: transition table + `statusAfterRefund` + `tillReducer` for the Day 4 till
 - [x] `plans.ts`: plans → features, `hasFeature`, `minimumPlanFor`
 - [x] `tokens/index.ts`: Quittung colours (light + dark), spacing, radius, type scale, motion, `contrastRatio()`
 - [x] `i18n/de.json`, `i18n/en.json`: payment statuses, explanations ("Kein Geld abgebucht."), till strings
@@ -161,7 +161,7 @@ So **Döner Ali (Free) gets `403 plan_required`** when creating a dynamic QR.
   - `users`, `merchants` (plan, handle, `receipt_seq`), `staff` (owner/manager/staff), `catalogue_items`
   - `accounts`, `ledger_transactions`, `postings`
   - `payment_intents`, `payment_attempts`, `refunds`
-  - `idempotency_keys`, `events` (the timeline for the Day 5 console)
+  - `idempotency_keys`, `events` (the timeline for the Day 6 console)
 - [x] Migrations `0000_init.sql` (generated) + `0001_ledger_rules.sql` (hand-written triggers)
 - [x] Seed (`src/db/seed.ts`):
 
@@ -192,7 +192,7 @@ So **Döner Ali (Free) gets `403 plan_required`** when creating a dynamic QR.
 | `GET /wallets/me` | consumer | — | balance + last 20 transactions |
 | `POST /wallets/me/topups` | consumer | ✅ | mock top-up |
 | `GET /merchants/:id/wallet` | staff | — | |
-| `GET /config` | anyone | — | stub, real on Day 5 |
+| `GET /config` | anyone | — | stub, real on Day 6 |
 | `GET/POST /dev/chaos`, `POST /dev/reset` | dev only | — | only when `CHAOS_ENABLED=true` |
 
 ### E. Tests (29 in the API, against a real Postgres `zahln_test`) ✅
@@ -309,7 +309,7 @@ different body → `idempotency_key_reused`; Lena 4.370, Café Mila 630; Döner 
 2. **Auth is a header stub** (`x-user-id`). Day 2 adds device-bound sessions.
 3. **The idempotency "stale after 30 s" takeover** assumes requests time out at 15 s (`requestTimeout`). In
    production you'd also keep a lease/heartbeat.
-4. **Events are written to a table but not yet pushed** to clients; Day 3 adds SSE after commit.
+4. **Events are written to a table but not yet pushed** to clients; Day 4 adds SSE after commit.
 
 ## Done when
 - [x] `pnpm test` is green, including the concurrency tests (94 tests)

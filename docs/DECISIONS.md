@@ -30,7 +30,11 @@ Interviewers at a founding-team stage want to hear the trade-off, not a library 
 | API | Fastify 5 (Node, TypeScript) | 5.12.7 |
 | Database | Postgres 17 (Docker) + Drizzle ORM | drizzle-orm 0.45.4 |
 | Realtime | Server-Sent Events, polling fallback | — |
-| Web console | Vite + React + Tailwind 4 + shadcn/ui + TanStack Table | vite 8.3.4 / tanstack-table 9.3.1 |
+| App split | Two RN apps (Zahln consumer, ZYSYGY merchant) on shared `mobile-ui` + `mobile-core` packages | — |
+| Internal console | Vite + React + Tailwind 4 + shadcn/ui + TanStack Table | vite 8.3.4 / tanstack-table 9.3.1 |
+| Customer web app | Next.js (App Router) + Tailwind 4 + shared `web-ui` | next 16.4.2 / react 19.3.1 / tailwindcss 4.3.3 |
+| Landing page | Next.js + Lenis + Motion + OGL (one shader) | next 16.4.2 / lenis 1.3.27 / motion 14.3.0 |
+| Web E2E + budgets | Playwright + Lighthouse CI | @playwright/test 1.64.1 |
 | Monorepo | pnpm workspaces + Turborepo | turbo 2.11.9 |
 | Lint + format | Biome | 2.5.15 |
 | Tests | Jest + RN Testing Library (mobile), Vitest (API/shared), Maestro (E2E) | jest 30.5.2 / RNTL 14.1.0 / vitest 5.0.5 |
@@ -221,14 +225,63 @@ Interviewers at a founding-team stage want to hear the trade-off, not a library 
 
 ---
 
-## 7. Web console
+## 7. Five front ends
 
-### 7.1 Vite + React + Tailwind 4 + shadcn/ui + TanStack Table
-- Matches Zahln's web stack (React, TS, Tailwind). shadcn components are copied into the repo (Radix-based, accessible),
-  and TanStack Table handles search, sort and pagination on payments.
-- **Rejected:** Next.js (no SSR need for an internal tool), Mantine (less Tailwind-aligned).
+### 7.1 Two mobile apps on shared packages (not one app with two modes)
+- **Chosen:** `apps/consumer` (Zahln, `de.zahln.app`) and `apps/merchant` (ZYSYGY, `de.zysygy.app`). What both
+  need lives in `packages/mobile-ui` (design system) and `packages/mobile-core` (API client, session, secure storage,
+  biometrics, prefs).
+- **Why:** they are two products for two audiences with different release risk. A till bug must not wait for a
+  wallet release, and vice versa. Separate bundle IDs also mean separate store listings, permissions (only the
+  consumer app asks for the camera) and app sizes. zysygy.de already markets them as two brands.
+- **Rejected:** one app with a mode switch (what Days 1–2 built). It was cheap to start but mixes permissions,
+  confuses store review and couples releases. Also rejected: one RN project with build flavors. That is fewer
+  folders, but native config diverges quickly and is harder to reason about.
+- **Cost accepted:** two native projects to keep upgraded. This is mitigated by identical RN versions pinned at
+  the root and by keeping native code in shared packages (the SecureScreen module is a package, not app code).
+- **If they ask** *"Isn't that double the work?"*: "About 90 % of the code is shared packages. The apps are thin
+  shells: a navigator, feature screens and a native project. The split costs one day; the payoff is independent
+  releases and a cashier who never sees a wallet."
+
+### 7.2 Internal console: Vite + React + Tailwind 4 + shadcn/ui + TanStack Table
+- Matches Zahln's web stack (React, TS, Tailwind). shadcn components are copied into `packages/web-ui`
+  (Radix-based, accessible), and TanStack Table handles search, sort and pagination on payments.
+- **Not Next.js here:** an internal tool behind a login has no SEO or SSR need. A static SPA is simpler to
+  host behind SSO.
 - **If they ask** *"How would you secure the internal console?"*: "SSO with roles, every write action audited
   (who refunded what and why), refunds above a threshold need four-eyes approval, and no PII in URLs."
+
+### 7.3 Customer web app: Next.js 16 App Router
+- **Audiences:** merchant owners (dashboard), consumers (web wallet), and anyone who opens a pay link (public
+  checkout).
+- **Why Next.js:** the checkout page is public and has to paint fast on a cheap phone over mobile data, so it
+  is server-rendered with almost no JS. The dashboard benefits from server components fetching close to the
+  API. One framework covers both, and it matches the landing page.
+- **Auth:** OTP sign-in, then an **httpOnly, Secure, SameSite=Lax cookie** plus a CSRF token. Bearer tokens in
+  `localStorage` are readable by any XSS, while cookies are not. Mobile keeps device-bound bearer tokens,
+  because there's no browser cookie jar and the device binding is the point.
+- **Rejected:** Remix/React Router 7 (a fine choice, but Next.js has the larger hiring pool at a startup) and a
+  pure SPA (a slow first paint for the checkout).
+- **If they ask** *"Why would a payments company let you pay on the web?"*: "Payment links for online
+  merchants are on your own site. The web checkout uses the same intent, the same state machine and the same
+  idempotency key flow as the app. The rail doesn't care which client approved."
+
+### 7.4 Landing page: Next.js + Lenis + Motion + one OGL shader
+- Modelled on the *mechanics* of Shopify Editions (studied in a browser; see [LANDING.md](LANDING.md)): sticky
+  chapter index, frame-to-nav morph, sticky art heroes, torn-paper transitions.
+- **Lenis** gives one smooth-scroll source and **Motion** handles scroll-linked transforms (`useScroll`,
+  `useTransform`). Both respect `prefers-reduced-motion`.
+- **OGL instead of Three.js:** we need one full-screen fragment shader (grain + ember light leak), not a scene
+  graph. That is about 30 KB versus about 600 KB.
+- **Art:** public-domain Old Masters (money-changers, merchants) from CC0 museum collections, with every image's
+  licence recorded in `apps/landing/ASSETS.md`.
+- **Fonts:** Inter Tight (display), Instrument Serif (editorial) and Pinyon Script (one initial per chapter), all
+  under the OFL and self-hosted with `next/font`.
+- **Enforced budgets:** LCP < 2 s on mobile, CLS < 0.02, first-load JS < 150 KB gzipped, Lighthouse a11y 100,
+  checked by Lighthouse CI.
+- **If they ask** *"Isn't a fancy landing page a distraction for a mobile engineer?"*: "It took two days and it
+  shows the same thing the app does: I care how it feels *and* I measure it. The budget is in CI, so it can't
+  quietly regress."
 
 ---
 
@@ -245,8 +298,8 @@ Interviewers at a founding-team stage want to hear the trade-off, not a library 
   screens, ban `console.log` (use the scrubbed logger).
 
 ### 8.3 i18next
-- German is the default language; English is the fallback toggle. Keys live in `packages/shared/i18n` so app and
-  console share copy. Money and dates are formatted with `Intl`, never by string concatenation.
+- German is the default language; English is the fallback toggle. Keys live in `packages/shared/i18n`, so both
+  apps, the web app, the console and the landing page share copy. Money and dates are formatted with `Intl`, never by string concatenation.
 - **If they ask** *"What breaks when you add German?"*: "Length: German strings run ~30 % longer, so buttons must
   wrap or grow, never truncate; plus decimal commas and `6,30 €` currency placement. I test layouts with the
   longest language and the largest Dynamic Type size."

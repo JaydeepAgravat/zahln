@@ -31,7 +31,7 @@ in German and English, and both a student and a merchant can onboard with a PIN 
 - **TurboModules**: lazily loaded native modules with typed specs (Codegen).
 - **JSI**: lets JS call C++ directly, without the old JSON bridge.
 - 0.88 is "bridgeless" by default; the DevTools target literally says *React Native Bridgeless*.
-- Reanimated 4, vision-camera 5, MMKV 4 (Nitro modules) and your Day-6 modules all need it.
+- Reanimated 4, vision-camera 5, MMKV 4 (Nitro modules) and your Day-11 modules all need it.
 
 ### 2. Metro in a monorepo
 Metro only watches the app folder by default. `apps/mobile/metro.config.js` sets:
@@ -80,7 +80,7 @@ token used from another device ID is rejected (tested). Sign-out revokes the dev
 - 6 digits.
 - `isWeakPin` rejects repeated digits, straight runs (234567 / 876543) and common PINs (123123, 159753…).
 - `pinCooldownMs`: 5 free attempts, then 30 s, 60 s, 120 s … capped at 1 h.
-- PIN entry uses the same `Keypad` primitive as the Day-3 amount entry (`mode="pin"`).
+- PIN entry uses the same `Keypad` primitive as the Day-4 amount entry (`mode="pin"`).
 
 ### 7. Session lock (`apps/mobile/src/lib/session.ts`)
 - States: `booting → onboarding | locked → ready`.
@@ -247,11 +247,11 @@ Craft bugs found in this pass:
 | Planned | Actual | Why |
 |---|---|---|
 | Inter Display for amounts | Inter SemiBold with tighter tracking | Google Fonts doesn't serve a static Inter Display cut. Fonts are named by PostScript name (`Inter-SemiBold`) so one string works on iOS and Android |
-| Device key pair | Random device UUID + server-side hashed session bound to it | Simpler for Day 2; the hardware key that signs payments (Secure Enclave / StrongBox) is the Day-6/next step |
+| Device key pair | Random device UUID + server-side hashed session bound to it | Simpler for Day 2; the hardware key that signs payments (Secure Enclave / StrongBox) is the Day-11/next step |
 | PIN verified on server | PIN in keychain, compared on device, attempt counter in keychain | MVP. Production: verify server-side, rate-limited per device, so a jailbroken phone can't brute-force offline |
 | — | Settings got a biometrics on/off toggle | Needed to test the PIN path, and users need it anyway |
 | `react-native-get-random-values` not planned | Added | Hermes has no `crypto.getRandomValues`; IDs and secrets must come from a secure RNG |
-| Storybook today | Moved to Day 6 (as planned in DAY-6.md) | — |
+| Storybook today | Moved to Day 12 (DAY-12.md) | — |
 
 ## Honest caveats (say these before they're asked)
 - **The iOS simulator doesn't enforce the biometric keychain ACL like a device.** The protected item was released
@@ -277,7 +277,7 @@ Craft bugs found in this pass:
 2. "Is a Face ID prompt enough to protect a session token? What is `BIOMETRY_CURRENT_SET` for?"
    *Then add: "and I know the simulator doesn't enforce it, so I'd test it on a device."*
 3. "What happens when the user adds a new fingerprint?"
-4. "How do you stop the app switcher from leaking the balance?" (Day 6: SecureScreen)
+4. "How do you stop the app switcher from leaking the balance?" (Day 11: SecureScreen)
 5. "How did you set up dark mode so screens can't use the wrong colour?"
    *CSS variables from one token file; no raw hex; same class in both themes.*
 6. "What broke on Android that didn't break on iOS?" *(new) Edge-to-edge keyboard handling.*

@@ -1,145 +1,117 @@
-# Day 4: When things go wrong (Act 2)
+# Day 4: The payment moment (Act 1)
 
 ## Goal
-"Kill the network after the money moved and the app never lies and never double-charges. It shows Wird geprüft
-and resolves to Bezahlt or Nicht belastet. Every other state (insufficient balance, expired, rejected) has its own
-honest screen. Static @handle QR codes, tips and refunds work too."
+"Café Mila's till builds an order from the catalogue, shows a one-time QR valid for 5 minutes, Lena scans it,
+confirms with Face ID, and both phones show Bezahlt in about a second, with the merchant wallet updating live."
 
 ## Why it matters for the interview
-- JD: *"Campus wifi will drop a request after the money has already moved. How the app behaves in that second is a
-  design decision, and it is yours."* Today you make that decision.
-- JD: *"Pending, failed, expired, insufficient balance, refunded, disputed. Asked to describe a payment screen, you describe all of them."*
-- Site: *"If the connection drops during a transaction, the app holds the payment and confirms it when the connection returns."*
-- This is **Act 2**, the act that wins the interview.
+- JD: *"That moment is the whole company and it belongs to this seat."*
+- JD: *"QR scan… merchant and amount confirmation, biometric authorisation, receipt. Measured in milliseconds."*
+- Site: *"Every payment. Its own QR code. Unique to this transaction… valid for 5 minutes."*
+- This is **Act 1** of the demo.
 
 ---
 
 ## Concepts to understand first
 
-### 1. The three outcomes of a timed-out request
-When `POST /pay` times out, the client **does not know** which of these happened:
-1. The request never reached the server → nothing happened.
-2. The server processed it and the response got lost → **money moved**.
-3. The server is still processing.
+### 1. The QR carries a reference, not the payment
+QR content: `https://pay.zahln.de/i/<intentId>.<sig>`, where `sig` is an HMAC that stops someone guessing intent IDs.
+The consumer app **fetches the intent from the API** and shows the server's merchant name and amount, never values
+decoded from the QR. A sticker over the merchant's QR can't silently change the payee or amount.
 
-So the only honest UI is **"Wird geprüft"** (checking), followed by reconciliation, *never* "failed", and *never* an automatic re-POST
-with a new key.
+Using an `https` URL also means a normal phone camera opens the app (universal link / app link) later.
 
-### 2. Reconciliation loop
-```
-on timeout / network error:
-  state → checking
-  repeat with backoff (0.5s, 1s, 2s, 4s… cap 8s, total ≤ 60s):
-    GET /attempts/by-key/<idempotencyKey>      (or re-POST with the SAME key; the server replays)
-    if paid        → paid
-    if rejected    → not_charged
-    if not found   → (request never arrived) → safe to offer "Erneut versuchen" (try again) with the SAME key
-  after 60s: "Wir prüfen noch" (we're still checking) + push notification when resolved; the receipt appears in history
-```
-If the network comes back, `NetInfo` triggers an immediate check. The app is killed mid-check → on next launch, the persisted
-pending key is found and the check resumes.
+### 2. Server-Sent Events (SSE)
+`GET /intents/:id/events` keeps an HTTP response open and writes lines like `event: status\ndata: {...}\n\n`.
+- The till subscribes to its intent; the console and the Zahln Web dashboard subscribe too (Days 6–7).
+- SSE is a **hint**. When the connection drops, the client fetches `GET /intents/:id`. The truth is always the REST status.
+- In RN, use `react-native-sse` or a small `fetch`-stream reader.
 
-### 3. The honest version of "offline payments"
-On account-to-account rails there's no card network guarantee. A merchant can't know the customer has the money while
-offline. Options:
-- **Online-only + fast reconciliation** (MVP): the till shows *Wird geprüft*, never green until the server confirms.
-- **Offline queue with merchant risk**: hand over the coffee and accept the risk under a small limit (like card offline floor limits).
-- **Pre-authorised offline tokens**: the wallet reserves a small balance in advance and signs offline tokens. This is how CBDC/offline-wallet
-  designs work, and it's complex.
+### 3. Measuring time to confirmation
+Measure `t0` = when the user approves Face ID, and `t1` = when the `paid` status is rendered. Show `t1 − t0` in a dev overlay
+("Bestätigt in 840 ms"). JD: *"You measure performance instead of asserting it."*
 
-This goes in ADR 2. Ask them in the interview which one they mean.
+### 4. Why the till shows the cart
+Like Stripe Terminal: the customer sees what they're paying for on the merchant device before scanning.
+Fewer disputes.
 
-### 4. Chaos modes (dev only)
-Controlled from `POST /dev/chaos` (and the console on Day 5):
-- `drop_after_settle`: settle, then destroy the socket without responding
-- `reject`: the rail rejects
-- `slow`: 3–8 s latency
-- `insufficient`: force insufficient funds
-
-### 5. Static QR / @handle (Free plan)
-The QR encodes `https://pay.zahln.de/@doener-ali`. There's no amount, so the **consumer types it**, and the merchant sees the payment arrive. Fraud
-consideration: the verified merchant name and a photo come from the server.
-
-### 6. Refund rules
-- Manager only (re-auth with biometrics)
-- Partial refunds add up and can never exceed the original amount
-- Each refund is an idempotent request and a new ledger transaction (merchant −, consumer +)
-- States: `paid → partially_refunded → refunded`
+### 5. Screen brightness
+Raise brightness while the QR is visible, and restore it afterwards. A tiny native call. Use a small library or write it as a warm-up for Day 11.
 
 ---
 
 ## Tasks
 
-### A. Error-state UI (≈2 h)
-- [ ] One `PaymentOutcome` screen driven by the reducer state:
-  - [ ] Bezahlt (paid)
-  - [ ] Wird geprüft (checking)
-  - [ ] Nicht belastet (not charged)
-  - [ ] Abgelaufen (expired)
-  - [ ] Guthaben reicht nicht (insufficient balance: show the balance + "Aufladen" (top up))
-  - [ ] Fehlgeschlagen (failed: unknown error, still says whether money moved)
-- [ ] Copy rule: every screen answers **"what happened to my money?"** in the first line
-- [ ] The merchant till mirrors these: it never shows green during `checking`, and shows "Kunde zahlt noch…" (customer is still paying)
-- [ ] Haptics per status (success / warning / error)
+### A. API additions (≈1 h)
+- [ ] HMAC-signed intent reference (`INTENT_SIGNING_SECRET` in env)
+- [ ] `GET /intents/:id/events` (SSE) emitting `scanned`, `paid`, `expired`, `refunded`
+- [ ] `POST /intents/:id/scanned`: the consumer app reports a scan, so the till shows "Kunde prüft…"
+- [ ] An in-process event bus (EventEmitter) that the payment transaction publishes to **after commit**
 
-### B. Reconciliation (≈2 h)
-- [ ] API: `GET /attempts/by-key/:key`
-- [ ] Mobile: a `useReconcile(key)` hook with backoff, a NetInfo trigger, and a cap
-- [ ] Persist pending attempts (key + intent + startedAt) so they survive an app kill; resume on launch
-- [ ] Unit tests for the reducer: `timeout → checking → paid`, `checking → not_charged`, and that there's no path from `checking → submitting` with a new key
+### B. Merchant till (≈2.5 h)
+- [ ] `MerchantTabs`: **Kasse** (till), **Wallet**, **Mehr** (more)
+- [ ] Till with tabs **Katalog / Betrag** (catalogue / amount)
+  - [ ] Catalogue grid (FlashList, `numColumns`), tap to add, quantity badge, running total, "QR erstellen" (create QR)
+  - [ ] Amount keypad (cents-first), "6,30 € kassieren" (charge 6,30 €)
+- [ ] `QRPanel` screen:
+  - [ ] White QR (`react-native-qrcode-svg`, error correction M, quiet zone 4)
+  - [ ] Amount + merchant name + line items
+  - [ ] Countdown ring (Reanimated) + "Noch 4:12" (4:12 left)
+  - [ ] Live state: Warten auf Scan → Kunde prüft → **Bezahlt**
+  - [ ] Brightness up on focus, restored on blur
+- [ ] Bezahlt flood screen (merchant): amount-hero, a ticking time, success haptic, auto-return after 2.5 s
 
-### C. Chaos (≈1 h)
-- [ ] `POST /dev/chaos { mode }` (disabled unless `CHAOS_ENABLED=true`)
-- [ ] `drop_after_settle` implemented as `reply.raw.destroy()` after the commit
-- [ ] A dev menu in the app to set chaos quickly (until the console exists)
+### C. Consumer pay flow (≈2.5 h)
+- [ ] `ConsumerTabs`: **Wallet**, **Bezahlen** (scan), **Verlauf** (history)
+- [ ] Scanner (vision-camera `useCodeScanner`, QR only), with the camera permission explained first (pre-prompt screen)
+- [ ] Parse the URL → `GET /intents/:id` → **Confirm** screen: merchant, amount, items, "Mit Face ID bezahlen · 6,30 €" (pay with Face ID)
+- [ ] Face ID via a keychain read (the biometric gate) → `POST /intents/:id/pay` with a fresh `Idempotency-Key`
+      **persisted before sending** (Zustand + MMKV or keychain, so it survives an app kill)
+- [ ] Drive the UI from the `paymentAttempt` reducer in `@zahln/shared`
+- [ ] Bezahlt screen (consumer) mirrors the merchant one; a receipt link
+- [ ] **Simulator tip:** the iOS simulator has no camera. Add a dev-only "QR-Link einfügen" (paste QR link) button that reads the
+      intent URL from the clipboard. On the till, add a dev-only "Link kopieren" (copy link). Both are hidden in release builds.
 
-### D. Static QR, tips, refunds (≈2 h)
-- [ ] Merchant "Mein QR" (my QR) screen with the @handle QR (always available, Free plan)
-- [ ] Consumer handle flow: scan → merchant profile → enter amount → confirm
-- [ ] Tips: after the cart, the consumer optionally picks 0 / 5 / 10 % / custom (Pro feature, gated on Day 5)
-- [ ] Refunds: transaction detail → "Erstatten" (refund) → full/partial amount → manager re-auth → done; the consumer receipt shows the
-      refund
-- [ ] History (FlashList): search by merchant, filter by status, sticky day headers, badges for anything other than paid
+### D. Wallets + receipt (≈1 h)
+- [ ] Consumer wallet: balance (`AmountDisplay` hero, discreet toggle), top-up (mock), last 5 transactions
+- [ ] Merchant wallet: today's total, balance, "Wird täglich um 23:00 ausgezahlt" (paid out daily at 23:00), "Jetzt auszahlen" (pay out now; mock withdraw → postings)
+- [ ] Receipt screen: receipt number (sequential per merchant), timestamp, items, VAT 7 % / 19 % breakdown, payment ID
 
 ---
 
 ## Files you'll create
 ```
-apps/api/src/routes/{dev.ts, attempts.ts}  apps/api/src/rail/chaos.ts
-apps/mobile/src/features/payments/{PaymentOutcomeScreen.tsx, useReconcile.ts, pendingStore.ts}
-apps/mobile/src/features/consumer/{HandlePayScreen, HistoryScreen, TransactionDetailScreen}.tsx
-apps/mobile/src/features/merchant/{MyQRScreen, RefundSheet}.tsx
-packages/shared/test/reconcile.test.ts
+apps/api/src/{routes/events.ts, lib/eventBus.ts, lib/intentRef.ts}
+apps/merchant/src/features/{TillScreen, CatalogueGrid, AmountPad, QRPanelScreen, PaidScreen, MerchantWalletScreen}.tsx
+apps/consumer/src/features/{WalletScreen, ScanScreen, ConfirmScreen, PaidScreen, ReceiptScreen}.tsx
+packages/mobile-core/src/payments/{usePayment.ts, useIntentEvents.ts, idempotency.ts}
+packages/mobile-ui/src/{QRPanel, Countdown}.tsx
 ```
 
 ## Pitfalls
-- **"Erneut versuchen" creating a new idempotency key.** The same attempt means the same key. A new key only comes when the user
-  starts a *new* payment.
-- **Showing a spinner forever.** Cap at 60 s and then explain in words what happens next.
-- **Treating 5xx as "not charged".** A 5xx after processing started is still unknown → `checking`.
-- **Refund race:** two managers refunding at the same time → lock the intent row (`FOR UPDATE`) and test it.
-- **Red for outgoing money in history.** Outgoing money isn't an error. Use text-primary (DESIGN_SYSTEM.md).
+- **Publishing the `paid` event before the database commit.** The till turns green and then the transaction rolls back. Publish after commit only.
+- **The scanner firing 30 times a second.** Debounce, and stop scanning after the first valid code.
+- **Generating a new idempotency key on re-render or retry.** It's created once per *attempt* when the user taps pay, and reused for every status check.
+- **Trusting the QR content.** Always re-fetch the intent.
+- **SSE through the Metro dev proxy / Android emulator:** use `10.0.2.2:4000` for Android, and allow cleartext for local dev only.
 
 ## Done when
-- [ ] **Act 2 works:** chaos `drop_after_settle` → app shows Wird geprüft → resolves to Bezahlt within ~2 s; the ledger
-      shows exactly one payment
-- [ ] Chaos `reject` → Nicht belastet, and the balance is unchanged
-- [ ] Turn the simulator's network off mid-payment, wait, and turn it back on → it resolves correctly
-- [ ] Killing the app during `checking` and reopening it resumes the check
-- [ ] A partial refund of 2,50 € then 3,80 € → refunded; a third refund is rejected
+- [ ] **Act 1 runs on two simulators** (Zahln on iOS, ZYSYGY on Android, or both on iOS) with no manual API calls
+- [ ] Time to confirmation is shown, and it's under 1.5 s on the simulator with the rail in `ok` mode
+- [ ] The intent expires after 5 minutes, and paying an expired one shows Abgelaufen
+- [ ] Both wallets and the receipt show the right amounts in de and en, in light and dark
 
 ## Interview drill
-1. "The request timed out. Did the payment go through? What does your app show, and why?" (Say all three cases.)
-2. "Why is a 5xx not the same as a failure?"
-3. "Our website promises offline payments. How would you build that, and what's the risk?"
-4. "Describe every state of a payment screen." (Recite them all.)
-5. "How do you stop two refunds racing each other?"
+1. "Walk me through what happens between scanning and Bezahlt, at the network level."
+2. "Why doesn't the QR contain the amount?"
+3. "What if the SSE connection drops while the customer is paying?"
+4. "How did you measure time to confirmation, and what dominates it?"
+5. "How would this work with a normal camera app instead of in-app scanning?" (universal links)
 
 ## Commit
 ```
-feat(mobile): payment outcome states and haptics
-feat(mobile): reconciliation with backoff that survives app kill
-feat(api): chaos modes for the rail simulator
-feat: static handle QR, tips, partial refunds and history
-test(shared): reconciliation never re-submits with a new key
+feat(api): signed intent references and SSE status events
+feat(mobile): merchant till with catalogue, keypad and live QR panel
+feat(mobile): consumer scan, confirm with Face ID and pay
+feat(mobile): wallets and GoBD-style receipt
 ```

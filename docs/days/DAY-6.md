@@ -1,154 +1,145 @@
-# Day 6: Below React Native, security, accessibility, Storybook, E2E
+# Day 6: Change the app without a release + internal console (Act 3)
 
 ## Goal
-"I wrote two native modules myself in Swift and Kotlin, the app passes my security checklist, every primitive is in
-Storybook in light and dark, every payment screen works with a screen reader, and Maestro runs the happy path and the
-network-drop path on a simulator."
+"From a web console I can find any payment, see its full timeline, and refund it, and I can change what every phone does
+right now: kill NFC pay, upgrade a merchant from Free to Pro, or force an update, with no app store release."
 
 ## Why it matters for the interview
-- JD: *"You know when dropping below the React Native layer is the right call and when it is showing off."*
-- JD: *"Certificate pinning, keychain and keystore, integrity checks, screenshot handling on sensitive screens,
-  logging that never puts a token or a balance in a crash report."*
-- JD: *"You have shipped NFC… and know exactly what Apple permits a third party to do."*
-- JD: *"Automated testing that runs on real devices."* / *"You have made an app genuinely accessible."*
+- JD: *"You cannot hotfix a phone… Kill switches, feature flags, staged rollout, forced update, configuration driven from
+  the server rather than baked into a binary. You decide how that works in your first weeks and it stays decided for years."*
+- India JD: *"Internal tools that let our team resolve an issue in minutes."* / *"You have built an admin… console."*
+- Site: Free / Pro / Business plans, which become feature flags.
+- This is **Act 3**.
 
 ---
 
 ## Concepts to understand first
 
-### 1. A TurboModule in 5 steps
-1. A TypeScript spec: `NativeSecureScreen.ts` with `export interface Spec extends TurboModule { enable(): void; disable(): void; }`
-2. `codegenConfig` in `package.json` → Codegen generates the C++/ObjC/Java glue
-3. iOS: implement in Swift (with a small ObjC++ shim the generated protocol needs)
-4. Android: implement in Kotlin, extending the generated `NativeSecureScreenSpec`
-5. Register the package; call it from JS via `TurboModuleRegistry.getEnforcing<Spec>('SecureScreen')`
+### 1. The remote config contract
+`GET /config` (per device + merchant) returns:
+```json
+{
+  "version": 42,
+  "minSupportedVersion": "1.0.0",
+  "latestVersion": "1.2.0",
+  "killSwitches": { "nfc_pay": false, "refunds": false, "topup": false },
+  "flags": { "tips": true, "discreet_mode_default": false },
+  "plan": "pro",
+  "features": ["dynamic_qr", "refunds", "tips", "staff_roles"],
+  "limits": { "reauthAboveCents": 5000, "maxPaymentCents": 50000 },
+  "messages": { "banner": null },
+  "ttlSeconds": 60
+}
+```
+- Fetched on launch and on every foreground, and pushed via SSE `config` events so the demo is instant.
+- **Cached** on device (MMKV). If the fetch fails, use the cache; with no cache, use **safe defaults bundled in the binary**.
+- The defaults are *conservative*: risky features stay off until the server says otherwise.
 
-Put modules in a local package: `apps/mobile/modules/secure-screen/` (autolinked).
+### 2. Kill switch vs feature flag vs plan feature
+| Kind | Who flips it | Example | Default when unknown |
+|---|---|---|---|
+| Kill switch | On-call engineer during an incident | `nfc_pay` broken on Android 16 | Feature **on** (from cache); off only if told |
+| Feature flag | Product, for rollout or experiments | `tips` for 10 % of merchants | **Off** |
+| Plan feature | Billing state | `dynamic_qr` requires Pro | Last known plan |
 
-### 2. SecureScreen
-- **Android:** `window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)` blocks screenshots, recordings, and the
-  recents thumbnail. Remove the flag when the screen loses focus. Must run on the UI thread.
-- **iOS:** there's no official screenshot block. Do this instead:
-  - (a) cover the window with a blur view on `willResignActive` so the app-switcher snapshot is clean;
-  - (b) observe `UIScreen.capturedDidChangeNotification` and hide the balance while recording;
-  - (c) listen to `userDidTakeScreenshotNotification` to log or warn.
-  - Be honest in the interview: a full block isn't possible with public APIs (secure-text-field tricks are fragile).
+Same delivery mechanism, different owners and defaults. Saying that clearly is senior.
 
-### 3. NFC: what's actually possible
-- **Android HCE (Host Card Emulation):** an app registers a `HostApduService` with an AID (application ID) in
-  `apduservice.xml`. Another phone in reader mode (`NfcAdapter.enableReaderMode`) sends `SELECT AID` and gets bytes back.
-  → The consumer phone emulates; the merchant phone reads the intent reference. Phone-to-phone works on Android.
-- **iOS:**
-  - Core NFC can *read* tags (NDEF and some ISO 7816).
-  - Since iOS 17.4 (EEA, under the Digital Markets Act), approved apps can do **HCE** with an entitlement (`HCE` /
-    "NFC & SE Platform") that requires an Apple agreement, payment-provider status and a review.
-  - Since 2024, Tap to Pay on iPhone lets merchants accept *contactless cards*, but only through approved PSPs. It's not for custom A2A tokens.
-  - → On iOS today: QR, and plan for the EEA HCE entitlement. Write this up in ADR 4.
-- Note: the HCE demo needs **two real Android phones**. Emulators don't do NFC. If you don't have them, show the code and record a
-  video on devices, or explain it.
+### 3. Forced update
+- `appVersion < minSupportedVersion` → a **blocking** `UpdateRequired` screen (root navigator; no deep link gets past it).
+- `appVersion < latestVersion` → a soft banner.
+- Why both: forced update is for security and protocol breaks; soft is for everything else. Be careful: if forced update is
+  abused, users uninstall.
 
-### 4. Certificate pinning
-Pin the **public key (SPKI hash)** of your API's certificate, plus a backup pin, not the leaf cert.
-- iOS: `NSPinnedDomains` in Info.plist (`NSAppTransportSecurity`).
-- Android: `network_security_config.xml` `<pin-set>` with an expiration date.
-- Pinning failures are a rollout risk (a certificate rotation bricks old apps), so the backup pin and an expiry date are mandatory.
-  Local dev uses HTTP, so pinning is configured for a `api.zahln.example` release domain and documented.
+### 4. Staged rollout (talk about it, mock it)
+Store-side: App Store phased release (7 days) and Play staged rollout (%). App side: flags with a percentage + a stable
+device bucket (`hash(deviceId) % 100`). Watch crash-free rate per cohort before going to 100 %.
 
-### 5. Integrity checks (talk about them, stub them)
-Play Integrity API (Android) and App Attest / DeviceCheck (iOS) prove that requests come from a genuine app on a real device.
-The server verifies the token. MVP: a stub interface + an ADR note.
+### 5. Server-side enforcement
+Hiding a button isn't security. The API **also** checks plan features and kill switches. A Free merchant calling the
+dynamic-intent endpoint gets `403 plan_required`.
 
-### 6. Log scrubber
-One `logger` used everywhere (Biome bans `console.*`). It redacts keys (`token`, `authorization`, `iban`, `pin`,
-`balance`, `amount` in error context) and patterns (IBAN regex, JWT regex). Later the same function becomes Sentry's `beforeSend`.
+### 6. The console's audit log
+Every write action (refund, plan change, flag flip) is stored as `{ actor, action, target, reason, at }`. Refunds above
+a threshold need a reason. Four-eyes approval is "next".
 
 ---
 
 ## Tasks
 
-### A. Native modules (≈3 h)
-- [ ] `modules/secure-screen` (TurboModule): Android `FLAG_SECURE`, iOS blur-on-resign + capture detection
-- [ ] `useSecureScreen()` hook used on PIN, wallet, receipt and refund screens
-- [ ] `modules/nfc-pay` (Android only): `HostApduService` that returns the pending intent reference; reader mode on
-      the till; JS events `onTagRead`
-- [ ] The iOS build compiles with NFC unavailable → "Tap to Pay" (phone-to-phone NFC) is hidden on iOS (plus the kill switch)
-- [ ] Brightness module (if not done on Day 3)
+### A. Remote config (≈2 h)
+- [ ] API: `config` table (global) + per-merchant plan → `GET /config`, `PATCH /admin/config`, SSE `config` event
+- [ ] API: plan/kill-switch guards on routes (`requireFeature('dynamic_qr')`)
+- [ ] Mobile: a `useRemoteConfig()` provider, MMKV cache, bundled defaults, refetch on `AppState` active
+- [ ] Mobile: a `<Feature name="nfc_pay">` gate component + `useFeature()`
+- [ ] Mobile: an `UpdateRequired` root gate (compare with `react-native-device-info` version or the `package.json` version)
+- [ ] Gate in the app:
+  - [ ] Dynamic QR → Pro (Free merchants only see "Mein QR" + an upsell)
+  - [ ] Tips → Pro
+  - [ ] Refunds → Pro + manager
+  - [ ] Tap to Pay button → `nfc_pay` kill switch
 
-### B. Security hardening (≈1.5 h)
-- [ ] Pinning config for the release domain (iOS ATS pinned domains, Android network security config) + docs
-- [ ] Logger + scrubber + unit tests (feed it a fake IBAN and JWT and assert they're redacted)
-- [ ] Re-auth rules from remote config: above `reauthAboveCents`, refunds, PIN change, data export
-- [ ] Jailbreak/root heuristics → only a warning banner, never a block (the ADR explains why)
-- [ ] GDPR basics: "Meine Daten exportieren" (export my data, a JSON download from the API) and "Konto löschen" (delete account; soft-delete + ledger retention note)
-- [ ] `docs/SECURITY.md` checklist
+### B. Web console (≈4 h)
+- [ ] `apps/console`: Vite + React + TS + Tailwind 4 + shadcn/ui (start `packages/web-ui` here: Tailwind preset from tokens + restyled shadcn); tokens as CSS variables from `@zahln/shared`; light/dark
+- [ ] Simple login (dev password from env), with every request carrying an admin token
+- [ ] **Payments**: TanStack Table, search by ID / merchant / amount, status filter, live rows via SSE
+- [ ] **Payment detail**: event timeline (created → scanned → authorised → submitted → settled → refunded), ledger postings,
+      refund button with a required reason
+- [ ] **Merchants**: list, detail with plan selector (Free/Pro/Business), staff, today's volume, CSV export
+      (DATEV-style columns: date, receipt number, amount, VAT rate, VAT, payment ID)
+- [ ] **Control room**: kill switches, flags, min/latest version, chaos mode selector (the demo panel for Acts 2 + 3)
+- [ ] **Audit log** page
 
-### C. Storybook (≈1.5 h)
-- [ ] `@storybook/react-native` 10, behind `STORYBOOK=1` (a separate entry point, so it's never in release builds)
-- [ ] Stories for every primitive, with the theme toggle + locale toggle + font-scale control
-- [ ] Payment outcome screens as stories (every state, light and dark)
-
-### D. Accessibility pass (≈1 h)
-- [ ] Every control has `accessibilityRole` + `accessibilityLabel`; amounts have spoken labels ("sechs Euro dreißig")
-- [ ] Status changes announced (`AccessibilityInfo.announceForAccessibility("Bezahlt, 6,30 Euro")`)
-- [ ] Test at the largest Dynamic Type size: nothing truncated in money flows
-- [ ] Reduce Motion: the flood becomes a crossfade, the countdown ring becomes text
-- [ ] Focus order on the QR panel: amount → merchant → time left → actions
-
-### E. Maestro E2E (≈1 h)
-- [ ] `e2e/happy-path.yaml`: onboard → create intent (via API helper) → paste link → pay → assert "Bezahlt"
-- [ ] `e2e/network-drop.yaml`: set chaos `drop_after_settle` → pay → assert "Wird geprüft" → assert "Bezahlt"
-- [ ] Add a CI job (GitHub Actions) for typecheck + lint + unit tests. Maestro runs locally (CI on macOS runners is "next").
+### C. Wire the demo (≈1 h)
+- [ ] Run all three acts end to end from the console
+- [ ] A seed reset button / `pnpm demo:reset` that restores balances and plans to their starting values
 
 ---
 
 ## Files you'll create
 ```
-apps/mobile/modules/secure-screen/{package.json, src/NativeSecureScreen.ts, ios/*.swift, ios/*.mm, android/**/*.kt}
-apps/mobile/modules/nfc-pay/{src/NativeNfcPay.ts, android/**/{NfcPayModule.kt, PaymentApduService.kt}, android/res/xml/apduservice.xml}
-apps/mobile/{.storybook/*, src/**/*.stories.tsx}
-apps/mobile/src/lib/{logger.ts, scrub.ts, reauth.ts}
-apps/mobile/e2e/*.yaml
-.github/workflows/ci.yml
-docs/SECURITY.md
+apps/api/src/{routes/config.ts, routes/admin/*.ts, lib/features.ts, lib/audit.ts}
+packages/mobile-core/src/{remoteConfig.tsx, defaults.ts}  packages/mobile-ui/src/UpdateRequiredScreen.tsx
+apps/console/ (vite app)  packages/web-ui/
+  src/{routes/Payments.tsx, routes/PaymentDetail.tsx, routes/Merchants.tsx, routes/ControlRoom.tsx, routes/Audit.tsx}
+  src/components/ui/* (shadcn)  src/lib/{api.ts, sse.ts}
+scripts/demo-reset.ts
 ```
 
 ## Commands
 ```bash
-STORYBOOK=1 pnpm --filter @zahln/mobile start
-maestro test apps/mobile/e2e/happy-path.yaml
-maestro test apps/mobile/e2e/network-drop.yaml
+pnpm web
+pnpm dlx shadcn@latest init
+pnpm dlx shadcn@latest add table button dialog input select badge switch sheet
 ```
 
 ## Pitfalls
-- **Codegen not running** → spec file name must start with `Native`, and `codegenConfig.jsSrcsDir` must point at it. Clean the build after changes.
-- **Swift + TurboModules:** the generated protocol is ObjC++, so you need a `.mm` bridging file that forwards to Swift.
-- **`FLAG_SECURE` set off the UI thread** → crash. Use `runOnUiThread`.
-- **HCE AID conflicts:** use a proprietary AID (starts with `F0…`), category `other`, not `payment` (that one needs the user to set
-  the app as the default payment app).
-- **Storybook leaking into production.** Make sure the release bundle doesn't import it.
-- **Maestro and Face ID:** use the dev "PIN only" path in E2E, or `xcrun simctl` to match Face ID before the step.
+- **Fail-open vs fail-closed confusion.** Decide per switch what happens with no config, and write it down.
+- **Config blocking the app start.** Never wait on the network to render. Render from cache/defaults, then update.
+- **Forced-update loops:** a store build with a version string the comparison misreads. Use semver comparison and test it.
+- **Console showing PII in URLs** (`/users?phone=…`). Use IDs in URLs.
+- **Tailwind 4 vs 3 token drift:** both are generated from the same TS tokens. Never hand-edit a generated file.
 
 ## Done when
-- [ ] On Android, a screenshot on the wallet screen is blocked; on iOS, the app switcher shows a blurred snapshot
-- [ ] The NFC module builds; with two Android devices, a tap moves the intent reference (or a recorded video + code walkthrough)
-- [ ] Scrubber tests pass; no `console.*` left (Biome rule)
-- [ ] Storybook shows every primitive and outcome screen in light and dark
-- [ ] VoiceOver can complete a payment end to end
-- [ ] Both Maestro flows pass locally
+- [ ] **Act 3 works live:**
+  - [ ] Döner Ali Free → Pro unlocks dynamic QR on the till within 2 s
+  - [ ] The `nfc_pay` switch hides Tap to Pay
+  - [ ] Raising `minSupportedVersion` blocks the app
+  - [ ] Lowering it recovers
+- [ ] With the API stopped, the app still starts (from cache) and shows an offline banner
+- [ ] Find Lena's last payment in the console in under 10 s, see the timeline, refund 1,00 €, see it on her phone
+- [ ] The audit log shows every action from the demo run
 
 ## Interview drill
-1. "Why did you write SecureScreen yourself instead of using a library?"
-2. "What exactly can a third-party iPhone app do with NFC in Germany today?"
-3. "How do you pin certificates without bricking old app versions?"
-4. "What would you never let reach a crash report, and how do you enforce that?"
-5. "How did you test the app with a screen reader? What did you have to change?"
+1. "A bug in NFC pay ships to 100 % of Android users on Friday evening. Walk me through the next hour."
+2. "What's the difference between a kill switch and a feature flag?"
+3. "What does the app do when it can't reach the config endpoint?"
+4. "When would you force an update, and when wouldn't you?"
+5. "How would you secure this console for a real ops team?"
 
 ## Commit
 ```
-feat(native): SecureScreen TurboModule for iOS and Android
-feat(native): Android HCE NfcPay module and till reader mode
-feat(security): log scrubber, re-auth rules, pinning config, GDPR export and delete
-feat(ds): Storybook for primitives and payment outcomes
-test(e2e): Maestro happy path and network drop flows
-ci: typecheck, lint and unit tests
+feat(api): remote config, plan features and kill switch guards
+feat(mobile): remote config provider, feature gates and forced update
+feat(web): admin console with payments, timelines, refunds and merchants
+feat(web): control room for flags, versions and chaos; audit log
 ```

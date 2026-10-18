@@ -1,141 +1,109 @@
-# Day 7: Tell the story (ADRs, README, video, rehearsal)
+# Day 7: Zahln Web I: the merchant dashboard
 
 ## Goal
-"Anyone who opens the repo understands the product, the architecture and my decisions in five minutes, and I can run
-the 5-minute demo twice in a row with no surprises."
+"Café Mila's owner signs in on a laptop and watches today's takings update live as customers pay at the counter.
+They can see every transaction and receipt, refund one, check payouts, manage staff, upgrade the plan and export
+for their tax adviser."
 
 ## Why it matters for the interview
-- JD: *"Nobody reviews your architecture before you commit to it."* ADRs show you document decisions without being asked.
-- JD: *"You have taste and you defend it."* / India JD: *"You write clearly and work well remotely."*
-- A rehearsed demo is worth more than any extra feature. **No new features today.**
+- zysygy.de promises a *"live payment dashboard"* (Pro), *"shift and daily reports"* and *"DATEV export"* (Business).
+- It shows the same backend serving a third audience: mobile, internal ops, and now the paying customer.
+- It shows web security done properly (cookies, CSRF), which differs from mobile's device binding, and you can
+  explain why.
 
 ---
 
 ## Concepts to understand first
 
-### 1. What an ADR is
-One page per decision:
-```
-# ADR-002: Never auto-retry a payment
-Status: Accepted · Date: 2026-10-24
-## Context        (the constraint, in 3–5 lines)
-## Decision       (one paragraph, starting with "We will…")
-## Consequences   (good, bad, and what we'll watch)
-## Alternatives considered
-```
-The ADRs below come straight from [DECISIONS.md](../DECISIONS.md). Condense them; don't repeat it.
+### 1. Cookie sessions for the browser
+- `POST /web/auth/otp` → `POST /web/auth/verify` sets `zahln_session`: **httpOnly, Secure, SameSite=Lax, Path=/**,
+  12 h idle timeout. The token is hashed in `web_sessions`, the same pattern as device sessions.
+- **CSRF:** a double-submit token. The API sets a readable `zahln_csrf` cookie, and every mutating request
+  echoes it in `x-csrf-token`. SameSite=Lax already blocks most cross-site POSTs, and the token covers the rest.
+- **Why not a bearer token in `localStorage`?** Any XSS can read it. An httpOnly cookie can't be read by JS at all.
+- **Scopes:** a web session is `merchant_owner` (for one merchant) or `consumer`. Staff (cashiers) have no
+  dashboard access. A cashier's job is the till.
 
-### 2. A README that sells
-Reviewers spend under two minutes on it. Order:
-1. A one-line pitch + a GIF of Act 1
-2. "What this demonstrates" (the JD → MVP table from PLAN.md)
-3. Architecture diagram
-4. Run it in 3 commands
-5. Demo script
-6. Links to ADRs, DECISIONS, DESIGN_SYSTEM, SECURITY
-7. "What I'd do next" (a short, prioritised list)
+### 2. Next.js App Router data flow
+- Server components fetch from the API with the session cookie forwarded (`cookies()` → `fetch`), so the first
+  paint already has data, with no spinner wall.
+- Mutations go through **server actions**, which add their own Origin check on top of our CSRF token.
+- Live data comes from a small client component subscribing to `GET /merchants/:id/events` (SSE, cookie auth). It
+  updates the TanStack Query cache, and the server-rendered list is the fallback.
 
-### 3. Demo risk management
-Live demos fail because of state, network, and nerves. Defences: a `demo:reset` script, a checklist, a backup video,
-and knowing what to say if something breaks. A failure during Act 2 is a feature: "this is exactly why the app says Wird geprüft".
+### 3. `packages/web-ui`
+- A Tailwind 4 `@theme` built from `@zahln/shared/tokens` (the same colours, spacing and type as the apps), plus
+  shadcn components restyled to Ember & ink. These include Button, Input, Table, Dialog, Sheet, Tabs, Badge,
+  Command and Toast.
+- It is shared by `apps/web` and `apps/console`, so there is one place to fix a focus ring.
+
+### 4. Owner-only actions
+Refunds, plan changes and staff changes require the `owner` role **and** a fresh OTP if the session is older than
+10 minutes (step-up auth, the same idea as re-auth on mobile).
 
 ---
 
 ## Tasks
 
-### A. ADRs (≈2 h) in `docs/adr/`
-- [ ] `001-bare-react-native.md`: bare vs Expo, and how to migrate to their Expo stack
-- [ ] `002-payment-states-and-retries.md`: state machine, idempotency, reconciliation, and the honest offline options
-- [ ] `003-server-driven-config.md`: kill switches vs flags vs plan features, defaults, forced update
-- [ ] `004-nfc-ios-android.md`: Android HCE vs iOS EEA HCE entitlement vs Tap to Pay on iPhone
-- [ ] `005-payment-rail-adapter.md`: simulator now, PSP later, why no sandbox in week one
-- [ ] `006-data-residency-and-records.md`: EU-only telemetry, scrubber, GoBD receipt numbering, ledger retention vs deletion
+### A. API (≈2 h)
+- [ ] `web_sessions` table + migration; `/web/auth/*` routes; cookie plugin; CSRF hook; per-route scope guard
+- [ ] `GET /merchants/:id/summary` (today, 7-day, by staff), `/transactions` (cursor pagination, filters), `/payouts`, `/staff`
+- [ ] `GET /merchants/:id/events` SSE with cookie auth
+- [ ] `GET /merchants/:id/export.csv?from&to`: DATEV-style columns, `;` separator, decimal comma, UTF-8 with BOM (what German Excel expects)
+- [ ] Tests: CSRF missing → 403; consumer cookie on a merchant route → 403; cashier → 403; step-up enforced
 
-### B. README + diagrams (≈1.5 h)
-- [ ] Root `README.md` in the order above
-- [ ] Architecture diagram (Mermaid in the README: mobile ↔ API ↔ Postgres, rail, SSE, console)
-- [ ] Sequence diagram for "pay with a dropped response" (Mermaid)
-- [ ] Screenshots of light + dark, de + en (2×2 grid), and the console
-- [ ] GIFs: Act 1 (≤ 10 s), Act 2 (≤ 15 s). Record with `xcrun simctl io booted recordVideo`, convert with `ffmpeg`
-- [ ] "What I'd do next":
-  - [ ] Expo migration
-  - [ ] Hardware-key SCA with dynamic linking
-  - [ ] Sentry EU
-  - [ ] Real PSP adapter
-  - [ ] Real KYC partner flow
-  - [ ] iOS HCE entitlement
-  - [ ] Play Integrity / App Attest
+### B. `packages/web-ui` (≈1.5 h)
+- [ ] Tailwind 4 theme from tokens (light/dark via `[data-theme]` + `prefers-color-scheme`); Inter via `next/font`
+- [ ] Restyled shadcn set; `Money`, `StatusBadge` and `Avatar` matching the mobile ones; the `ReceiptEdge` SVG
 
-### C. Video (≈1.5 h)
-- [ ] 2-minute Loom/QuickTime: 15 s intro → Act 1 → Act 2 → Act 3 → 15 s "why these decisions"
-- [ ] Script it (below), record twice, keep the better take, add captions
-- [ ] Unlisted link in the README and in your follow-up message to the founder
-
-### D. Rehearsal (≈2 h)
-- [ ] `docs/DEMO.md`: the exact click path, what to say, the fallback for each act
-- [ ] Pre-flight checklist:
-  - [ ] Docker up
-  - [ ] `pnpm demo:reset`
-  - [ ] Both simulators booted and logged in
-  - [ ] Console open on the Control room
-  - [ ] Chaos off
-  - [ ] Notifications off
-  - [ ] Battery/Wi-Fi icons clean (`xcrun simctl status_bar booted override --time 9:41`)
-- [ ] Run the full demo twice, timed. Then once while explaining it out loud to a friend or a recording.
-- [ ] Clean up the repo:
-  - [ ] No secrets
-  - [ ] `.env.example` complete
-  - [ ] Fresh-clone test: `git clone` into `/tmp` → follow the README → it runs
-- [ ] Final push; tag `v0.1-interview`
+### C. Dashboard (≈4 h)
+- [ ] `apps/web` Next.js 16; `/login` (phone → OTP) with the receipt-mark illustration
+- [ ] **Heute (Today):** a big takings number (ember count-up), a live feed of payments sliding in, a sparkline by hour, per-staff split
+- [ ] **Umsätze (Transactions):** a table with filters (date, status, staff, amount) and a row → receipt sheet (GoBD fields: sequence, timestamp, VAT)
+- [ ] **Auszahlungen (Payouts):** next settlement at 23:00, history, "Jetzt auszahlen" (withdraw now)
+- [ ] **Team:** staff list, invite by phone, role change (owner only)
+- [ ] **Plan:** Free / Pro / Business cards from `plans.ts`; upgrading flips the plan live (the till shows dynamic QR within seconds)
+- [ ] **Export:** a date range → CSV download
+- [ ] Empty, loading (skeleton) and error states for every page; de/en; light/dark; ⌘K to jump between pages
 
 ---
 
-## Demo script (the words)
+## Files you'll create
+```
+apps/api/src/{routes/web.ts, lib/webSession.ts, lib/csrf.ts}  apps/api/drizzle/0003_web_sessions.sql
+packages/web-ui/{package.json, src/theme.css, src/components/*}
+apps/web/{next.config.ts, app/(auth)/login, app/business/{page,transactions,payouts,team,plan,export}/*, lib/api.ts}
+```
 
-**Opening (15 s)**
-"Zahln's whole company is the three seconds in the Mensa queue. So I built that moment, and the three things that go
-wrong around it."
+## Commands
+```bash
+pnpm --filter @zahln/web dev            # http://localhost:3000/business
+pnpm --filter @zahln/api test
+```
 
-**Act 1 (90 s)**
-"Café Mila's till. Cappuccino and croissant, 6,30. The QR is unique to this payment and valid for five minutes. You can see
-the countdown. Lena scans, sees the merchant and amount *from our server, not from the QR*, Face ID… paid. Both phones
-at once. 840 milliseconds from Face ID to confirmation, measured, not guessed."
-
-**Act 2 (2 min)**
-"Now campus wifi. I tell the rail to settle and then drop the response. That's the worst case: money moved, the phone doesn't know.
-Watch: no 'failed', no retry. *Wird geprüft.* It asks the server with the same idempotency key… *Bezahlt*, charged once.
-And when the bank really rejects it: *Nicht belastet*. The first line always says what happened to your money."
-
-**Act 3 (90 s)**
-"You can't hotfix a phone. So: Café Mila goes from Free to Pro, and dynamic QR appears. NFC has a bug? Kill switch, the button's
-gone. A security issue? Minimum version, and old apps are blocked. Lower it, and they recover. No release needed."
-
-**Close (15 s)**
-"Every one of these is a decision I'd make in week one. The ADRs are in the repo. I'd love to argue with you about them."
-
-## Fallbacks
-| If… | Then… |
-|---|---|
-| A simulator crashes | Switch to the video at that act's timestamp |
-| The API dies | `pnpm api`; the app shows its offline banner meanwhile: "this is the cached config path" |
-| SSE is slow | The till falls back to polling within 2 s: "this is why SSE is only a hint" |
-| You blank | Open DEMO.md on a second screen |
+## Pitfalls
+- **Forgetting `credentials: 'include'`** on client fetches means the cookie is silently missing and you get 401s that look like a bug in the auth code.
+- **`Secure` cookies on `http://localhost`:** browsers allow them on localhost, but not on a LAN IP. Use localhost for the demo.
+- **Hydration mismatch on money and dates:** format with the same locale and timezone (`Europe/Berlin`) on the server and the client.
+- **SSE behind Next's dev proxy buffering:** connect the browser straight to the API origin (with CORS + credentials) rather than through a Next route.
+- **CSV in German Excel:** without the BOM, umlauts break; with `,` as separator, amounts split into two columns.
 
 ## Done when
-- [ ] Six ADRs, a README with GIFs + diagrams, DEMO.md, SECURITY.md
-- [ ] The video is recorded and linked
-- [ ] Two timed runs under 5:30 each with no surprises
-- [ ] A fresh clone runs by following the README
-- [ ] Tag `v0.1-interview` pushed
+- [ ] Pay at the till (Act 1) and the payment appears on the dashboard in under a second without a refresh
+- [ ] Refund from the dashboard shows on Lena's phone and in the console's audit log
+- [ ] Upgrade Döner Ali to Pro on the web and the till shows dynamic QR
+- [ ] The exported CSV opens cleanly in Numbers/Excel with a German locale
+- [ ] API tests green including the new auth tests
 
-## Interview drill (final)
-Answer every "Interview drill" question from Days 1–6 out loud, without notes. Mark any you hesitate on and reread
-that day's concepts section. Then prepare your **questions for them** (PLAN.md → Interview prep).
+## Interview drill
+1. "Why cookies on the web but bearer tokens on mobile?"
+2. "Walk me through a CSRF attack on the refund endpoint and why it fails."
+3. "Server components or client components for the transactions table, and why?"
+4. "How does the dashboard stay correct if the SSE connection drops for a minute?"
 
 ## Commit
 ```
-docs: ADRs 001-006
-docs: README with architecture, demo GIFs and run instructions
-docs: demo script, rehearsal checklist and security checklist
-chore: release v0.1-interview
+feat(api): web sessions with httpOnly cookies, CSRF and scopes
+feat(web-ui): shared web design system from tokens
+feat(web): merchant dashboard with live takings, transactions, payouts, team, plan and export
 ```

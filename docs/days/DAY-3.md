@@ -1,118 +1,136 @@
-# Day 3: The payment moment (Act 1)
+# Day 3: Two apps, shared packages (Zahln + ZYSYGY)
 
 ## Goal
-"Café Mila's till builds an order from the catalogue, shows a one-time QR valid for 5 minutes, Lena scans it,
-confirms with Face ID, and both phones show Bezahlt in about a second, with the merchant wallet updating live."
+"Zahln (consumer) and ZYSYGY (merchant) are two separate apps with their own bundle IDs, icons and store
+identities. About 90 % of their code is shared packages, and both build, launch and onboard on iOS and Android."
 
 ## Why it matters for the interview
-- JD: *"That moment is the whole company and it belongs to this seat."*
-- JD: *"QR scan… merchant and amount confirmation, biometric authorisation, receipt. Measured in milliseconds."*
-- Site: *"Every payment. Its own QR code. Unique to this transaction… valid for 5 minutes."*
-- This is **Act 1** of the demo.
+- JD: *"You own the app… from an empty repository."* This is the moment the repo becomes a product family.
+- zysygy.de sells **ZYSYGY** to merchants and **Zahln** to consumers: two brands, two audiences, two release risks.
+- It shows you can refactor a working codebase without breaking it (tests stay green throughout).
+- The likely question is *"One app or two?"*, and ADR-007 answers it.
 
 ---
 
 ## Concepts to understand first
 
-### 1. The QR carries a reference, not the payment
-QR content: `https://pay.zahln.de/i/<intentId>.<sig>`, where `sig` is an HMAC that stops someone guessing intent IDs.
-The consumer app **fetches the intent from the API** and shows the server's merchant name and amount, never values
-decoded from the QR. A sticker over the merchant's QR can't silently change the payee or amount.
+### 1. What goes where
+| Layer | Package | Contents (moved from `apps/mobile/src`) |
+|---|---|---|
+| Design system | `packages/mobile-ui` | `ds/*`: Text, Button, Screen, Card, Icon, Keypad, PinDots, OtpInput, illustrations, Logo, theme |
+| Plumbing | `packages/mobile-core` | `lib/*`: api, secure, session, prefs, queries, biometrics, haptics, random, format, i18n |
+| Shared flows | `packages/mobile-core/flows` | Onboarding steps (phone, OTP, name, PIN, biometrics), LockScreen, Settings, as screens with props, not navigators |
+| App shell | `apps/consumer`, `apps/merchant` | `App.tsx`, the navigator, feature screens, native projects, `metro.config.js`, `babel.config.js`, `tailwind.config.js` |
 
-Using an `https` URL also means a normal phone camera opens the app (universal link / app link) later.
+Rule: **packages never import from apps**, and `mobile-ui` never imports from `mobile-core`. Biome's `noRestrictedImports`
+enforces both.
 
-### 2. Server-Sent Events (SSE)
-`GET /intents/:id/events` keeps an HTTP response open and writes lines like `event: status\ndata: {...}\n\n`.
-- The till subscribes to its intent; the console subscribes to everything (Day 5).
-- SSE is a **hint**. When the connection drops, the client fetches `GET /intents/:id`. The truth is always the REST status.
-- In RN, use `react-native-sse` or a small `fetch`-stream reader.
+### 2. Shared flows, app-specific wiring
+Onboarding differs per app: the merchant app adds "pick your business", and the consumer app adds the camera
+permission later. So the flow steps are shared *screens*, and each app owns its *navigator*:
 
-### 3. Measuring time to confirmation
-Measure `t0` = when the user approves Face ID, and `t1` = when the `paid` status is rendered. Show `t1 − t0` in a dev overlay
-("Bestätigt in 840 ms"). JD: *"You measure performance instead of asserting it."*
+```ts
+// apps/merchant/src/navigation/Onboarding.tsx
+<Stack.Screen name="Phone" component={PhoneScreen} />
+<Stack.Screen name="Otp" component={OtpScreen} />
+<Stack.Screen name="Merchant" component={MerchantPickerScreen} />   // merchant only
+<Stack.Screen name="PinCreate" component={PinCreateScreen} />
+```
+The `role` in the draft store disappears. The app *is* the role, sent as `x-app: consumer | merchant` so the API
+can reject a consumer login on the till.
 
-### 4. Why the till shows the cart
-Like Stripe Terminal: the customer sees what they're paying for on the merchant device before scanning.
-Fewer disputes.
+### 3. Native projects per app
+- Bundle IDs: `de.zahln.app` and `de.zysygy.app`. Display names: "Zahln" and "ZYSYGY".
+- Icons: Zahln keeps the ember receipt mark. ZYSYGY gets an ink-first till-receipt mark (ink background, ember Z).
+- Permissions: **only the consumer app** declares camera (QR scan). Both declare biometrics.
+- Each app has its own `Podfile`, Gradle project and launch screen. Gradle paths still point at the hoisted
+  `node_modules` (`../../../node_modules`).
 
-### 5. Screen brightness
-Raise brightness while the QR is visible, and restore it afterwards. A tiny native call. Use a small library or write it as a warm-up for Day 6.
+### 4. Metro and NativeWind across packages
+- `watchFolders: [workspaceRoot]` already covers `packages/*`.
+- Tailwind `content` must include `../../packages/mobile-ui/src/**/*.{ts,tsx}` and `mobile-core`, or classes used only
+  inside packages are purged and silently render nothing (the same failure mode as the missing spacing keys on Day 2).
+- Packages export TypeScript source (`"main": "src/index.ts"`). Metro compiles them, and nothing gets pre-built.
+
+### 5. Doing it without breaking anything
+Move in this order, and run `pnpm typecheck && pnpm test` after each step:
+1. Create the packages and move `ds` → `mobile-ui` with `git mv`, so history follows the files.
+2. Move `lib` → `mobile-core`.
+3. Move shared flows.
+4. Copy `apps/mobile` → `apps/merchant` (rename the native project), then rename `apps/mobile` → `apps/consumer`.
+5. Strip each app down to its own features.
 
 ---
 
 ## Tasks
 
-### A. API additions (≈1 h)
-- [ ] HMAC-signed intent reference (`INTENT_SIGNING_SECRET` in env)
-- [ ] `GET /intents/:id/events` (SSE) emitting `scanned`, `paid`, `expired`, `refunded`
-- [ ] `POST /intents/:id/scanned`: the consumer app reports a scan, so the till shows "Kunde prüft…"
-- [ ] An in-process event bus (EventEmitter) that the payment transaction publishes to **after commit**
+### A. Packages (≈2 h)
+- [ ] `packages/mobile-ui` + `packages/mobile-core` with `package.json`, `tsconfig.json`, an `index.ts` barrel and peer deps (react, react-native, nativewind, reanimated…)
+- [ ] `git mv` the design system and lib, then fix imports (`../../ds` → `@zahln/mobile-ui`)
+- [ ] Biome import boundaries
+- [ ] Move `__tests__/session.test.ts` to `mobile-core`, and give the packages their own Jest config
 
-### B. Merchant till (≈2.5 h)
-- [ ] `MerchantTabs`: **Kasse** (till), **Wallet**, **Mehr** (more)
-- [ ] Till with tabs **Katalog / Betrag** (catalogue / amount)
-  - [ ] Catalogue grid (FlashList, `numColumns`), tap to add, quantity badge, running total, "QR erstellen" (create QR)
-  - [ ] Amount keypad (cents-first), "6,30 € kassieren" (charge 6,30 €)
-- [ ] `QRPanel` screen:
-  - [ ] White QR (`react-native-qrcode-svg`, error correction M, quiet zone 4)
-  - [ ] Amount + merchant name + line items
-  - [ ] Countdown ring (Reanimated) + "Noch 4:12" (4:12 left)
-  - [ ] Live state: Warten auf Scan → Kunde prüft → **Bezahlt**
-  - [ ] Brightness up on focus, restored on blur
-- [ ] Bezahlt flood screen (merchant): amount-hero, a ticking time, success haptic, auto-return after 2.5 s
+### B. Consumer app (≈1.5 h)
+- [ ] `apps/mobile` → `apps/consumer`, package name `@zahln/consumer`
+- [ ] Rename the iOS project/scheme to `Zahln` and set the bundle ID to `de.zahln.app` (Xcode project, Info.plist, `applicationId`, `namespace`, Kotlin package path)
+- [ ] Remove merchant screens, the role step and the till tab
 
-### C. Consumer pay flow (≈2.5 h)
-- [ ] `ConsumerTabs`: **Wallet**, **Bezahlen** (scan), **Verlauf** (history)
-- [ ] Scanner (vision-camera `useCodeScanner`, QR only), with the camera permission explained first (pre-prompt screen)
-- [ ] Parse the URL → `GET /intents/:id` → **Confirm** screen: merchant, amount, items, "Mit Face ID bezahlen · 6,30 €" (pay with Face ID)
-- [ ] Face ID via a keychain read (the biometric gate) → `POST /intents/:id/pay` with a fresh `Idempotency-Key`
-      **persisted before sending** (Zustand + MMKV or keychain, so it survives an app kill)
-- [ ] Drive the UI from the `paymentAttempt` reducer in `@zahln/shared`
-- [ ] Bezahlt screen (consumer) mirrors the merchant one; a receipt link
-- [ ] **Simulator tip:** the iOS simulator has no camera. Add a dev-only "QR-Link einfügen" (paste QR link) button that reads the
-      intent URL from the clipboard. On the till, add a dev-only "Link kopieren" (copy link). Both are hidden in release builds.
+### C. Merchant app (≈2.5 h)
+- [ ] `apps/merchant` (`@zahln/merchant`) with a fresh RN 0.88 native project (`npx @react-native-community/cli init ZYSYGY --version 0.88.0 --skip-install`), then copy in our native tweaks (SceneDelegate background, splash, Gradle paths, Maven mirror note)
+- [ ] Bundle ID `de.zysygy.app`, display name "ZYSYGY", no camera permission
+- [ ] The ZYSYGY icon set (light, dark and tinted on iOS; adaptive + monochrome on Android) and the launch screen
+- [ ] Navigator: onboarding with the merchant picker, then tabs Kasse / Umsatz / Profil
+- [ ] Default theme: dark (the till is ink-first); the user can still choose
+- [ ] API: `x-app` header; consumer-only accounts get `403 wrong_app` from the merchant app, with a friendly screen ("Diese App ist für Händler. Lade Zahln.")
 
-### D. Wallets + receipt (≈1 h)
-- [ ] Consumer wallet: balance (`AmountDisplay` hero, discreet toggle), top-up (mock), last 5 transactions
-- [ ] Merchant wallet: today's total, balance, "Wird täglich um 23:00 ausgezahlt" (paid out daily at 23:00), "Jetzt auszahlen" (pay out now; mock withdraw → postings)
-- [ ] Receipt screen: receipt number (sequential per merchant), timestamp, items, VAT 7 % / 19 % breakdown, payment ID
+### D. Tooling (≈1 h)
+- [ ] Root scripts: `pnpm consumer:ios`, `consumer:android`, `merchant:ios`, `merchant:android`
+- [ ] Turbo pipeline includes the new packages; the README run section is updated
+- [ ] Both apps build on both platforms, release configuration included (`--mode Release` once)
 
 ---
 
 ## Files you'll create
 ```
-apps/api/src/{routes/events.ts, lib/eventBus.ts, lib/intentRef.ts}
-apps/mobile/src/features/
-  merchant/{TillScreen, CatalogueGrid, AmountPad, QRPanelScreen, PaidScreen, MerchantWalletScreen}.tsx
-  consumer/{WalletScreen, ScanScreen, ConfirmScreen, PaidScreen, ReceiptScreen}.tsx
-  payments/{usePayment.ts, useIntentEvents.ts, idempotency.ts}
-apps/mobile/src/ds/{QRPanel, Countdown, ListRow, Toast}.tsx
+packages/mobile-ui/{package.json, tsconfig.json, src/index.ts, src/*}         (moved from apps/mobile/src/ds)
+packages/mobile-core/{package.json, tsconfig.json, src/index.ts, src/*}       (moved from apps/mobile/src/lib)
+packages/mobile-core/src/flows/{Onboarding*, PinScreens, LockScreen, SettingsScreen}.tsx
+apps/consumer/   (renamed from apps/mobile)
+apps/merchant/   (new native project + thin shell)
+```
+
+## Commands
+```bash
+pnpm install
+pnpm typecheck && pnpm test
+pnpm consumer:ios
+pnpm merchant:android
 ```
 
 ## Pitfalls
-- **Publishing the `paid` event before the database commit.** The till turns green and then the transaction rolls back. Publish after commit only.
-- **The scanner firing 30 times a second.** Debounce, and stop scanning after the first valid code.
-- **Generating a new idempotency key on re-render or retry.** It's created once per *attempt* when the user taps pay, and reused for every status check.
-- **Trusting the QR content.** Always re-fetch the intent.
-- **SSE through the Metro dev proxy / Android emulator:** use `10.0.2.2:4000` for Android, and allow cleartext for local dev only.
+- **Two copies of `react-native`.** If a package lists it as a dependency instead of a peer, Metro bundles two copies and you get "Invalid hook call". Peer deps only.
+- **Purged Tailwind classes** from packages (see concept 4).
+- **Renaming an iOS project by hand** misses `PRODUCT_BUNDLE_IDENTIFIER` in one build configuration. Grep the `.pbxproj` for the old ID afterwards.
+- **Android package rename:** the Kotlin folder path must match `namespace`, or `MainActivity` won't be found at launch.
+- **MMKV/keychain storage IDs:** give each app its own MMKV ID (`zahln`, `zysygy`). Keychain is already isolated by bundle ID.
+- **Both apps on one simulator** is fine, but the dev server port must differ (`8081` / `8082`) to run them side by side.
 
 ## Done when
-- [ ] **Act 1 runs on two simulators** (iOS consumer, Android till, or two iOS) with no manual API calls
-- [ ] Time to confirmation is shown, and it's under 1.5 s on the simulator with the rail in `ok` mode
-- [ ] The intent expires after 5 minutes, and paying an expired one shows Abgelaufen
-- [ ] Both wallets and the receipt show the right amounts in de and en, in light and dark
+- [ ] Both apps are on the home screen of one simulator, each with its own icon and name
+- [ ] Lena onboards in Zahln; Mila onboards in ZYSYGY; Lena's number in ZYSYGY gets the "wrong app" screen
+- [ ] All tests green (shared, API, mobile-core); typecheck and Biome clean
+- [ ] `apps/consumer` and `apps/merchant` each contain only their own features (`grep -r merchant apps/consumer/src` is empty)
 
 ## Interview drill
-1. "Walk me through what happens between scanning and Bezahlt, at the network level."
-2. "Why doesn't the QR contain the amount?"
-3. "What if the SSE connection drops while the customer is paying?"
-4. "How did you measure time to confirmation, and what dominates it?"
-5. "How would this work with a normal camera app instead of in-app scanning?" (universal links)
+1. "Why two apps? Isn't that double the maintenance?"
+2. "What lives in a shared package and what stays in the app? Where's the line?"
+3. "How do you stop two copies of React Native ending up in the bundle?"
+4. "How would you ship a fix to only the merchant app?"
 
 ## Commit
 ```
-feat(api): signed intent references and SSE status events
-feat(mobile): merchant till with catalogue, keypad and live QR panel
-feat(mobile): consumer scan, confirm with Face ID and pay
-feat(mobile): wallets and GoBD-style receipt
+refactor(mobile): extract mobile-ui and mobile-core packages
+feat(consumer): Zahln app with its own bundle ID and icon
+feat(merchant): ZYSYGY app with merchant onboarding and ink-first theme
+feat(api): x-app header and wrong_app guard
 ```

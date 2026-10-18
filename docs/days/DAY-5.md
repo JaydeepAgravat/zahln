@@ -1,145 +1,146 @@
-# Day 5: Change the app without a release + web console (Act 3)
+# Day 5: When things go wrong (Act 2)
 
 ## Goal
-"From a web console I can find any payment, see its full timeline, and refund it, and I can change what every phone does
-right now: kill NFC pay, upgrade a merchant from Free to Pro, or force an update, with no app store release."
+"Kill the network after the money moved and the app never lies and never double-charges. It shows Wird geprüft
+and resolves to Bezahlt or Nicht belastet. Every other state (insufficient balance, expired, rejected) has its own
+honest screen. Static @handle QR codes, tips and refunds work too."
 
 ## Why it matters for the interview
-- JD: *"You cannot hotfix a phone… Kill switches, feature flags, staged rollout, forced update, configuration driven from
-  the server rather than baked into a binary. You decide how that works in your first weeks and it stays decided for years."*
-- India JD: *"Internal tools that let our team resolve an issue in minutes."* / *"You have built an admin… console."*
-- Site: Free / Pro / Business plans, which become feature flags.
-- This is **Act 3**.
+- JD: *"Campus wifi will drop a request after the money has already moved. How the app behaves in that second is a
+  design decision, and it is yours."* Today you make that decision.
+- JD: *"Pending, failed, expired, insufficient balance, refunded, disputed. Asked to describe a payment screen, you describe all of them."*
+- Site: *"If the connection drops during a transaction, the app holds the payment and confirms it when the connection returns."*
+- This is **Act 2**, the act that wins the interview.
 
 ---
 
 ## Concepts to understand first
 
-### 1. The remote config contract
-`GET /config` (per device + merchant) returns:
-```json
-{
-  "version": 42,
-  "minSupportedVersion": "1.0.0",
-  "latestVersion": "1.2.0",
-  "killSwitches": { "nfc_pay": false, "refunds": false, "topup": false },
-  "flags": { "tips": true, "discreet_mode_default": false },
-  "plan": "pro",
-  "features": ["dynamic_qr", "refunds", "tips", "staff_roles"],
-  "limits": { "reauthAboveCents": 5000, "maxPaymentCents": 50000 },
-  "messages": { "banner": null },
-  "ttlSeconds": 60
-}
+### 1. The three outcomes of a timed-out request
+When `POST /pay` times out, the client **does not know** which of these happened:
+1. The request never reached the server → nothing happened.
+2. The server processed it and the response got lost → **money moved**.
+3. The server is still processing.
+
+So the only honest UI is **"Wird geprüft"** (checking), followed by reconciliation, *never* "failed", and *never* an automatic re-POST
+with a new key.
+
+### 2. Reconciliation loop
 ```
-- Fetched on launch and on every foreground, and pushed via SSE `config` events so the demo is instant.
-- **Cached** on device (MMKV). If the fetch fails, use the cache; with no cache, use **safe defaults bundled in the binary**.
-- The defaults are *conservative*: risky features stay off until the server says otherwise.
+on timeout / network error:
+  state → checking
+  repeat with backoff (0.5s, 1s, 2s, 4s… cap 8s, total ≤ 60s):
+    GET /attempts/by-key/<idempotencyKey>      (or re-POST with the SAME key; the server replays)
+    if paid        → paid
+    if rejected    → not_charged
+    if not found   → (request never arrived) → safe to offer "Erneut versuchen" (try again) with the SAME key
+  after 60s: "Wir prüfen noch" (we're still checking) + push notification when resolved; the receipt appears in history
+```
+If the network comes back, `NetInfo` triggers an immediate check. The app is killed mid-check → on next launch, the persisted
+pending key is found and the check resumes.
 
-### 2. Kill switch vs feature flag vs plan feature
-| Kind | Who flips it | Example | Default when unknown |
-|---|---|---|---|
-| Kill switch | On-call engineer during an incident | `nfc_pay` broken on Android 16 | Feature **on** (from cache); off only if told |
-| Feature flag | Product, for rollout or experiments | `tips` for 10 % of merchants | **Off** |
-| Plan feature | Billing state | `dynamic_qr` requires Pro | Last known plan |
+### 3. The honest version of "offline payments"
+On account-to-account rails there's no card network guarantee. A merchant can't know the customer has the money while
+offline. Options:
+- **Online-only + fast reconciliation** (MVP): the till shows *Wird geprüft*, never green until the server confirms.
+- **Offline queue with merchant risk**: hand over the coffee and accept the risk under a small limit (like card offline floor limits).
+- **Pre-authorised offline tokens**: the wallet reserves a small balance in advance and signs offline tokens. This is how CBDC/offline-wallet
+  designs work, and it's complex.
 
-Same delivery mechanism, different owners and defaults. Saying that clearly is senior.
+This goes in ADR 2. Ask them in the interview which one they mean.
 
-### 3. Forced update
-- `appVersion < minSupportedVersion` → a **blocking** `UpdateRequired` screen (root navigator; no deep link gets past it).
-- `appVersion < latestVersion` → a soft banner.
-- Why both: forced update is for security and protocol breaks; soft is for everything else. Be careful: if forced update is
-  abused, users uninstall.
+### 4. Chaos modes (dev only)
+Controlled from `POST /dev/chaos` (and the console on Day 6):
+- `drop_after_settle`: settle, then destroy the socket without responding
+- `reject`: the rail rejects
+- `slow`: 3–8 s latency
+- `insufficient`: force insufficient funds
 
-### 4. Staged rollout (talk about it, mock it)
-Store-side: App Store phased release (7 days) and Play staged rollout (%). App side: flags with a percentage + a stable
-device bucket (`hash(deviceId) % 100`). Watch crash-free rate per cohort before going to 100 %.
+### 5. Static QR / @handle (Free plan)
+The QR encodes `https://pay.zahln.de/@doener-ali`. There's no amount, so the **consumer types it**, and the merchant sees the payment arrive. Fraud
+consideration: the verified merchant name and a photo come from the server.
 
-### 5. Server-side enforcement
-Hiding a button isn't security. The API **also** checks plan features and kill switches. A Free merchant calling the
-dynamic-intent endpoint gets `403 plan_required`.
-
-### 6. The console's audit log
-Every write action (refund, plan change, flag flip) is stored as `{ actor, action, target, reason, at }`. Refunds above
-a threshold need a reason. Four-eyes approval is "next".
+### 6. Refund rules
+- Manager only (re-auth with biometrics)
+- Partial refunds add up and can never exceed the original amount
+- Each refund is an idempotent request and a new ledger transaction (merchant −, consumer +)
+- States: `paid → partially_refunded → refunded`
 
 ---
 
 ## Tasks
 
-### A. Remote config (≈2 h)
-- [ ] API: `config` table (global) + per-merchant plan → `GET /config`, `PATCH /admin/config`, SSE `config` event
-- [ ] API: plan/kill-switch guards on routes (`requireFeature('dynamic_qr')`)
-- [ ] Mobile: a `useRemoteConfig()` provider, MMKV cache, bundled defaults, refetch on `AppState` active
-- [ ] Mobile: a `<Feature name="nfc_pay">` gate component + `useFeature()`
-- [ ] Mobile: an `UpdateRequired` root gate (compare with `react-native-device-info` version or the `package.json` version)
-- [ ] Gate in the app:
-  - [ ] Dynamic QR → Pro (Free merchants only see "Mein QR" + an upsell)
-  - [ ] Tips → Pro
-  - [ ] Refunds → Pro + manager
-  - [ ] Tap to Pay button → `nfc_pay` kill switch
+### A. Error-state UI (≈2 h)
+- [ ] One `PaymentOutcome` screen driven by the reducer state:
+  - [ ] Bezahlt (paid)
+  - [ ] Wird geprüft (checking)
+  - [ ] Nicht belastet (not charged)
+  - [ ] Abgelaufen (expired)
+  - [ ] Guthaben reicht nicht (insufficient balance: show the balance + "Aufladen" (top up))
+  - [ ] Fehlgeschlagen (failed: unknown error, still says whether money moved)
+- [ ] Copy rule: every screen answers **"what happened to my money?"** in the first line
+- [ ] The merchant till mirrors these: it never shows green during `checking`, and shows "Kunde zahlt noch…" (customer is still paying)
+- [ ] Haptics per status (success / warning / error)
 
-### B. Web console (≈4 h)
-- [ ] `apps/web`: Vite + React + TS + Tailwind 4 + shadcn/ui; tokens as CSS variables from `@zahln/shared`; light/dark
-- [ ] Simple login (dev password from env), with every request carrying an admin token
-- [ ] **Payments**: TanStack Table, search by ID / merchant / amount, status filter, live rows via SSE
-- [ ] **Payment detail**: event timeline (created → scanned → authorised → submitted → settled → refunded), ledger postings,
-      refund button with a required reason
-- [ ] **Merchants**: list, detail with plan selector (Free/Pro/Business), staff, today's volume, CSV export
-      (DATEV-style columns: date, receipt number, amount, VAT rate, VAT, payment ID)
-- [ ] **Control room**: kill switches, flags, min/latest version, chaos mode selector (the demo panel for Acts 2 + 3)
-- [ ] **Audit log** page
+### B. Reconciliation (≈2 h)
+- [ ] API: `GET /attempts/by-key/:key`
+- [ ] Mobile: a `useReconcile(key)` hook with backoff, a NetInfo trigger, and a cap
+- [ ] Persist pending attempts (key + intent + startedAt) so they survive an app kill; resume on launch
+- [ ] Unit tests for the reducer: `timeout → checking → paid`, `checking → not_charged`, and that there's no path from `checking → submitting` with a new key
 
-### C. Wire the demo (≈1 h)
-- [ ] Run all three acts end to end from the console
-- [ ] A seed reset button / `pnpm demo:reset` that restores balances and plans to their starting values
+### C. Chaos (≈1 h)
+- [ ] `POST /dev/chaos { mode }` (disabled unless `CHAOS_ENABLED=true`)
+- [ ] `drop_after_settle` implemented as `reply.raw.destroy()` after the commit
+- [ ] A dev menu in the app to set chaos quickly (until the console exists)
+
+### D. Static QR, tips, refunds (≈2 h)
+- [ ] Merchant "Mein QR" (my QR) screen with the @handle QR (always available, Free plan)
+- [ ] Consumer handle flow: scan → merchant profile → enter amount → confirm
+- [ ] Tips: after the cart, the consumer optionally picks 0 / 5 / 10 % / custom (Pro feature, gated on Day 6)
+- [ ] Refunds: transaction detail → "Erstatten" (refund) → full/partial amount → manager re-auth → done; the consumer receipt shows the
+      refund
+- [ ] History (FlashList): search by merchant, filter by status, sticky day headers, badges for anything other than paid
 
 ---
 
 ## Files you'll create
 ```
-apps/api/src/{routes/config.ts, routes/admin/*.ts, lib/features.ts, lib/audit.ts}
-apps/mobile/src/lib/{remoteConfig.tsx, defaults.ts}  apps/mobile/src/app/UpdateRequiredScreen.tsx
-apps/web/ (vite app)
-  src/{routes/Payments.tsx, routes/PaymentDetail.tsx, routes/Merchants.tsx, routes/ControlRoom.tsx, routes/Audit.tsx}
-  src/components/ui/* (shadcn)  src/lib/{api.ts, sse.ts}
-scripts/demo-reset.ts
-```
-
-## Commands
-```bash
-pnpm web
-pnpm dlx shadcn@latest init
-pnpm dlx shadcn@latest add table button dialog input select badge switch sheet
+apps/api/src/routes/{dev.ts, attempts.ts}  apps/api/src/rail/chaos.ts
+packages/mobile-core/src/payments/{useReconcile.ts, pendingStore.ts}
+packages/mobile-ui/src/PaymentOutcome.tsx
+apps/consumer/src/features/{HandlePayScreen, HistoryScreen, TransactionDetailScreen}.tsx
+apps/merchant/src/features/{MyQRScreen, RefundSheet}.tsx
+packages/shared/test/reconcile.test.ts
 ```
 
 ## Pitfalls
-- **Fail-open vs fail-closed confusion.** Decide per switch what happens with no config, and write it down.
-- **Config blocking the app start.** Never wait on the network to render. Render from cache/defaults, then update.
-- **Forced-update loops:** a store build with a version string the comparison misreads. Use semver comparison and test it.
-- **Console showing PII in URLs** (`/users?phone=…`). Use IDs in URLs.
-- **Tailwind 4 vs 3 token drift:** both are generated from the same TS tokens. Never hand-edit a generated file.
+- **"Erneut versuchen" creating a new idempotency key.** The same attempt means the same key. A new key only comes when the user
+  starts a *new* payment.
+- **Showing a spinner forever.** Cap at 60 s and then explain in words what happens next.
+- **Treating 5xx as "not charged".** A 5xx after processing started is still unknown → `checking`.
+- **Refund race:** two managers refunding at the same time → lock the intent row (`FOR UPDATE`) and test it.
+- **Red for outgoing money in history.** Outgoing money isn't an error. Use text-primary (DESIGN_SYSTEM.md).
 
 ## Done when
-- [ ] **Act 3 works live:**
-  - [ ] Döner Ali Free → Pro unlocks dynamic QR on the till within 2 s
-  - [ ] The `nfc_pay` switch hides Tap to Pay
-  - [ ] Raising `minSupportedVersion` blocks the app
-  - [ ] Lowering it recovers
-- [ ] With the API stopped, the app still starts (from cache) and shows an offline banner
-- [ ] Find Lena's last payment in the console in under 10 s, see the timeline, refund 1,00 €, see it on her phone
-- [ ] The audit log shows every action from the demo run
+- [ ] **Act 2 works:** chaos `drop_after_settle` → app shows Wird geprüft → resolves to Bezahlt within ~2 s; the ledger
+      shows exactly one payment
+- [ ] Chaos `reject` → Nicht belastet, and the balance is unchanged
+- [ ] Turn the simulator's network off mid-payment, wait, and turn it back on → it resolves correctly
+- [ ] Killing the app during `checking` and reopening it resumes the check
+- [ ] A partial refund of 2,50 € then 3,80 € → refunded; a third refund is rejected
 
 ## Interview drill
-1. "A bug in NFC pay ships to 100 % of Android users on Friday evening. Walk me through the next hour."
-2. "What's the difference between a kill switch and a feature flag?"
-3. "What does the app do when it can't reach the config endpoint?"
-4. "When would you force an update, and when wouldn't you?"
-5. "How would you secure this console for a real ops team?"
+1. "The request timed out. Did the payment go through? What does your app show, and why?" (Say all three cases.)
+2. "Why is a 5xx not the same as a failure?"
+3. "Our website promises offline payments. How would you build that, and what's the risk?"
+4. "Describe every state of a payment screen." (Recite them all.)
+5. "How do you stop two refunds racing each other?"
 
 ## Commit
 ```
-feat(api): remote config, plan features and kill switch guards
-feat(mobile): remote config provider, feature gates and forced update
-feat(web): admin console with payments, timelines, refunds and merchants
-feat(web): control room for flags, versions and chaos; audit log
+feat(mobile): payment outcome states and haptics
+feat(mobile): reconciliation with backoff that survives app kill
+feat(api): chaos modes for the rail simulator
+feat: static handle QR, tips, partial refunds and history
+test(shared): reconciliation never re-submits with a new key
 ```
