@@ -75,6 +75,30 @@ merchant name, QR, "Mit Zahln bezahlen") with `@react-pdf/renderer` on the serve
 
 ---
 
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| `GET /public/intents/:ref` | Done: signature verified, a forged ref is a plain 404, `cache-control: no-store`, and a link opened after expiry flips the intent to `expired` (and tells the till) | The page can never offer a pay button on a dead intent |
+| Pay with OTP, same states | `/i/[ref]` is server-rendered (`force-dynamic`); one client island runs the **shared `attemptReducer`**. Paying needs a code from the last 10 minutes (the web's Face ID); signed in but stale → the code goes to the known number automatically | Same state machine as the app, a third client |
+| Same idempotency and chaos | `respondToPay()` is now one function used by the app route and the web route: same scope (the user), same replay, same chaos | One implementation, so the web can't drift from the app |
+| Key in `sessionStorage` | Saved **before** the request leaves; on reload a saved key → `RESUME` → `checking` (never a new key); cleared on a final answer | Tested: drop → checking → reload → still checking → Bezahlt, one ledger transaction |
+| Act 2 via chaos `drop_after_settle` | Works, but Chrome **retries a POST** when a reused keep-alive socket dies before any response; the retry carries the same key, so the server replays and the user sees Bezahlt directly. The Playwright spec therefore lets the request reach the server and resets the connection in the browser | A nice interview detail: the idempotency key is what makes the browser's own retry safe |
+| Payment request (24 h) | `/business/requests`: amount + note → link + QR + copy/share; Pro (dynamic QR). The note (`description`) is now part of the intent DTO | Request **by phone number** (into the app's activity) is not built |
+| Consumer web wallet | `/wallet`: balance, history (same name minimisation), receipts (only your own; anyone else's is 404), devices with sign-out, JSON data export; device sign-out and export need step-up | Tested in the API; wallet viewed in the browser |
+| Poster PDF via `@react-pdf/renderer` | `/business/poster`: server-rendered SVG QR on an A5 print layout; "Drucken" → print or Save as PDF | No PDF library in the bundle |
+| Universal links | `/.well-known/apple-app-site-association` and `/.well-known/assetlinks.json` routes (team ID and cert fingerprint from env at release); Android intent-filters (`zahln://`, `https://pay.zahln.de/i/*` + `/@*`, `autoVerify`); iOS `zahln` URL scheme; `Zahln.entitlements` with `applinks:pay.zahln.de`, attached to **Release only** | Associated Domains needs a paid team and the domain; Debug simulator builds stay unsigned |
+| In-app handling | `usePayLinks()` in the signed-in, unlocked stack: `/i/<ref>` → Pay, `/@handle` → Handle. A link can't skip the PIN | The Pay screen fetches merchant and amount from the server as always |
+| JS budget with `next/font` | The checkout imports zod-free subpaths (`@zahln/shared/payment`, `/money`, `/phone`) and no design system | Lighthouse not run on the checkout yet |
+| Playwright | 4 specs green against the real stack with the installed Chrome (no browser download): pay link → OTP → Bezahlt; forged link; drop → checking → reload → Bezahlt (one ledger transaction); dashboard live in < 2 s | |
+
+**Not verified:** the Android emulator's Chrome (none running), Lighthouse LCP for the checkout, and real universal links
+(they need the domain).
+
+**Verified on the iOS simulator:** rebuilt Zahln with the `zahln` scheme; `xcrun simctl openurl booted zahln://i/<ref>`
+while the app was **locked** → it stays on the PIN screen → after the PIN, the Pay screen opens for that intent
+(Café Mila, 6,30 €). Found on the way: Metro's inline requires loaded the link listener only when the wallet first
+rendered, so a link that arrived while locked was lost; the buffer now starts in `App.tsx`.
+
 ## Files you'll create
 ```
 apps/api/src/routes/public.ts

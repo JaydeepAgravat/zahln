@@ -16,6 +16,7 @@ import { routes } from './routes';
 import { adminRoutes } from './routes/admin';
 import { authRoutes } from './routes/auth';
 import { configRoutes } from './routes/config';
+import { publicRoutes } from './routes/public';
 import { webRoutes } from './routes/web';
 
 /** Never log credentials, account identifiers or balances. */
@@ -86,9 +87,13 @@ export async function buildApp(options: AppOptions) {
   await app.register(configRoutes, { db: options.db });
   await app.register(webRoutes, {
     db: options.db,
+    rail,
+    chaos,
+    chaosEnabled: options.chaosEnabled ?? false,
     devOtp: devAuth,
     secureCookies: options.secureCookies ?? true,
   });
+  await app.register(publicRoutes, { db: options.db });
   await app.register(adminRoutes, {
     db: options.db,
     adminToken: options.adminToken ?? 'dev-admin-token-change-me-please',

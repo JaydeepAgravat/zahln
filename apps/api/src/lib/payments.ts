@@ -50,6 +50,7 @@ export function toIntentDto(row: IntentRow, merchant: MerchantRow): PaymentInten
     amountCents: row.amountCents,
     currency: 'EUR',
     items: row.items,
+    description: row.description,
     status: row.status,
     acceptsTips: hasFeature(merchant.plan, 'tips'),
     refundedCents: row.refundedCents,
@@ -123,7 +124,13 @@ function assertTransition(from: IntentStatus, to: IntentStatus) {
 
 export async function createIntent(
   tx: Tx,
-  input: { merchantId: string; userId: string; request: CreateIntentRequest },
+  input: {
+    merchantId: string;
+    userId: string;
+    request: CreateIntentRequest;
+    /** A QR at the till lives 5 minutes; a payment request sent as a link lives a day. */
+    ttlSeconds?: number;
+  },
 ): Promise<PaymentIntent> {
   const merchant = await loadMerchant(tx, input.merchantId);
   await requireStaff(tx, merchant.id, input.userId);
@@ -173,7 +180,7 @@ export async function createIntent(
       amountCents,
       items,
       description,
-      expiresAt: sql`now() + make_interval(secs => ${INTENT_TTL_SECONDS})`,
+      expiresAt: sql`now() + make_interval(secs => ${input.ttlSeconds ?? INTENT_TTL_SECONDS})`,
     })
     .returning();
   if (!row) throw new Error('failed to create intent');

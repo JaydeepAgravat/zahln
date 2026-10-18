@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyLists/1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Universal links for pay links. Needs the Associated Domains capability on the App ID (release signing). -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:pay.zahln.de</string>
+	</array>
+</dict>
+</plist>

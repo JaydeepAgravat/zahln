@@ -20,6 +20,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { HomeStackParamList } from '../../app/navigation/types';
+import { usePayLinks } from '../pay/usePayLinks';
 
 function QuickAction({
   icon,
@@ -68,6 +69,7 @@ export function WalletScreen() {
   const soon = () => toast(t('home.soon'), 'sparkle');
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const topupKilled = useKillSwitch('topup');
+  usePayLinks();
 
   // A payment was in flight when the app was killed: pick it up before anything else.
   useEffect(() => {

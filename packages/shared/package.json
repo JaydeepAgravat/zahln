@@ -8,7 +8,11 @@
     ".": "./src/index.ts",
     "./tokens": "./src/tokens/index.ts",
     "./i18n": "./src/i18n/index.ts",
-    "./tokens/tailwind": "./src/tokens/tailwind.ts"
+    "./tokens/tailwind": "./src/tokens/tailwind.ts",
+    "./payment": "./src/state/paymentAttempt.ts",
+    "./phone": "./src/phone.ts",
+    "./money": "./src/money.ts",
+    "./payUrl": "./src/payUrl.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

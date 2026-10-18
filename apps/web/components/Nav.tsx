@@ -11,10 +11,12 @@ import { useT } from './I18n';
 export const PAGES: { href: string; key: MessageKey }[] = [
   { href: '/business', key: 'nav.today' },
   { href: '/business/transactions', key: 'nav.transactions' },
+  { href: '/business/requests', key: 'nav.requests' },
   { href: '/business/payouts', key: 'nav.payouts' },
   { href: '/business/team', key: 'nav.team' },
   { href: '/business/plan', key: 'nav.plan' },
   { href: '/business/export', key: 'nav.export' },
+  { href: '/business/poster', key: 'nav.poster' },
 ];
 
 export function Nav() {

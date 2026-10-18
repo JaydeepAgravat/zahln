@@ -6,12 +6,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: translator(await serverLocale())('login.verify') };
 }
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ for?: string }> }) {
+  const wallet = (await searchParams).for === 'wallet';
   return (
     <main className="grid min-h-dvh place-items-center px-4 py-10">
       <div className="flex w-full max-w-sm flex-col gap-8">
         <ReceiptMark />
-        <LoginForm />
+        <LoginForm audience={wallet ? 'consumer' : 'business'} />
       </div>
     </main>
   );

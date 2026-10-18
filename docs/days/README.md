@@ -22,7 +22,7 @@ One file per day. Each one has the same sections:
 | [Day 5](DAY-5.md) ✅ | Every payment state, `checking` reconciliation, chaos, static QR, tips, refunds | **Act 2** |
 | [Day 6](DAY-6.md) ✅ | Remote config, plan gating, kill switches, forced update, internal console | **Act 3** |
 | [Day 7](DAY-7.md) ✅ | Zahln Web I: web auth, `web-ui`, merchant dashboard | Payments appear live on the dashboard |
-| [Day 8](DAY-8.md) | Zahln Web II: pay-link checkout, consumer web wallet, Playwright | Pay a link in a browser |
+| [Day 8](DAY-8.md) ✅ | Zahln Web II: pay-link checkout, consumer web wallet, Playwright | Pay a link in a browser |
 | [Day 9](DAY-9.md) | The Zahln Edition I: content, CC0 art, lettering, static layout | Reads perfectly with JS off |
 | [Day 10](DAY-10.md) | The Zahln Edition II: motion, shader, Lighthouse CI budgets | Budgets green |
 | [Day 11](DAY-11.md) | Native modules (SecureScreen, NFC HCE), security hardening | Security checklist |

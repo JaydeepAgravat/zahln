@@ -15,7 +15,13 @@ export async function serverGet<T>(path: string): Promise<T> {
     headers: { cookie: jar.toString() },
     cache: 'no-store',
   });
-  if (res.status === 401) redirect('/login');
+  // Signed out, or signed in for the other side (a wallet session on /business or the reverse).
+  const wallet = path.startsWith('/web/wallet');
+  if (
+    res.status === 401 ||
+    (res.status === 403 && path === (wallet ? '/web/wallet' : '/web/business/summary'))
+  )
+    redirect(wallet ? '/login?for=wallet' : '/login');
   if (!res.ok) throw new Error(`${path} → ${res.status}`);
   return (await res.json()) as T;
 }
@@ -30,4 +36,9 @@ export async function serverGetOptional<T>(path: string): Promise<T | null> {
   return (await res.json()) as T;
 }
 
-export const getSession = () => serverGet<Session>('/web/session');
+export const getSession = async () => {
+  const s = await serverGet<Session>('/web/session');
+  // A wallet session can't use the dashboard: send it to sign in as a business.
+  if (!s.merchant) redirect('/login');
+  return s;
+};

@@ -22,3 +22,7 @@ apps/mobile/android/local.properties
 .next
 next-env.d.ts
 *.tsbuildinfo
+
+# Playwright
+test-results
+playwright-report

@@ -6,7 +6,8 @@ import { useState } from 'react';
 import { useT } from '@/components/I18n';
 import { ApiError, api } from '@/lib/client';
 
-export function LoginForm() {
+export function LoginForm({ audience }: { audience: 'business' | 'consumer' }) {
+  const wallet = audience === 'consumer';
   const { t } = useT();
   const [phone, setPhone] = useState('');
   const [challenge, setChallenge] = useState<{ id: string; devCode?: string } | null>(null);
@@ -26,8 +27,10 @@ export function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-title font-bold tracking-tight">{t('login.title')}</h1>
-        <p className="text-callout text-text-secondary">{t('login.sub')}</p>
+        <h1 className="text-title font-bold tracking-tight">
+          {wallet ? t('wallet.signInTitle') : t('login.title')}
+        </h1>
+        <p className="text-callout text-text-secondary">{wallet ? t('wallet.signInSub') : t('login.sub')}</p>
       </div>
       {!challenge ? (
         <form
@@ -75,9 +78,9 @@ export function LoginForm() {
             setError(null);
             try {
               await api('POST', '/web/auth/verify', {
-                body: { challengeId: challenge.id, code, audience: 'business' },
+                body: { challengeId: challenge.id, code, audience },
               });
-              window.location.assign('/business');
+              window.location.assign(wallet ? '/wallet' : '/business');
             } catch (err) {
               fail(err);
               setBusy(false);

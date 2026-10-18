@@ -2,20 +2,22 @@ import cookie from '@fastify/cookie';
 import {
   type Feature,
   hasFeature,
+  IdempotencyKeySchema,
   INTENT_STATUSES,
   OTP_LENGTH,
   type PaymentIntent,
+  PayRequestSchema,
   PLAN_STAFF_LIMIT,
   PLANS,
   RequestOtpSchema,
 } from '@zahln/shared';
-import { and, desc, eq, gte, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lt, sql } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
-import type { Db } from '../db/client';
 import {
   authChallenges,
+  devices,
   ledgerTransactions,
   merchants,
   paymentAttempts,
@@ -33,7 +35,16 @@ import { publishConfigChanged, publishIntent, subscribeAllIntents } from '../lib
 import { merchantCsv } from '../lib/export';
 import { readIdempotencyKey, withIdempotency } from '../lib/idempotency';
 import { accountId, balanceOf, lockAccount, postTransaction } from '../lib/ledger';
-import { getIntent, refundIntent, requireFeature, toIntentDto } from '../lib/payments';
+import {
+  createIntent,
+  getAttemptByKey,
+  getIntent,
+  getWallet,
+  markScanned,
+  refundIntent,
+  requireFeature,
+  toIntentDto,
+} from '../lib/payments';
 import { openSse } from '../lib/sse';
 import {
   authenticateWeb,
@@ -49,6 +60,7 @@ import {
   steppedUp,
   type WebSession,
 } from '../lib/webSession';
+import { type RouteDeps, respondToPay } from './index';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -56,7 +68,10 @@ declare module 'fastify' {
   }
 }
 
-export type WebDeps = { db: Db; devOtp: boolean; secureCookies: boolean };
+export type WebDeps = Pick<RouteDeps, 'db' | 'rail' | 'chaos' | 'chaosEnabled'> & {
+  devOtp: boolean;
+  secureCookies: boolean;
+};
 
 /** "Lena Hoffmann" → "Lena H.": the merchant sees who paid, not their full name (data minimisation). */
 const shortName = (name: string | null) => {
@@ -679,5 +694,176 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
       if (intent.merchant.id === s.merchant.id) send('intent', intent);
     });
     send('ready', {});
+  });
+
+  // ---------- Payment requests (a pay link that lives 24 hours) ----------
+
+  app.post(
+    '/web/business/requests',
+    {
+      schema: {
+        body: z.object({
+          amountCents: z.number().int().positive().max(1_000_000),
+          description: z.string().trim().max(80).optional(),
+        }),
+      },
+    },
+    async (req, reply) => {
+      const s = business(req);
+      const key = readIdempotencyKey(req);
+      const result = await withIdempotency(
+        db,
+        { scope: s.user.id, key, route: 'POST /web/business/requests', body: req.body },
+        async (tx) => ({
+          statusCode: 201,
+          body: await createIntent(tx, {
+            merchantId: s.merchant.id,
+            userId: s.user.id,
+            request: { amountCents: req.body.amountCents, description: req.body.description },
+            ttlSeconds: 24 * 3600,
+          }),
+        }),
+      );
+      return reply.status(result.statusCode).send(result.body);
+    },
+  );
+
+  // ---------- Consumer on the web: pay a link, see the wallet ----------
+
+  /** A consumer session (the checkout or the web wallet). A business session pays nothing. */
+  const consumer = (req: FastifyRequest) => {
+    const s = session(req);
+    if (s.merchant) throw new ApiError(403, 'forbidden', 'not a consumer session');
+    return s;
+  };
+
+  app.post(
+    '/web/pay/:intentId/scanned',
+    { schema: { params: z.object({ intentId: z.uuid() }) } },
+    async (req) => {
+      consumer(req);
+      const intent = await db.transaction((tx) => markScanned(tx, req.params.intentId));
+      publishIntent(intent);
+      return intent;
+    },
+  );
+
+  app.post(
+    '/web/pay/:intentId',
+    { schema: { params: z.object({ intentId: z.uuid() }), body: PayRequestSchema } },
+    async (req, reply) => {
+      const s = consumer(req);
+      // Like Face ID before every payment on the phone: a code from the last 10 minutes.
+      requireStepUp(s);
+      // The same handler as the app: same idempotency scope (the user), same replay, same chaos.
+      return respondToPay(deps, req, reply, {
+        userId: s.user.id,
+        intentId: req.params.intentId,
+        tipCents: req.body.tipCents,
+      });
+    },
+  );
+
+  app.get(
+    '/web/pay/attempts/:key',
+    { schema: { params: z.object({ key: IdempotencyKeySchema }) } },
+    async (req) => getAttemptByKey(db, consumer(req).user.id, req.params.key.toLowerCase()),
+  );
+
+  app.get('/web/wallet', async (req) => {
+    const s = consumer(req);
+    return {
+      user: { name: s.user.name, phone: maskPhone(s.user.phone) },
+      wallet: await getWallet(db, accountId.consumer(s.user.id), 50),
+    };
+  });
+
+  /** A receipt the signed-in person paid (or was refunded). Anything else looks like it doesn't exist. */
+  app.get('/web/wallet/receipts/:intentId', { schema: { params: IntentParams } }, async (req) => {
+    const s = consumer(req);
+    const [mine] = await db
+      .select({ tipCents: paymentAttempts.tipCents })
+      .from(paymentAttempts)
+      .where(
+        and(
+          eq(paymentAttempts.intentId, req.params.intentId),
+          eq(paymentAttempts.payerUserId, s.user.id),
+          eq(paymentAttempts.status, 'paid'),
+        ),
+      );
+    if (!mine) throw new ApiError(404, 'not_found', 'receipt not found');
+    return { intent: await getIntent(db, req.params.intentId), tipCents: mine.tipCents };
+  });
+
+  app.get('/web/wallet/devices', async (req) => {
+    const s = consumer(req);
+    const rows = await db
+      .select()
+      .from(devices)
+      .where(and(eq(devices.userId, s.user.id), isNull(devices.revokedAt)))
+      .orderBy(desc(devices.lastSeenAt));
+    return rows.map((d) => ({
+      id: d.id,
+      platform: d.platform,
+      createdAt: d.createdAt.toISOString(),
+      lastSeenAt: d.lastSeenAt.toISOString(),
+    }));
+  });
+
+  /** Lost phone: sign it out from a laptop. The next request from that phone gets 401 and it locks itself. */
+  app.delete(
+    '/web/wallet/devices/:deviceId',
+    { schema: { params: z.object({ deviceId: z.uuid() }) } },
+    async (req, reply) => {
+      const s = consumer(req);
+      requireStepUp(s);
+      const [row] = await db
+        .update(devices)
+        .set({ revokedAt: sql`now()` })
+        .where(
+          and(eq(devices.id, req.params.deviceId), eq(devices.userId, s.user.id), isNull(devices.revokedAt)),
+        )
+        .returning({ id: devices.id });
+      if (!row) throw new ApiError(404, 'not_found', 'device not found');
+      return reply.status(204).send();
+    },
+  );
+
+  /** GDPR Art. 15/20: everything we hold about you, as JSON. Needs a fresh code, like any data export. */
+  app.get('/web/wallet/export.json', async (req, reply) => {
+    const s = consumer(req);
+    requireStepUp(s);
+    const [user] = await db.select().from(users).where(eq(users.id, s.user.id));
+    const attempts = await db
+      .select()
+      .from(paymentAttempts)
+      .where(eq(paymentAttempts.payerUserId, s.user.id));
+    const myDevices = await db
+      .select({
+        id: devices.id,
+        platform: devices.platform,
+        createdAt: devices.createdAt,
+        lastSeenAt: devices.lastSeenAt,
+        revokedAt: devices.revokedAt,
+      })
+      .from(devices)
+      .where(eq(devices.userId, s.user.id));
+    const memberships = await db.select().from(staff).where(eq(staff.userId, s.user.id));
+    const wallet = await getWallet(db, accountId.consumer(s.user.id), 10_000);
+    return reply
+      .header(
+        'content-disposition',
+        `attachment; filename="zahln-daten-${new Date().toISOString().slice(0, 10)}.json"`,
+      )
+      .header('cache-control', 'no-store')
+      .send({
+        exportedAt: new Date().toISOString(),
+        user,
+        memberships,
+        devices: myDevices,
+        wallet,
+        paymentAttempts: attempts,
+        note: 'Ledger entries are kept for 10 years (German commercial and tax law, § 147 AO) even after deletion.',
+      });
   });
 }

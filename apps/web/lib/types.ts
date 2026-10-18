@@ -45,3 +45,17 @@ export type Team = {
   limit: number | null;
   canManage: boolean;
 };
+
+export type WalletTx = {
+  id: string;
+  kind: 'payment' | 'refund' | 'topup' | 'payout';
+  amountCents: number;
+  counterpartyName: string;
+  intentId: string | null;
+  createdAt: string;
+};
+export type WalletView = {
+  user: { name: string; phone: string };
+  wallet: { balanceCents: number; transactions: WalletTx[] };
+};
+export type Device = { id: string; platform: 'ios' | 'android'; createdAt: string; lastSeenAt: string };

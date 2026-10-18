@@ -35,3 +35,34 @@
     animation: none;
   }
 }
+
+/* The outcome colour rises from the bottom of the screen, like the app's flood. */
+@keyframes flood {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Printing the poster: only the poster, on A5. */
+@media print {
+  @page {
+    size: A5;
+    margin: 0;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .poster,
+  .poster * {
+    visibility: visible;
+  }
+  .poster {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}

@@ -1,21 +1,15 @@
 import { z } from 'zod';
+import { GERMAN_MOBILE } from './phone';
 import { PlanSchema } from './schemas';
 
 export const PIN_LENGTH = 6;
 export const OTP_LENGTH = 6;
 export const MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN = 5;
 
-/** German mobile numbers in E.164, e.g. +4915112345678. */
-export const PhoneSchema = z.string().regex(/^\+491\d{9,11}$/, 'invalid German mobile number');
+export { GERMAN_MOBILE, normalizeGermanPhone } from './phone';
 
-/** Turn what people type ("0151 1234 5678", "+49 151 …") into E.164. */
-export function normalizeGermanPhone(input: string): string {
-  const digits = input.replace(/[^\d+]/g, '');
-  if (digits.startsWith('+49')) return digits;
-  if (digits.startsWith('0049')) return `+${digits.slice(2)}`;
-  if (digits.startsWith('0')) return `+49${digits.slice(1)}`;
-  return digits;
-}
+/** German mobile numbers in E.164, e.g. +4915112345678. */
+export const PhoneSchema = z.string().regex(GERMAN_MOBILE, 'invalid German mobile number');
 
 const COMMON_PINS = new Set([
   '123456',

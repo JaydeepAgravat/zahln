@@ -8,7 +8,7 @@ import {
   RefundRequestSchema,
   TopUpRequestSchema,
 } from '@zahln/shared';
-import type { FastifyInstance, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import type { Db } from '../db/client';
@@ -54,6 +54,64 @@ function publishCommitted(result: IdempotentResult) {
 function send(reply: FastifyReply, result: IdempotentResult) {
   if (result.replayed) reply.header('idempotent-replayed', 'true');
   return reply.status(result.statusCode).send(result.body);
+}
+
+/**
+ * Pay one intent, idempotently, and answer. Shared by the app (bearer token) and the web checkout (cookie),
+ * so both get the same rules, the same replay behaviour and the same chaos.
+ */
+export async function respondToPay(
+  deps: Pick<RouteDeps, 'db' | 'rail' | 'chaos' | 'chaosEnabled'>,
+  req: FastifyRequest,
+  reply: FastifyReply,
+  input: { userId: string; intentId: string; tipCents: number; route?: string },
+) {
+  const { db, rail, chaos } = deps;
+  const key = readIdempotencyKey(req);
+  const result = await withIdempotency(
+    db,
+    {
+      scope: input.userId,
+      key,
+      route: input.route ?? `POST /intents/${input.intentId}/pay`,
+      body: { tipCents: input.tipCents },
+    },
+    async (tx) => {
+      const outcome = await payIntent(
+        tx,
+        { rail, chaos },
+        {
+          intentId: input.intentId,
+          payerUserId: input.userId,
+          idempotencyKey: key,
+          tipCents: input.tipCents,
+        },
+      );
+      return outcome.kind === 'expired'
+        ? {
+            statusCode: 409,
+            body: new ApiError(409, 'intent_expired', 'this payment code has expired').toJSON(),
+          }
+        : { statusCode: 201, body: outcome.result };
+    },
+  );
+
+  // Chaos: the money moved and the response is saved, but the client never hears back.
+  // A replay with the same key returns the stored response: that's how the app and the web reconcile.
+  if (
+    deps.chaosEnabled &&
+    chaos.mode === 'drop_after_settle' &&
+    !result.replayed &&
+    result.statusCode === 201
+  ) {
+    req.log.warn({ intentId: input.intentId }, 'chaos: dropping response after settlement');
+    publishCommitted(result);
+    reply.hijack();
+    reply.raw.destroy();
+    return;
+  }
+  publishCommitted(result);
+  return send(reply, result);
 }
 
 export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
@@ -163,46 +221,11 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
     { schema: { params: IntentParams, body: PayRequestSchema } },
     async (req, reply) => {
       const actor = requireActor(req);
-      const key = readIdempotencyKey(req);
-      const result = await withIdempotency(
-        db,
-        { scope: actor.userId, key, route: `POST /intents/${req.params.intentId}/pay`, body: req.body },
-        async (tx) => {
-          const outcome = await payIntent(
-            tx,
-            { rail, chaos },
-            {
-              intentId: req.params.intentId,
-              payerUserId: actor.userId,
-              idempotencyKey: key,
-              tipCents: req.body.tipCents,
-            },
-          );
-          return outcome.kind === 'expired'
-            ? {
-                statusCode: 409,
-                body: new ApiError(409, 'intent_expired', 'this payment code has expired').toJSON(),
-              }
-            : { statusCode: 201, body: outcome.result };
-        },
-      );
-
-      // Chaos: the money moved and the response is saved, but the phone never hears back.
-      // A replay with the same key returns the stored response — that's how the app reconciles.
-      if (
-        deps.chaosEnabled &&
-        chaos.mode === 'drop_after_settle' &&
-        !result.replayed &&
-        result.statusCode === 201
-      ) {
-        req.log.warn({ intentId: req.params.intentId }, 'chaos: dropping response after settlement');
-        publishCommitted(result);
-        reply.hijack();
-        reply.raw.destroy();
-        return;
-      }
-      publishCommitted(result);
-      return send(reply, result);
+      return respondToPay(deps, req, reply, {
+        userId: actor.userId,
+        intentId: req.params.intentId,
+        tipCents: req.body.tipCents,
+      });
     },
   );
 

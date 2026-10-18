@@ -290,3 +290,121 @@ describe('CORS with cookies', () => {
     expect(evil.headers['access-control-allow-origin']).toBeUndefined();
   });
 });
+
+describe('pay links (Day 8)', () => {
+  it('the public intent shows merchant and amount to anyone with the link, and nothing for a forged one', async () => {
+    const intent = (await t.api.createIntent(CART)).body;
+    const res = await t.call('GET', `/public/intents/${intent.ref}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ id: intent.id, amountCents: 630, merchant: { name: 'Café Mila' } });
+    expect(JSON.stringify(res.body)).not.toMatch(/usr_|payer|balance/);
+    const forged = `${intent.id}.AAAAAAAAAAAAAAAA`;
+    expect((await t.call('GET', `/public/intents/${forged}`)).status).toBe(404);
+  });
+
+  it('a link opened after expiry says expired (and the till hears about it)', async () => {
+    const intent = (await t.api.createIntent(CART)).body;
+    await t.db.execute(
+      sql`UPDATE payment_intents SET expires_at = now() - interval '1 second' WHERE id = ${intent.id}`,
+    );
+    expect((await t.call('GET', `/public/intents/${intent.ref}`)).body.status).toBe('expired');
+  });
+
+  it('pays in the browser with a consumer session; a business session cannot pay', async () => {
+    const intent = (await t.api.createIntent(CART)).body;
+    const mila = await signIn(PHONE.mila);
+    expect((await mila.call('POST', `/web/pay/${intent.id}`, { body: {}, key: randomUUID() })).status).toBe(
+      403,
+    );
+    const lena = await signIn(PHONE.lena, 'consumer');
+    const res = await lena.call('POST', `/web/pay/${intent.id}`, { body: {}, key: randomUUID() });
+    expect(res).toMatchObject({ status: 201, body: { attempt: { status: 'paid' } } });
+    expect(await t.api.balance(LENA)).toBe(5000 - 630);
+    // A session whose last code is older than 10 minutes must confirm again before paying.
+    const next = (await t.api.createIntent(CART)).body;
+    await ageSession();
+    expect((await lena.call('POST', `/web/pay/${next.id}`, { body: {}, key: randomUUID() })).body.error).toBe(
+      'step_up_required',
+    );
+  });
+
+  it('Act 2 on the web: the response is dropped, the key finds the outcome, a resend replays it (one charge)', async () => {
+    const intent = (await t.api.createIntent(CART)).body;
+    const lena = await signIn(PHONE.lena, 'consumer');
+    const key = randomUUID();
+    expect((await lena.call('GET', `/web/pay/attempts/${key}`)).status).toBe(404);
+    t.chaos.set('drop_after_settle');
+    await expect(lena.call('POST', `/web/pay/${intent.id}`, { body: {}, key })).rejects.toThrow();
+    t.chaos.set('ok');
+    expect((await lena.call('GET', `/web/pay/attempts/${key}`)).body.status).toBe('paid');
+    const replay = await lena.call('POST', `/web/pay/${intent.id}`, { body: {}, key });
+    expect(replay.headers['idempotent-replayed']).toBe('true');
+    expect(await t.api.balance(LENA)).toBe(5000 - 630);
+  });
+
+  it('a payment request lives 24 hours and opens as a normal pay link', async () => {
+    const mila = await signIn(PHONE.mila);
+    const res = await mila.call('POST', '/web/business/requests', {
+      body: { amountCents: 4500, description: 'Catering Freitag' },
+      key: randomUUID(),
+    });
+    expect(res.status).toBe(201);
+    const hours = (Date.parse(res.body.expiresAt) - Date.now()) / 3_600_000;
+    expect(hours).toBeGreaterThan(23.9);
+    expect((await t.call('GET', `/public/intents/${res.body.ref}`)).body.description).toBe(
+      'Catering Freitag',
+    );
+  });
+});
+
+describe('web wallet (Day 8)', () => {
+  it('shows only your own receipts', async () => {
+    const id = await paidIntent();
+    const lena = await signIn(PHONE.lena, 'consumer');
+    expect((await lena.call('GET', `/web/wallet/receipts/${id}`)).status).toBe(200);
+    const jonas = await signIn(PHONE.jonas, 'consumer');
+    expect((await jonas.call('GET', `/web/wallet/receipts/${id}`)).status).toBe(404);
+    expect((await lena.call('GET', '/web/wallet')).body.wallet.balanceCents).toBe(5000 - 630);
+  });
+
+  it('revoking a phone and exporting your data both need a fresh code', async () => {
+    const app = await t.app;
+    const otp = (
+      await app.inject({ method: 'POST', url: '/auth/otp', payload: { phone: PHONE.lena } })
+    ).json();
+    const verified = (
+      await app.inject({
+        method: 'POST',
+        url: '/auth/verify',
+        payload: { challengeId: otp.challengeId, code: otp.devCode },
+      })
+    ).json();
+    const deviceId = randomUUID();
+    const bound = await app.inject({
+      method: 'POST',
+      url: '/devices',
+      payload: { verificationToken: verified.verificationToken, deviceId, platform: 'ios' },
+    });
+    const phoneToken = bound.json().sessionToken as string;
+
+    const lena = await signIn(PHONE.lena, 'consumer');
+    expect((await lena.call('GET', '/web/wallet/devices')).body.map((d: { id: string }) => d.id)).toContain(
+      deviceId,
+    );
+    await ageSession();
+    expect((await lena.call('GET', '/web/wallet/export.json')).body.error).toBe('step_up_required');
+    expect((await lena.call('DELETE', `/web/wallet/devices/${deviceId}`)).body.error).toBe(
+      'step_up_required',
+    );
+    await stepUp(lena);
+    expect((await lena.call('DELETE', `/web/wallet/devices/${deviceId}`)).status).toBe(204);
+    const fromPhone = await app.inject({
+      method: 'GET',
+      url: '/me',
+      headers: { authorization: `Bearer ${phoneToken}`, 'x-device-id': deviceId },
+    });
+    expect(fromPhone.statusCode).toBe(401);
+    const data = await lena.call('GET', '/web/wallet/export.json');
+    expect(data.body.user.id).toBe(LENA);
+  });
+});

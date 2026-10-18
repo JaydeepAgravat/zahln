@@ -76,6 +76,8 @@ export const PaymentIntentSchema = z.object({
   amountCents: PositiveCentsSchema,
   currency: z.literal('EUR'),
   items: z.array(LineItemSchema),
+  /** A note on an amount-only intent, e.g. a payment request's "Catering Freitag". */
+  description: z.string().nullable().optional(),
   status: IntentStatusSchema,
   /** Whether the merchant's plan includes tips, so the payer's app only offers them where they work. */
   acceptsTips: z.boolean(),

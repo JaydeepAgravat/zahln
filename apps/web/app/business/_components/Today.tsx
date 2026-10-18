@@ -123,7 +123,11 @@ export function Today({ initialSummary, initialFeed }: { initialSummary: Summary
           <span className="sr-only">{money(summary.today.cents, locale)}</span>
         </p>
         <p className="mt-3 flex flex-wrap gap-x-4 text-callout text-on-ink-muted">
-          <span>{t('today.payments', { count: summary.today.count })}</span>
+          <span>
+            {summary.today.count === 1
+              ? t('today.paymentOne')
+              : t('today.payments', { count: summary.today.count })}
+          </span>
           {summary.today.tipCents ? (
             <span>{t('today.tips', { amount: money(summary.today.tipCents, locale) })}</span>
           ) : null}

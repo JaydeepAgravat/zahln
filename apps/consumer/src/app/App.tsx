@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { LogBox } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { startPayLinkBuffer } from '../features/pay/usePayLinks';
 import { RootNavigator } from './navigation/RootNavigator';
 
 // NativeWind's css-interop registers every RN component at startup, including ImageBackground,
@@ -27,6 +28,7 @@ export function App() {
     void getOrCreateDeviceId(uuid).then(boot);
     void prefetchBiometry();
     const stopConfig = startRemoteConfig();
+    startPayLinkBuffer();
     const stopLock = startAutoLock();
     return () => {
       stopConfig();

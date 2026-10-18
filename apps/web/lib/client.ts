@@ -37,7 +37,7 @@ export async function api<T>(
   if (res.status === 204) return undefined as T;
   const json = await res.json().catch(() => null);
   if (res.status === 401 && !path.startsWith('/web/auth/')) {
-    window.location.assign('/login');
+    window.location.assign(window.location.pathname.startsWith('/wallet') ? '/login?for=wallet' : '/login');
   }
   if (!res.ok) throw new ApiError(res.status, json?.error ?? 'error', json?.message ?? res.statusText);
   return json as T;
