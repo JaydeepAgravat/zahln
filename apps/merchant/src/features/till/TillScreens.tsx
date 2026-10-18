@@ -24,17 +24,19 @@ import {
   Skeleton,
   StatusBadge,
   Text,
+  TillIllustration,
   TransactionList,
   toast,
   useTheme,
 } from '@zahln/mobile-ui';
-import { applyKeypadKey, type CatalogueItem } from '@zahln/shared';
-import { useRef, useState } from 'react';
+import { applyKeypadKey, type CatalogueItem, isPayable } from '@zahln/shared';
+import { useEffect, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { HomeStackParamList } from '../../app/navigation/types';
 import { cartTotal, useCart } from './cart';
+import { openIntent } from './openIntent';
 
 export function useCurrentMerchant() {
   const merchantId = usePrefs((s) => s.merchantId);
@@ -42,7 +44,7 @@ export function useCurrentMerchant() {
   return me.data?.memberships.find((m) => m.merchantId === merchantId) ?? null;
 }
 
-function MerchantHeader() {
+function MerchantHeader({ onMyQr }: { onMyQr?: () => void }) {
   const { t } = useT();
   const merchant = useCurrentMerchant();
   const firstName = usePrefs((s) => s.firstName);
@@ -67,6 +69,7 @@ function MerchantHeader() {
           label={merchant.plan[0]?.toUpperCase() + merchant.plan.slice(1)}
         />
       ) : null}
+      {onMyQr ? <IconButton icon="qr" label={t('myQr.title')} onPress={onMyQr} /> : null}
     </Animated.View>
   );
 }
@@ -274,6 +277,27 @@ export function TillScreen() {
     staleTime: 5 * 60_000,
   });
   const total = cartTotal(cart, catalogue.data);
+  const clearCart = useCart((s) => s.clear);
+
+  // Back from an auto-lock (or an app restart) mid-payment: show the open QR again, or the result.
+  useEffect(() => {
+    const id = openIntent.get();
+    if (!id) return;
+    payments
+      .intent(id)
+      .then((intent) => {
+        if (intent.status === 'paid') {
+          openIntent.clear();
+          clearCart();
+          navigation.navigate('Paid', { intent });
+        } else if (isPayable(intent.status) && Date.parse(intent.expiresAt) > Date.now()) {
+          navigation.navigate('Qr', { intent });
+        } else {
+          openIntent.clear();
+        }
+      })
+      .catch(() => undefined);
+  }, [navigation, clearCart]);
   // One key per order: a retry after a network error returns the same intent instead of a second QR.
   const orderKey = useRef<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -303,9 +327,21 @@ export function TillScreen() {
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <View className="flex-1 gap-4 px-5 pt-2">
-        <MerchantHeader />
-        <ModeSwitch />
-        {cart.mode === 'catalogue' ? (
+        <MerchantHeader onMyQr={() => navigation.navigate('MyQr')} />
+        {merchant?.plan === 'free' ? (
+          // Free plan: no one-time QR codes. Say so up front and point to what does work.
+          <View className="flex-1 items-center justify-center gap-4 px-2">
+            <TillIllustration width={220} />
+            <Text tone="secondary" className="text-center">
+              {t('myQr.freePlan')}
+            </Text>
+            <View className="w-full">
+              <Button title={t('myQr.title')} icon="qr" onPress={() => navigation.navigate('MyQr')} />
+            </View>
+          </View>
+        ) : null}
+        {merchant?.plan === 'free' ? null : <ModeSwitch />}
+        {merchant?.plan === 'free' ? null : cart.mode === 'catalogue' ? (
           <ScrollView contentContainerClassName="pb-4" showsVerticalScrollIndicator={false}>
             <CatalogueGrid catalogue={catalogue.data} />
           </ScrollView>
@@ -313,27 +349,29 @@ export function TillScreen() {
           <AmountEntry />
         )}
       </View>
-      <View className="gap-3 border-t border-border bg-surface px-5 pb-4 pt-3">
-        <View className="flex-row items-center justify-between">
-          <Text variant="footnote" tone="secondary">
-            {total.count > 0 ? t('till.items', { count: total.count }) : t('till.emptyCart')}
-          </Text>
-          {total.count > 0 ? (
-            <PressableScale onPress={cart.clear} hitSlop={8} accessibilityRole="button">
-              <Text variant="footnote" tone="brand" style={{ fontFamily: 'Inter-SemiBold' }}>
-                {t('till.clear')}
-              </Text>
-            </PressableScale>
-          ) : null}
+      {merchant?.plan === 'free' ? null : (
+        <View className="gap-3 border-t border-border bg-surface px-5 pb-4 pt-3">
+          <View className="flex-row items-center justify-between">
+            <Text variant="footnote" tone="secondary">
+              {total.count > 0 ? t('till.items', { count: total.count }) : t('till.emptyCart')}
+            </Text>
+            {total.count > 0 ? (
+              <PressableScale onPress={cart.clear} hitSlop={8} accessibilityRole="button">
+                <Text variant="footnote" tone="brand" style={{ fontFamily: 'Inter-SemiBold' }}>
+                  {t('till.clear')}
+                </Text>
+              </PressableScale>
+            ) : null}
+          </View>
+          <Button
+            title={total.cents > 0 ? t('till.charge', { amount: money(total.cents) }) : t('till.createQr')}
+            icon="qr"
+            loading={creating}
+            disabled={total.cents === 0 || !merchant}
+            onPress={() => void charge()}
+          />
         </View>
-        <Button
-          title={total.cents > 0 ? t('till.charge', { amount: money(total.cents) }) : t('till.createQr')}
-          icon="qr"
-          loading={creating}
-          disabled={total.cents === 0 || !merchant}
-          onPress={() => void charge()}
-        />
-      </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -342,6 +380,7 @@ export function MerchantWalletScreen() {
   const { t } = useT();
   const { colors } = useTheme();
   const wallet = useMerchantWallet();
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <ScrollView
@@ -374,6 +413,7 @@ export function MerchantWalletScreen() {
             {t('home.recent')}
           </Text>
           <TransactionList
+            onPress={(tx) => tx.intentId && navigation.navigate('Payment', { intentId: tx.intentId })}
             transactions={wallet.data?.transactions}
             loading={wallet.isLoading}
             emptyTitle={t('merchant.noSales')}

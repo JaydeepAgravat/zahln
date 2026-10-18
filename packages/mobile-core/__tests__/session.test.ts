@@ -1,4 +1,7 @@
 import { AppState } from 'react-native';
+import { z } from 'zod';
+import { api, setAuth } from '../src/api';
+import { configureApp } from '../src/app';
 import { checkPin, savePin, saveSession } from '../src/secure';
 import { LOCK_AFTER_BACKGROUND_MS, startAutoLock, useSession } from '../src/session';
 
@@ -56,5 +59,22 @@ describe('unlock', () => {
     await saveSession({ token: 'secret', userId: 'usr_lena' });
     await useSession.getState().unlock();
     expect(useSession.getState().status).toBe('ready');
+  });
+});
+
+describe('revoked session', () => {
+  it('a 401 on an authenticated request signs the device out instead of leaving a broken screen', async () => {
+    configureApp('consumer');
+    useSession.setState({ status: 'ready' });
+    setAuth({ token: 'revoked', deviceId: 'device-1' });
+    const fetchMock = jest.fn(async () => ({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'unauthorized', message: 'session revoked' }),
+    }));
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await expect(api('/me', z.unknown())).rejects.toMatchObject({ status: 401 });
+    await new Promise<void>((r) => setTimeout(r, 0));
+    expect(useSession.getState().status).toBe('onboarding');
   });
 });

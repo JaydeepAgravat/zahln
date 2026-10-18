@@ -53,6 +53,7 @@ async function membershipsOf(db: DbOrTx, userId: string): Promise<Membership[]> 
     .select({
       merchantId: merchants.id,
       merchantName: merchants.name,
+      handle: merchants.handle,
       role: staff.role,
       plan: merchants.plan,
     })

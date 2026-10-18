@@ -14,6 +14,25 @@ const REF = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.([
 
 export type IntentRef = { ref: string; intentId: string };
 
+const HANDLE = /^@([a-z0-9][a-z0-9-]{1,30}[a-z0-9])$/;
+
+/** The merchant's static QR (Free plan): no amount, no expiry. The payer types the amount. */
+export function handleUrlFor(handle: string): string {
+  return `${PAY_URL_BASE.replace(/i\/$/, '')}@${handle}`;
+}
+
+/** `https://pay.zahln.de/@doener-ali` (or `zahln://@doener-ali`) → `doener-ali`; anything else is `null`. */
+export function parseHandleUrl(text: string): string | null {
+  const trimmed = text.trim().split(/[?#]/)[0] ?? '';
+  const base = PAY_URL_BASE.replace(/i\/$/, '');
+  const raw = trimmed.startsWith(base)
+    ? trimmed.slice(base.length)
+    : trimmed.startsWith('zahln://')
+      ? trimmed.slice(8)
+      : '';
+  return HANDLE.exec(raw)?.[1] ?? null;
+}
+
 export function payUrlFor(ref: string): string {
   return `${PAY_URL_BASE}${ref}`;
 }

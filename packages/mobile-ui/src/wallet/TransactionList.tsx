@@ -41,7 +41,10 @@ export function TransactionList({
   loading,
   emptyTitle,
   emptyBody,
+  onPress,
 }: {
+  /** Opens the payment behind a row (receipt, refund). Rows without an intent aren't tappable. */
+  onPress?: (tx: WalletTransaction) => void;
   transactions: WalletTransaction[] | undefined;
   loading: boolean;
   emptyTitle: string;
@@ -96,6 +99,7 @@ export function TransactionList({
               title={title}
               subtitle={when(tx.createdAt)}
               accessibilityLabel={`${title}, ${amount}, ${when(tx.createdAt)}`}
+              onPress={onPress && tx.intentId ? () => onPress(tx) : undefined}
               trailing={
                 <Text
                   variant="callout"

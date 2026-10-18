@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useMe, useT, useWallet } from '@zahln/mobile-core';
+import { pendingPayment, useMe, useT, useWallet } from '@zahln/mobile-core';
 import {
   Avatar,
   BalanceCard,
@@ -14,6 +14,7 @@ import {
   toast,
   useTheme,
 } from '@zahln/mobile-ui';
+import { useEffect } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -66,6 +67,12 @@ export function WalletScreen() {
   const soon = () => toast(t('home.soon'), 'sparkle');
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
 
+  // A payment was in flight when the app was killed: pick it up before anything else.
+  useEffect(() => {
+    const pending = pendingPayment.read();
+    if (pending) navigation.navigate('Pay', { resume: pending });
+  }, [navigation]);
+
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <ScrollView
@@ -104,7 +111,11 @@ export function WalletScreen() {
           />
           <QuickAction icon="plus" label={t('home.actions.topUp')} onPress={soon} />
           <QuickAction icon="send" label={t('home.actions.send')} onPress={soon} />
-          <QuickAction icon="receipt" label={t('home.actions.receipts')} onPress={soon} />
+          <QuickAction
+            icon="receipt"
+            label={t('home.actions.receipts')}
+            onPress={() => navigation.navigate('History')}
+          />
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(420).delay(180)} className="gap-1">
@@ -112,6 +123,7 @@ export function WalletScreen() {
             {t('home.recent')}
           </Text>
           <TransactionList
+            onPress={(tx) => tx.intentId && navigation.navigate('Receipt', { intentId: tx.intentId })}
             transactions={wallet.data?.transactions}
             loading={wallet.isLoading}
             emptyTitle={t('home.emptyTitle')}

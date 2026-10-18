@@ -18,7 +18,9 @@ import {
   useOnboardingScreenOptions,
   WelcomeScreen,
 } from '@zahln/mobile-ui';
+import { MyQrScreen } from '../../features/till/MyQrScreen';
 import { PaidScreen } from '../../features/till/PaidScreen';
+import { PaymentScreen } from '../../features/till/PaymentScreen';
 import { QrScreen } from '../../features/till/QrScreen';
 import { MerchantWalletScreen, TillScreen } from '../../features/till/TillScreens';
 import type { HomeStackParamList, TabParamList } from './types';
@@ -83,6 +85,12 @@ function HomeStack() {
         component={PaidScreen}
         options={{ animation: 'fade', gestureEnabled: false }}
       />
+      <Home.Screen
+        name="MyQr"
+        component={MyQrScreen}
+        options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+      />
+      <Home.Screen name="Payment" component={PaymentScreen} options={{ animation: 'slide_from_bottom' }} />
     </Home.Navigator>
   );
 }

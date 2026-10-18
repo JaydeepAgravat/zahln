@@ -2,9 +2,11 @@ import {
   type CatalogueItem,
   CatalogueItemSchema,
   type CreateIntentRequest,
+  MerchantPublicSchema,
   PaymentAttemptSchema,
   PaymentIntentSchema,
   PayResultSchema,
+  RefundSchema,
 } from '@zahln/shared';
 import { z } from 'zod';
 import { api } from '../api';
@@ -32,6 +34,27 @@ export const payments = {
       idempotencyKey,
       timeoutMs: 12_000,
     }),
+
+  handle: (handle: string) => api(`/handles/${encodeURIComponent(handle)}`, MerchantPublicSchema),
+
+  /** Static QR: the payer typed the amount; this turns it into a normal one-time intent. */
+  createHandleIntent: (handle: string, amountCents: number, idempotencyKey: string) =>
+    api(`/handles/${encodeURIComponent(handle)}/intents`, PaymentIntentSchema, {
+      method: 'POST',
+      body: { amountCents },
+      idempotencyKey,
+    }),
+
+  refund: (intentId: string, amountCents: number, reason: string, idempotencyKey: string) =>
+    api(`/intents/${intentId}/refunds`, z.object({ refund: RefundSchema, intent: PaymentIntentSchema }), {
+      method: 'POST',
+      body: { amountCents, reason },
+      idempotencyKey,
+    }),
+
+  setChaos: (mode: string) =>
+    api('/dev/chaos', z.object({ mode: z.string() }), { method: 'POST', body: { mode } }),
+  chaos: () => api('/dev/chaos', z.object({ mode: z.string() })),
 
   attemptByKey: (idempotencyKey: string) => api(`/attempts/by-key/${idempotencyKey}`, PaymentAttemptSchema),
 

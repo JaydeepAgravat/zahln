@@ -17,7 +17,9 @@ import {
   useOnboardingScreenOptions,
   WelcomeScreen,
 } from '@zahln/mobile-ui';
+import { HistoryScreen } from '../../features/history/HistoryScreen';
 import { WalletScreen } from '../../features/home/WalletScreen';
+import { HandleScreen } from '../../features/pay/HandleScreen';
 import { PayScreen } from '../../features/pay/PayScreen';
 import { ReceiptScreen } from '../../features/pay/ReceiptScreen';
 import { ScanScreen } from '../../features/pay/ScanScreen';
@@ -73,7 +75,9 @@ function HomeStack() {
         options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
       />
       <Home.Screen name="Pay" component={PayScreen} options={{ animation: 'fade', gestureEnabled: false }} />
+      <Home.Screen name="Handle" component={HandleScreen} options={{ animation: 'fade' }} />
       <Home.Screen name="Receipt" component={ReceiptScreen} options={{ animation: 'slide_from_bottom' }} />
+      <Home.Screen name="History" component={HistoryScreen} />
     </Home.Navigator>
   );
 }

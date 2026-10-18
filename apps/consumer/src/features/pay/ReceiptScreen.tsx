@@ -1,6 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useT } from '@zahln/mobile-core';
-import { AmountDisplay, Icon, PressableScale, ReceiptEdge, SafeArea, Text } from '@zahln/mobile-ui';
+import { useQuery } from '@tanstack/react-query';
+import { payments, useT } from '@zahln/mobile-core';
+import { AmountDisplay, Icon, PressableScale, ReceiptEdge, SafeArea, Skeleton, Text } from '@zahln/mobile-ui';
 import { includedVat, type VatRate } from '@zahln/shared';
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -36,9 +37,20 @@ const Rule = () => <View className="border-t border-dashed border-border-strong"
  */
 export function ReceiptScreen({ navigation, route }: Props) {
   const { t, money, locale } = useT();
-  const { intent, attempt } = route.params;
-  const paidAt = new Date(intent.paidAt ?? attempt.settledAt ?? attempt.createdAt);
-  const total = attempt.amountCents + attempt.tipCents;
+  const { intentId, attempt } = route.params;
+  // Always fetched fresh: the receipt must show refunds made after the payment.
+  const query = useQuery({ queryKey: ['intent', intentId], queryFn: () => payments.intent(intentId) });
+  const intent = query.data;
+  if (!intent) {
+    return (
+      <SafeArea className="flex-1 gap-4 bg-bg px-5 pt-16" edges={['top']}>
+        <Skeleton height={520} radius={24} />
+      </SafeArea>
+    );
+  }
+  const paidAt = new Date(intent.paidAt ?? attempt?.settledAt ?? intent.createdAt);
+  const tip = attempt?.tipCents ?? 0;
+  const total = intent.amountCents + tip;
 
   // Gross per VAT rate, then the VAT included in it (prices in Germany are gross).
   const byRate = new Map<VatRate, number>();
@@ -132,10 +144,30 @@ export function ReceiptScreen({ navigation, route }: Props) {
                 />
               ))}
 
+            {tip > 0 ? <Row label={t('pay.tip')} value={money(tip)} mono /> : null}
+            {intent.refundedCents > 0 ? (
+              <View className="flex-row items-center justify-between rounded-md bg-success-subtle px-3 py-2">
+                <Text variant="footnote" tone="success" style={{ fontFamily: 'Inter-SemiBold' }}>
+                  {intent.status === 'refunded' ? t('receipt.refunded') : t('receipt.partiallyRefunded')}
+                </Text>
+                <Text
+                  variant="footnote"
+                  tone="success"
+                  style={{ fontFamily: 'Inter-Bold', fontVariant: ['tabular-nums'] }}
+                >
+                  +{money(intent.refundedCents)}
+                </Text>
+              </View>
+            ) : null}
+
             <Rule />
             <View className="gap-2">
               <Row label={t('receipt.method')} value={t('receipt.methodValue')} />
-              <Row label={t('receipt.paymentId')} value={attempt.id.slice(0, 8).toUpperCase()} mono />
+              <Row
+                label={t('receipt.paymentId')}
+                value={(attempt?.id ?? intent.id).slice(0, 8).toUpperCase()}
+                mono
+              />
             </View>
 
             <View className="flex-row items-start gap-2 pt-1">

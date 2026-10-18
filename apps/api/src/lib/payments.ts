@@ -9,6 +9,7 @@ import {
   isPayable,
   isRefundable,
   type LineItem,
+  type MerchantPublic,
   minimumPlanFor,
   type PaymentAttempt,
   type PaymentIntent,
@@ -50,6 +51,7 @@ export function toIntentDto(row: IntentRow, merchant: MerchantRow): PaymentInten
     currency: 'EUR',
     items: row.items,
     status: row.status,
+    acceptsTips: hasFeature(merchant.plan, 'tips'),
     refundedCents: row.refundedCents,
     receiptNumber: row.receiptNumber,
     expiresAt: iso(row.expiresAt),
@@ -260,6 +262,44 @@ export async function latestOpenIntent(db: DbOrTx): Promise<PaymentIntent | null
     .orderBy(sql`${paymentIntents.createdAt} desc`)
     .limit(1);
   return row ? toIntentDto(row.intent, row.merchant) : null;
+}
+
+// ---------- Static @handle QR (Free plan) ----------
+
+export async function merchantByHandle(db: DbOrTx, handle: string): Promise<MerchantPublic> {
+  const [m] = await db.select().from(merchants).where(eq(merchants.handle, handle));
+  if (!m) throw notFound('merchant');
+  return { id: m.id, name: m.name, handle: m.handle, city: m.city };
+}
+
+/**
+ * The payer scanned a merchant's static QR and typed an amount. That becomes a normal one-time intent,
+ * so the same pay → idempotency → reconciliation path applies. No plan gate: static QR is on every plan.
+ */
+export async function createHandleIntent(
+  tx: Tx,
+  input: { handle: string; payerUserId: string; amountCents: number },
+): Promise<PaymentIntent> {
+  const [merchant] = await tx.select().from(merchants).where(eq(merchants.handle, input.handle));
+  if (!merchant) throw notFound('merchant');
+  const [row] = await tx
+    .insert(paymentIntents)
+    .values({
+      merchantId: merchant.id,
+      createdByUserId: input.payerUserId,
+      amountCents: input.amountCents,
+      items: [],
+      description: `@${merchant.handle}`,
+      expiresAt: sql`now() + make_interval(secs => ${INTENT_TTL_SECONDS})`,
+    })
+    .returning();
+  if (!row) throw new Error('failed to create intent');
+  await recordEvent(tx, row.id, 'intent.created', {
+    amountCents: input.amountCents,
+    by: input.payerUserId,
+    via: 'handle',
+  });
+  return toIntentDto(row, merchant);
 }
 
 // ---------- Pay ----------
@@ -499,8 +539,10 @@ export async function getWallet(db: DbOrTx, account: string, limit = 20): Promis
     created_at: Date | string;
     counterparty: string | null;
     counterparty_name: string;
+    intent_id: string | null;
   }>(sql`
     SELECT lt.id, lt.kind, p.amount_cents, lt.reference, lt.created_at, cp.account_id AS counterparty,
+           COALESCE(pa.intent_id, rf.intent_id) AS intent_id,
            -- Data minimisation: people are shown as "Lena H.", merchants by their business name.
            COALESCE(m.name, split_part(u.name, ' ', 1) || COALESCE(' ' || left(NULLIF(split_part(u.name, ' ', 2), ''), 1) || '.', ''), '') AS counterparty_name
       FROM postings p
@@ -510,6 +552,8 @@ export async function getWallet(db: DbOrTx, account: string, limit = 20): Promis
       LEFT JOIN accounts a ON a.id = cp.account_id
       LEFT JOIN merchants m ON a.kind = 'merchant_wallet' AND m.id = a.owner_id
       LEFT JOIN users u ON a.kind = 'consumer_wallet' AND u.id = a.owner_id
+      LEFT JOIN payment_attempts pa ON lt.kind = 'payment' AND pa.id::text = lt.reference
+      LEFT JOIN refunds rf ON lt.kind = 'refund' AND rf.id::text = lt.reference
      WHERE p.account_id = ${account}
      ORDER BY p.id DESC
      LIMIT ${limit}
@@ -525,6 +569,7 @@ export async function getWallet(db: DbOrTx, account: string, limit = 20): Promis
       counterparty: r.counterparty ?? '',
       counterpartyName: r.counterparty_name,
       reference: r.reference,
+      intentId: r.intent_id,
       createdAt: new Date(r.created_at).toISOString(),
     })),
   };

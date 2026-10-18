@@ -5,7 +5,12 @@ import { storage } from '../storage';
  * If the app is killed mid-payment, the next launch asks the server about this key instead of guessing.
  * Not a secret: a key is useless without the session token, which lives in the keychain.
  */
-export type PendingPayment = { intentId: string; idempotencyKey: string; startedAt: number };
+export type PendingPayment = {
+  intentId: string;
+  idempotencyKey: string;
+  startedAt: number;
+  tipCents?: number;
+};
 
 const KEY = 'payments.pending';
 

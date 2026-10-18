@@ -117,3 +117,57 @@ describe('dev helpers', () => {
     expect((await t.call('GET', '/merchants/cafe-mila/catalogue', { user: LENA })).status).toBe(403);
   });
 });
+
+describe('static @handle QR (Free plan)', () => {
+  it('a Free merchant gets paid through its static QR; the payer types the amount', async () => {
+    const merchant = await t.call('GET', '/handles/doener-ali', { user: LENA });
+    expect(merchant.body).toEqual({
+      id: 'doener-ali',
+      name: 'Döner Ali',
+      handle: 'doener-ali',
+      city: 'Augsburg',
+    });
+
+    const key = '6b0f0d8e-7a3e-4e4a-9d38-1a2b3c4d5e6f';
+    const intent = await t.call('POST', '/handles/doener-ali/intents', {
+      user: LENA,
+      key,
+      body: { amountCents: 850 },
+    });
+    expect(intent.status).toBe(201);
+    expect(intent.body).toMatchObject({ amountCents: 850, status: 'awaiting_scan', items: [] });
+    // Same key, same intent: a double tap on "Weiter" doesn't create two.
+    const again = await t.call('POST', '/handles/doener-ali/intents', {
+      user: LENA,
+      key,
+      body: { amountCents: 850 },
+    });
+    expect(again.body.id).toBe(intent.body.id);
+
+    expect((await t.api.pay(intent.body.id)).status).toBe(201);
+    expect(await t.api.merchantBalance('doener-ali', 'usr_ali')).toBe(850);
+  });
+
+  it('unknown handles and silly amounts are refused', async () => {
+    expect((await t.call('GET', '/handles/nobody-here', { user: LENA })).status).toBe(404);
+    const res = await t.call('POST', '/handles/doener-ali/intents', {
+      user: LENA,
+      key: '7c1f0d8e-7a3e-4e4a-9d38-1a2b3c4d5e6f',
+      body: { amountCents: 0 },
+    });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('wallet history', () => {
+  it('payments and refunds point at their intent, so history can open the receipt or refund it', async () => {
+    const intent = (await t.api.createIntent(CART)).body;
+    await t.api.pay(intent.id);
+    await t.api.refund(intent.id, 250);
+    const lena = (await t.call('GET', '/wallets/me', { user: LENA })).body.transactions;
+    expect(lena.slice(0, 2).map((tx: { kind: string; intentId: string }) => [tx.kind, tx.intentId])).toEqual([
+      ['refund', intent.id],
+      ['payment', intent.id],
+    ]);
+  });
+});

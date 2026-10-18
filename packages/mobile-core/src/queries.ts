@@ -26,8 +26,12 @@ export function useMe() {
   return query;
 }
 
-export function useWallet() {
-  return useQuery({ queryKey: ['wallet', 'me'], queryFn: () => api('/wallets/me', WalletSchema) });
+/** The wallet with its most recent transactions; history asks for more. */
+export function useWallet(limit = 20) {
+  return useQuery({
+    queryKey: ['wallet', 'me', limit],
+    queryFn: () => api(`/wallets/me?limit=${limit}`, WalletSchema),
+  });
 }
 
 export function useMerchantWallet() {

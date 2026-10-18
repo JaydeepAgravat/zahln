@@ -1,4 +1,11 @@
-# Day 5: When things go wrong (Act 2)
+# Day 5: When things go wrong (Act 2) ✅ Done
+
+> **Status: complete (2026-10-18).** Act 2 verified on the iOS simulator against the real API:
+> - **`drop_after_settle`:** the server moved the money and dropped the response. Zahln showed **"Wird geprüft. Dein Geld ist sicher…"**, asked the server with the same key and resolved to **Bezahlt 6,93 €** in 1.56 s. The ledger shows exactly **one** attempt and one charge.
+> - **`reject`:** **"Nicht belastet. Kein Geld abgebucht."**, and the balance didn't move (28,47 € before and after).
+> - **Revoked session:** after a data reset the app signed itself out cleanly instead of showing empty screens.
+>
+> **162 tests green:** 99 shared, 51 API, 12 mobile-core.
 
 ## Goal
 "Kill the network after the money moved and the app never lies and never double-charges. It shows Wird geprüft
@@ -102,6 +109,26 @@ consideration: the verified merchant name and a photo come from the server.
 - [ ] History (FlashList): search by merchant, filter by status, sticky day headers, badges for anything other than paid
 
 ---
+
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| Separate `useReconcile` hook + `PaymentOutcome` component in mobile-ui | Reconciliation lives in `usePayment` (mobile-core), and the outcome views live in the consumer's `PayScreen`, one view per reducer status | One hook owns the key's whole life (create → save → send → check → resend → clear); splitting it would split the invariant |
+| NetInfo trigger | Foreground trigger instead: coming back to the app checks immediately (`AppState`), then the backoff resumes | No new native module today. On a phone, "back online" mostly means "back in the app"; NetInfo is a small follow-up |
+| Cap at 60 s | After 60 s the copy changes to "Dein Geld ist sicher: entweder angekommen oder nichts abgebucht…", a "Später nachsehen" button appears, and checks slow to every 15 s. The saved key resumes on the next launch | Never a spinner forever, and never a guess |
+| Resume after an app kill | New `RESUME` event in the shared reducer (idle → **checking** only, never submitting); the wallet resumes a saved payment on unlock | Proven by reducer tests and a hook test; not yet exercised by killing the app on a device |
+| Dev menu for chaos | In Settings, debug builds only, both apps | The console takes it over on Day 6 |
+| Static @handle QR: "merchant profile → amount → confirm" | `pay.zahln.de/@handle` → amount keypad → `POST /handles/:handle/intents` (idempotent) → the normal confirm/pay path | One payment path for both QR kinds, so Act 2 protections apply to static QR too |
+| Tips: 0 / 5 / 10 % / custom | 0 / 5 / 10 %, only when the intent says `acceptsTips` (merchant plan) and only for carts | Custom tip is a small follow-up; plan gating proper is Day 6 |
+| Refunds: transaction detail → refund → manager re-auth | ZYSYGY wallet rows → payment detail → refund sheet (amount, reason, **PIN**) → one idempotent request; owners/managers only, enforced by the server | Typechecked and covered by API tests (partial refunds add up, no over-refund, racing managers); **not yet clicked through on a device** (the Android emulator was shut down during testing) |
+| History: search, filters, sticky day headers | Done (FlashList, `?limit=100`); rows open the receipt | The receipt now loads fresh and shows refunds |
+| — | **401 → clean sign-out** | Found on device: a reset wiped device sessions and the app sat "signed in" with every request failing |
+| — | `/dev/reset` keeps device sessions | Rehearsals shouldn't mean re-onboarding two phones |
+| — | Phone input capped at 12 digits | Found on device: the field accepted 17 digits |
+| — | Till restores an open QR after an auto-lock (or the green screen if it was paid meanwhile) | The Day 4 edge case |
+| — | ZYSYGY "Mein QR" screen, and a Free-plan till state that points to it | Free merchants can't create one-time QR codes; now the till says so up front |
+
+Not verified on a device today (code typechecks, logic is unit/API tested): refund sheet, Mein QR, the till's open-QR restore, resume-after-kill. The history header padding fix was made after the last screenshot.
 
 ## Files you'll create
 ```

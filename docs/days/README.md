@@ -19,7 +19,7 @@ One file per day. Each one has the same sections:
 | [Day 2](DAY-2.md) ✅ | React Native app, Ember & ink design system, i18n, onboarding, PIN, biometrics | Onboard on two simulators |
 | [Day 3](DAY-3.md) ✅ | Split into **Zahln** + **ZYSYGY** apps on `mobile-ui` + `mobile-core` | Both apps on one home screen |
 | [Day 4](DAY-4.md) ✅ | Merchant till, dynamic QR, scan → pay, SSE, receipts, wallets | **Act 1** |
-| [Day 5](DAY-5.md) | Every payment state, `checking` reconciliation, chaos, static QR, tips, refunds | **Act 2** |
+| [Day 5](DAY-5.md) ✅ | Every payment state, `checking` reconciliation, chaos, static QR, tips, refunds | **Act 2** |
 | [Day 6](DAY-6.md) | Remote config, plan gating, kill switches, forced update, internal console | **Act 3** |
 | [Day 7](DAY-7.md) | Zahln Web I: web auth, `web-ui`, merchant dashboard | Payments appear live on the dashboard |
 | [Day 8](DAY-8.md) | Zahln Web II: pay-link checkout, consumer web wallet, Playwright | Pay a link in a browser |

@@ -8,6 +8,7 @@ import {
   usePayment,
   usePrefs,
   useT,
+  useWallet,
 } from '@zahln/mobile-core';
 import {
   AmountDisplay,
@@ -77,13 +78,67 @@ function OrderReceipt({ intent }: { intent: PaymentIntent }) {
   );
 }
 
+const TIP_PERCENT = [0, 5, 10] as const;
+
+/** Tips only where the merchant's plan supports them, and only for a cart (not a typed static-QR amount). */
+function TipChips({
+  intent,
+  tipCents,
+  onChange,
+}: {
+  intent: PaymentIntent;
+  tipCents: number;
+  onChange: (c: number) => void;
+}) {
+  const { t, money } = useT();
+  return (
+    <View className="gap-2">
+      <Text variant="footnote" tone="tertiary" className="px-1">
+        {t('pay.tip')}
+      </Text>
+      <View className="flex-row gap-2" accessibilityRole="radiogroup">
+        {TIP_PERCENT.map((pct) => {
+          const cents = Math.round((intent.amountCents * pct) / 100);
+          const active = cents === tipCents;
+          return (
+            <PressableScale
+              key={pct}
+              onPress={() => {
+                haptic.select();
+                onChange(cents);
+              }}
+              scaleTo={0.95}
+              accessibilityRole="radio"
+              accessibilityState={{ selected: active }}
+              className={`min-h-[52px] flex-1 items-center justify-center rounded-md border-2 ${active ? 'border-brand bg-brand-subtle' : 'border-border bg-surface'}`}
+            >
+              <Text variant="callout" style={{ fontFamily: 'Inter-SemiBold' }}>
+                {pct === 0 ? t('pay.noTip') : `${pct} %`}
+              </Text>
+              {pct > 0 ? (
+                <Text variant="caption" tone="secondary" style={{ fontVariant: ['tabular-nums'] }}>
+                  {money(cents)}
+                </Text>
+              ) : null}
+            </PressableScale>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 function ConfirmView({
   state,
+  tipCents,
+  onTip,
   onPay,
   onClose,
   onExpire,
 }: {
   state: Extract<AttemptState, { status: 'confirming' | 'authorising' | 'submitting' }>;
+  tipCents: number;
+  onTip: (cents: number) => void;
   onPay: () => void;
   onClose: () => void;
   onExpire: () => void;
@@ -100,7 +155,8 @@ function ConfirmView({
     if (countdown.expired && state.status === 'confirming') onExpire();
   }, [countdown.expired, state.status, onExpire]);
 
-  const amount = money(intent.amountCents);
+  const amount = money(intent.amountCents + tipCents);
+  const tips = intent.acceptsTips && intent.items.length > 0;
   return (
     <SafeArea className="flex-1 bg-bg px-5" edges={['top', 'bottom']}>
       <View className="flex-row items-center justify-between py-2">
@@ -134,6 +190,11 @@ function ConfirmView({
         <Animated.View entering={FadeInDown.duration(320).delay(80)}>
           <OrderReceipt intent={intent} />
         </Animated.View>
+        {tips ? (
+          <Animated.View entering={FadeInDown.duration(320).delay(140)}>
+            <TipChips intent={intent} tipCents={tipCents} onChange={busy ? () => undefined : onTip} />
+          </Animated.View>
+        ) : null}
       </View>
 
       <View className="gap-3 pb-2">
@@ -164,11 +225,14 @@ function ConfirmView({
 function PinSheet({
   visible,
   intent,
+  amountCents,
   onSuccess,
   onCancel,
 }: {
   visible: boolean;
   intent: PaymentIntent | null;
+  /** Including the tip: the PIN confirms exactly what will be charged. */
+  amountCents: number;
   onSuccess: () => void;
   onCancel: () => void;
 }) {
@@ -206,7 +270,7 @@ function PinSheet({
           <PinLayout
             title={t('pay.pinTitle')}
             subtitle={t('pay.authPrompt', {
-              amount: money(intent.amountCents),
+              amount: money(amountCents),
               merchant: intent.merchant.name,
             })}
             error={error}
@@ -226,14 +290,22 @@ type Outcome = { icon: IconName; tone: 'danger' | 'warning' | 'textSecondary'; t
 
 function OutcomeView({
   outcome,
+  detail,
   primary,
   onClose,
 }: {
   outcome: Outcome;
+  /** A second fact, e.g. the current balance when it wasn't enough. */
+  detail?: string;
   primary?: { title: string; onPress: () => void };
   onClose: () => void;
 }) {
   const { t } = useT();
+  useEffect(() => {
+    // Warning when nothing went wrong with the money (expired, too little balance); error otherwise.
+    if (outcome.tone === 'danger') haptic.error();
+    else haptic.warning();
+  }, [outcome.tone]);
   return (
     <SafeArea className="flex-1 bg-bg px-5" edges={['top', 'bottom']}>
       <View className="flex-row py-2">
@@ -252,6 +324,13 @@ function OutcomeView({
         <Text tone="secondary" className="text-center">
           {outcome.body}
         </Text>
+        {detail ? (
+          <View className="rounded-full bg-surface px-4 py-2">
+            <Text variant="callout" style={{ fontFamily: 'Inter-SemiBold', fontVariant: ['tabular-nums'] }}>
+              {detail}
+            </Text>
+          </View>
+        ) : null}
       </Animated.View>
       <View className="gap-3 pb-2">
         {primary ? <Button title={primary.title} onPress={primary.onPress} /> : null}
@@ -261,7 +340,15 @@ function OutcomeView({
   );
 }
 
-function CheckingView({ checks }: { checks: number }) {
+function CheckingView({
+  checks,
+  stillChecking,
+  onLater,
+}: {
+  checks: number;
+  stillChecking: boolean;
+  onLater: () => void;
+}) {
   const { t } = useT();
   const { colors } = useTheme();
   return (
@@ -274,9 +361,19 @@ function CheckingView({ checks }: { checks: number }) {
           {t('payment.status.checking')}
         </Text>
         <Text tone="secondary" className="text-center">
-          {checks >= 3 ? t('pay.checkingLong') : t('payment.explain.checking')}
+          {stillChecking
+            ? t('pay.stillChecking')
+            : checks >= 3
+              ? t('pay.checkingLong')
+              : t('payment.explain.checking')}
         </Text>
       </View>
+      {stillChecking ? (
+        <Animated.View entering={FadeIn} className="pb-2">
+          {/* Closing is safe: the key stays saved and the check resumes on the next launch. */}
+          <Button title={t('pay.checkLater')} variant="secondary" onPress={onLater} />
+        </Animated.View>
+      ) : null}
     </SafeArea>
   );
 }
@@ -292,10 +389,13 @@ export function PayScreen({ navigation, route }: Props) {
   const biometricsEnabled = usePrefs((s) => s.biometricsEnabled);
   const biometry = useBiometry();
   const [pinVisible, setPinVisible] = useState(false);
+  const wallet = useWallet();
 
+  const params = route.params;
   useEffect(() => {
-    void pay.load(route.params.ref);
-  }, [route.params.ref, pay.load]);
+    if ('resume' in params) void pay.resume(params.resume);
+    else void pay.load(params.ref);
+  }, [params, pay.load, pay.resume]);
 
   useEffect(() => {
     if (state.status === 'paid') void queryClient.invalidateQueries({ queryKey: ['wallet'] });
@@ -310,7 +410,7 @@ export function PayScreen({ navigation, route }: Props) {
     if (biometricsEnabled && biometry?.available) {
       const result = await unlockWithBiometrics({
         title: t('pay.authPrompt', {
-          amount: money(state.intent.amountCents),
+          amount: money(state.intent.amountCents + pay.tipCents),
           merchant: state.intent.merchant.name,
         }),
         cancel: t('lock.usePin'),
@@ -325,6 +425,7 @@ export function PayScreen({ navigation, route }: Props) {
     <PinSheet
       visible={pinVisible && state.status === 'authorising'}
       intent={intentForPin}
+      amountCents={(intentForPin?.amountCents ?? 0) + pay.tipCents}
       onSuccess={() => {
         setPinVisible(false);
         pay.authorised();
@@ -355,6 +456,8 @@ export function PayScreen({ navigation, route }: Props) {
         <>
           <ConfirmView
             state={state}
+            tipCents={pay.tipCents}
+            onTip={pay.setTipCents}
             onPay={() => void startPayment()}
             onClose={close}
             onExpire={pay.expire}
@@ -363,7 +466,7 @@ export function PayScreen({ navigation, route }: Props) {
         </>
       );
     case 'checking':
-      return <CheckingView checks={state.checks} />;
+      return <CheckingView checks={state.checks} stillChecking={pay.stillChecking} onLater={close} />;
     case 'paid': {
       const total = state.attempt.amountCents + state.attempt.tipCents;
       return (
@@ -379,10 +482,7 @@ export function PayScreen({ navigation, route }: Props) {
               variant="ink"
               icon="receipt"
               onPress={() =>
-                navigation.replace('Receipt', {
-                  intent: pay.paidIntent ?? state.intent,
-                  attempt: state.attempt,
-                })
+                navigation.replace('Receipt', { intentId: state.intent.id, attempt: state.attempt })
               }
             />
             <PressableScale
@@ -405,8 +505,11 @@ export function PayScreen({ navigation, route }: Props) {
             icon: 'coins',
             tone: 'warning',
             title: t('payment.status.insufficientBalance'),
-            body: t('payment.explain.insufficientBalance', { amount: money(state.intent.amountCents) }),
+            body: t('payment.explain.insufficientBalance', {
+              amount: money(state.intent.amountCents + pay.tipCents),
+            }),
           }}
+          detail={wallet.data ? t('pay.balanceIs', { amount: money(wallet.data.balanceCents) }) : undefined}
           primary={{ title: t('payment.actions.topUp'), onPress: close }}
           onClose={close}
         />

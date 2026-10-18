@@ -65,7 +65,15 @@ export function PhoneScreen({ navigation }: Props) {
         <TextInput
           value={value}
           onChangeText={(v) => {
-            setValue(v.replace(/[^\d ]/g, ''));
+            // A German mobile number has at most 11 digits after +49 (12 with a leading 0): stop there.
+            const cleaned = v.replace(/[^\d ]/g, '');
+            let digits = 0;
+            setValue(
+              [...cleaned]
+                .filter((c) => c === ' ' || ++digits <= 12)
+                .join('')
+                .trimEnd(),
+            );
             if (error) setError(undefined);
           }}
           onFocus={() => setFocused(true)}

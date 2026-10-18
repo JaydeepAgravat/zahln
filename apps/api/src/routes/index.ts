@@ -1,5 +1,6 @@
 import {
   CreateIntentRequestSchema,
+  HandleIntentRequestSchema,
   IdempotencyKeySchema,
   type PaymentIntent,
   PayRequestSchema,
@@ -11,6 +12,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import type { Db } from '../db/client';
+import { devices, users } from '../db/schema';
 import { seed } from '../db/seed';
 import { ApiError } from '../lib/errors';
 import { publishIntent } from '../lib/eventBus';
@@ -18,6 +20,7 @@ import { type IdempotentResult, readIdempotencyKey, withIdempotency } from '../l
 import { verifyIntentRef } from '../lib/intentRef';
 import { accountId } from '../lib/ledger';
 import {
+  createHandleIntent,
   createIntent,
   getAttemptByKey,
   getCatalogue,
@@ -25,6 +28,7 @@ import {
   getWallet,
   latestOpenIntent,
   markScanned,
+  merchantByHandle,
   payIntent,
   refundIntent,
   requireMerchantStaff,
@@ -86,6 +90,34 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
             merchantId: req.params.merchantId,
             userId: actor.userId,
             request: req.body,
+          }),
+        }),
+      );
+      return send(reply, result);
+    },
+  );
+
+  // ---------- Consumer: static @handle QR (Free plan) ----------
+  const HandleParams = z.object({ handle: z.string().regex(/^[a-z0-9-]{3,32}$/) });
+  app.get('/handles/:handle', { schema: { params: HandleParams } }, async (req) => {
+    requireActor(req);
+    return merchantByHandle(db, req.params.handle);
+  });
+  app.post(
+    '/handles/:handle/intents',
+    { schema: { params: HandleParams, body: HandleIntentRequestSchema } },
+    async (req, reply) => {
+      const actor = requireActor(req);
+      const key = readIdempotencyKey(req);
+      const result = await withIdempotency(
+        db,
+        { scope: actor.userId, key, route: `POST /handles/${req.params.handle}/intents`, body: req.body },
+        async (tx) => ({
+          statusCode: 201,
+          body: await createHandleIntent(tx, {
+            handle: req.params.handle,
+            payerUserId: actor.userId,
+            amountCents: req.body.amountCents,
           }),
         }),
       );
@@ -197,9 +229,10 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
   );
 
   // ---------- Wallets ----------
-  app.get('/wallets/me', async (req) => {
+  const WalletQuery = z.object({ limit: z.coerce.number().int().min(1).max(200).default(20) });
+  app.get('/wallets/me', { schema: { querystring: WalletQuery } }, async (req) => {
     const actor = requireActor(req);
-    return getWallet(db, accountId.consumer(actor.userId));
+    return getWallet(db, accountId.consumer(actor.userId), req.query.limit);
   });
 
   app.post('/wallets/me/topups', { schema: { body: TopUpRequestSchema } }, async (req, reply) => {
@@ -249,8 +282,14 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
       const intent = await latestOpenIntent(db);
       return { ref: intent?.ref ?? null };
     });
+    // Rehearsal reset: money, intents and history go back to the seed, but the demo phones stay signed in
+    // (their device sessions are kept for users that still exist), so nobody re-onboards two devices.
     app.post('/dev/reset', async () => {
+      const keep = await db.select().from(devices);
       await seed(db, { history: true });
+      const userIds = new Set((await db.select({ id: users.id }).from(users)).map((u) => u.id));
+      const survivors = keep.filter((d) => userIds.has(d.userId));
+      if (survivors.length) await db.insert(devices).values(survivors).onConflictDoNothing();
       chaos.set('ok');
       return { ok: true };
     });

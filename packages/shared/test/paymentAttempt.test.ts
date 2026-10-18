@@ -15,6 +15,7 @@ const intent: PaymentIntent = {
   currency: 'EUR',
   items: [],
   status: 'awaiting_scan',
+  acceptsTips: true,
   refundedCents: 0,
   receiptNumber: null,
   expiresAt: '2026-10-18T12:05:00.000Z',
@@ -116,6 +117,22 @@ describe('attemptReducer', () => {
     expect(attemptReducer(idle, { type: 'CONFIRM' })).toBe(idle);
     const paid = run([...toSubmitting, { type: 'SERVER_RESULT', attempt: attempt('paid') }]);
     expect(attemptReducer(paid, { type: 'OUTCOME_UNKNOWN', at: 2 })).toBe(paid);
+  });
+
+  it('after an app kill, a saved key resumes in checking, never in submitting', () => {
+    const resumed = run([{ type: 'RESUME', intent, idempotencyKey: KEY, at: 500 }]);
+    expect(resumed).toMatchObject({ status: 'checking', idempotencyKey: KEY, since: 500, checks: 0 });
+    expect(run([{ type: 'SERVER_RESULT', attempt: attempt('paid') }], resumed).status).toBe('paid');
+    // If the server never saw it, the resend uses the SAME saved key.
+    expect(run([{ type: 'KEY_NOT_FOUND' }], resumed)).toMatchObject({
+      status: 'submitting',
+      idempotencyKey: KEY,
+    });
+  });
+
+  it('RESUME is ignored mid-payment: it can only start from idle', () => {
+    const confirming = run(toSubmitting.slice(0, 2));
+    expect(run([{ type: 'RESUME', intent, idempotencyKey: KEY, at: 500 }], confirming)).toBe(confirming);
   });
 
   it('RESET always returns to idle', () => {

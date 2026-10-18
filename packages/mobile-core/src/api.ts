@@ -24,6 +24,16 @@ export function setAuth(next: Auth) {
   auth = next;
 }
 
+let onUnauthorized: (() => void) | null = null;
+
+/**
+ * Called when the server rejects our session (revoked device, expired token). The session module
+ * signs out, so the app never sits in a half-working "signed in but every request fails" state.
+ */
+export function setUnauthorizedHandler(handler: (() => void) | null) {
+  onUnauthorized = handler;
+}
+
 /** Headers for clients that can't go through `api()`, like the SSE stream. */
 export function authHeaders(): Record<string, string> {
   return auth
@@ -73,6 +83,7 @@ export async function api<S extends z.ZodType>(
   }
 
   const json: unknown = res.status === 204 ? null : await res.json().catch(() => null);
+  if (res.status === 401 && auth) onUnauthorized?.();
   if (!res.ok) {
     const parsed = ApiErrorSchema.safeParse(json);
     throw parsed.success

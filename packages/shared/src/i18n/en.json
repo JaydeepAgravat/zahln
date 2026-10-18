@@ -12,7 +12,7 @@
     },
     "explain": {
       "paid": "You paid {{amount}} to {{merchant}}.",
-      "checking": "We're checking with your bank. This usually takes 3 seconds.",
+      "checking": "Your money is safe. We're asking the bank whether the payment arrived.",
       "notCharged": "No money was taken.",
       "expired": "This code has expired. No money was taken.",
       "insufficientBalance": "Your balance doesn't cover {{amount}}. No money was taken.",
@@ -219,7 +219,15 @@
     "to": "to {{merchant}}",
     "checkingLong": "The bank is taking a little longer. You don't need to do anything; we keep checking.",
     "topUpSoon": "Top-ups are coming soon.",
-    "payWithBiometrics": "Pay with {{method}} · {{amount}}"
+    "payWithBiometrics": "Pay with {{method}} · {{amount}}",
+    "tip": "Tip",
+    "noTip": "None",
+    "checkLater": "Check later",
+    "stillChecking": "Your money is safe: either the payment arrived, or nothing was charged. We keep checking; you'll see the result in your history.",
+    "handleTitle": "Enter amount",
+    "handleHint": "Static QR of {{merchant}}. You enter the amount.",
+    "balanceIs": "Your balance: {{amount}}",
+    "resuming": "Checking your last payment."
   },
   "receipt": {
     "title": "Receipt",
@@ -229,6 +237,44 @@
     "vatIncluded": "incl. VAT {{rate}} %",
     "method": "Payment method",
     "methodValue": "Zahln · SEPA Instant",
-    "gobd": "Electronic receipt. Stored tamper-proof under GoBD."
+    "gobd": "Electronic receipt. Stored tamper-proof under GoBD.",
+    "refunded": "Refunded",
+    "partiallyRefunded": "Partially refunded"
+  },
+  "history": {
+    "title": "History",
+    "search": "Search merchants",
+    "all": "All",
+    "payments": "Payments",
+    "refunds": "Refunds",
+    "topups": "Top-ups",
+    "empty": "Nothing found."
+  },
+  "refund": {
+    "title": "Refund",
+    "action": "Refund",
+    "refundable": "Still refundable: {{amount}}",
+    "reason": "Reason",
+    "reasons": {
+      "wrongOrder": "Wrong order",
+      "unhappy": "Customer unhappy",
+      "double": "Charged twice"
+    },
+    "confirm": "Refund {{amount}}",
+    "done": "{{amount}} refunded",
+    "failed": "Refund failed. No money was moved.",
+    "managerOnly": "Only owners and managers can refund.",
+    "pinTitle": "PIN for the refund",
+    "refundedSoFar": "Already refunded",
+    "payment": "Payment"
+  },
+  "myQr": {
+    "title": "My QR",
+    "body": "Customers scan this code and enter the amount themselves. It never expires, also on the Free plan.",
+    "freePlan": "On the Free plan you get paid with your static QR. One-time QR codes need Pro."
+  },
+  "dev": {
+    "chaos": "Development · Chaos mode",
+    "chaosHint": "Simulates network and bank failures for Act 2. Debug builds only."
   }
 }

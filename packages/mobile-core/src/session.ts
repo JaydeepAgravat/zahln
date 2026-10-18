@@ -1,7 +1,7 @@
 import type { Membership, User } from '@zahln/shared';
 import { AppState, type AppStateStatus } from 'react-native';
 import { create } from 'zustand';
-import { setAuth } from './api';
+import { setAuth, setUnauthorizedHandler } from './api';
 import { usePrefs } from './prefs';
 import { clearAll, readSession, type StoredSession } from './secure';
 
@@ -87,3 +87,8 @@ export function startAutoLock(now: () => number = Date.now) {
   const sub = AppState.addEventListener('change', onChange);
   return () => sub.remove();
 }
+
+// A 401 from the API means this device's session is gone (revoked or reset): start over cleanly.
+setUnauthorizedHandler(() => {
+  if (useSession.getState().status === 'ready') void useSession.getState().signOut();
+});

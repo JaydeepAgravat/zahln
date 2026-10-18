@@ -34,6 +34,7 @@ const intent: PaymentIntent = {
   currency: 'EUR',
   items: [],
   status: 'awaiting_scan',
+  acceptsTips: true,
   refundedCents: 0,
   receiptNumber: null,
   expiresAt: later,
@@ -123,6 +124,33 @@ describe('usePayment', () => {
     await act(() => hook.result.current.authorised());
     await waitFor(() => expect(hook.result.current.state.status).toBe('expired'));
     expect(api.attemptByKey).not.toHaveBeenCalled();
+  });
+
+  it('after an app kill, the saved key is checked, never re-sent with a new one', async () => {
+    api.intent.mockResolvedValue(intent);
+    api.attemptByKey.mockImplementation(async (key) => attempt(key));
+    const hook = await renderHook(() => usePayment());
+    const saved = {
+      intentId: intent.id,
+      idempotencyKey: 'c0ffee00-1111-4111-8111-111111111111',
+      startedAt: Date.now(),
+    };
+    await act(() => hook.result.current.resume(saved));
+    await waitFor(() => expect(hook.result.current.state.status).toBe('paid'), { timeout: 3000 });
+    expect(api.attemptByKey).toHaveBeenCalledWith(saved.idempotencyKey);
+    expect(api.pay).not.toHaveBeenCalled();
+  });
+
+  it('a tip chosen before paying is sent with the payment and kept for a resend', async () => {
+    const hook = await readyToPay();
+    await act(() => hook.result.current.setTipCents(63));
+    api.pay
+      .mockRejectedValueOnce(new ApiRequestError(0, 'network', 'network error'))
+      .mockImplementationOnce(async (_id, key) => ({ attempt: attempt(key), intent }));
+    api.attemptByKey.mockRejectedValue(new ApiRequestError(404, 'not_found', 'payment attempt not found'));
+    await act(() => hook.result.current.authorised());
+    await waitFor(() => expect(hook.result.current.state.status).toBe('paid'), { timeout: 3000 });
+    expect(api.pay.mock.calls.map((c) => c[2])).toEqual([63, 63]);
   });
 
   it('a forged or unknown QR fails before anything can be authorised', async () => {

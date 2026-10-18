@@ -12,7 +12,7 @@
     },
     "explain": {
       "paid": "{{amount}} an {{merchant}} bezahlt.",
-      "checking": "Wir fragen bei deiner Bank nach. Dauert meist 3 Sekunden.",
+      "checking": "Dein Geld ist sicher. Wir fragen bei der Bank nach, ob die Zahlung angekommen ist.",
       "notCharged": "Kein Geld abgebucht.",
       "expired": "Dieser Code ist abgelaufen. Es wurde kein Geld abgebucht.",
       "insufficientBalance": "Dein Guthaben reicht für {{amount}} nicht. Es wurde kein Geld abgebucht.",
@@ -219,7 +219,15 @@
     "to": "an {{merchant}}",
     "checkingLong": "Die Bank braucht etwas länger. Du musst nichts tun, wir prüfen weiter.",
     "topUpSoon": "Aufladen kommt bald.",
-    "payWithBiometrics": "Mit {{method}} bezahlen · {{amount}}"
+    "payWithBiometrics": "Mit {{method}} bezahlen · {{amount}}",
+    "tip": "Trinkgeld",
+    "noTip": "Kein",
+    "checkLater": "Später nachsehen",
+    "stillChecking": "Dein Geld ist sicher: Entweder ist die Zahlung angekommen, oder es wurde nichts abgebucht. Wir prüfen weiter, das Ergebnis siehst du im Verlauf.",
+    "handleTitle": "Betrag eingeben",
+    "handleHint": "Statischer QR von {{merchant}}. Du gibst den Betrag ein.",
+    "balanceIs": "Dein Guthaben: {{amount}}",
+    "resuming": "Wir prüfen deine letzte Zahlung."
   },
   "receipt": {
     "title": "Beleg",
@@ -229,6 +237,44 @@
     "vatIncluded": "enth. MwSt. {{rate}} %",
     "method": "Zahlungsart",
     "methodValue": "Zahln · SEPA Instant",
-    "gobd": "Elektronischer Beleg. Unveränderbar gespeichert nach GoBD."
+    "gobd": "Elektronischer Beleg. Unveränderbar gespeichert nach GoBD.",
+    "refunded": "Erstattet",
+    "partiallyRefunded": "Teilweise erstattet"
+  },
+  "history": {
+    "title": "Verlauf",
+    "search": "Händler suchen",
+    "all": "Alle",
+    "payments": "Zahlungen",
+    "refunds": "Erstattungen",
+    "topups": "Aufladungen",
+    "empty": "Nichts gefunden."
+  },
+  "refund": {
+    "title": "Erstattung",
+    "action": "Erstatten",
+    "refundable": "Noch erstattbar: {{amount}}",
+    "reason": "Grund",
+    "reasons": {
+      "wrongOrder": "Falsche Bestellung",
+      "unhappy": "Kunde unzufrieden",
+      "double": "Doppelt kassiert"
+    },
+    "confirm": "{{amount}} erstatten",
+    "done": "{{amount}} erstattet",
+    "failed": "Erstattung fehlgeschlagen. Es wurde kein Geld bewegt.",
+    "managerOnly": "Erstatten dürfen nur Inhaber:innen und Manager:innen.",
+    "pinTitle": "PIN für die Erstattung",
+    "refundedSoFar": "Bereits erstattet",
+    "payment": "Zahlung"
+  },
+  "myQr": {
+    "title": "Mein QR",
+    "body": "Kunden scannen diesen Code und geben den Betrag selbst ein. Er läuft nie ab, auch im Free-Plan.",
+    "freePlan": "Im Free-Plan kassierst du mit deinem statischen QR. Einmal-QR-Codes gibt es ab Pro."
+  },
+  "dev": {
+    "chaos": "Entwicklung · Chaos-Modus",
+    "chaosHint": "Simuliert Netz- und Bankfehler für Akt 2. Nur in Debug-Builds."
   }
 }

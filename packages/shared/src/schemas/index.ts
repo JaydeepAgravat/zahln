@@ -53,6 +53,9 @@ export type IntentStatus = z.infer<typeof IntentStatusSchema>;
 
 export const INTENT_TTL_SECONDS = 5 * 60;
 
+/** Static @handle QR (Free plan): the payer types the amount, so the request comes from the payer. */
+export const HandleIntentRequestSchema = z.object({ amountCents: PositiveCentsSchema.max(50_000) });
+
 /** Either a cart from the catalogue or a keypad amount, never both. */
 export const CreateIntentRequestSchema = z.union([
   z.object({
@@ -74,6 +77,8 @@ export const PaymentIntentSchema = z.object({
   currency: z.literal('EUR'),
   items: z.array(LineItemSchema),
   status: IntentStatusSchema,
+  /** Whether the merchant's plan includes tips, so the payer's app only offers them where they work. */
+  acceptsTips: z.boolean(),
   refundedCents: CentsSchema,
   receiptNumber: z.number().int().nullable(),
   expiresAt: z.iso.datetime({ offset: true }),
@@ -140,6 +145,8 @@ export const WalletTransactionSchema = z.object({
   /** Display name: merchant or person on the other side, or empty for system accounts (top-up, payout). */
   counterpartyName: z.string(),
   reference: z.string(),
+  /** The payment this line belongs to (payments and refunds), so history can open its receipt or a refund. */
+  intentId: z.uuid().nullable(),
   createdAt: z.iso.datetime({ offset: true }),
 });
 export type WalletTransaction = z.infer<typeof WalletTransactionSchema>;

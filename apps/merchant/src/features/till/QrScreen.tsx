@@ -19,6 +19,7 @@ import QRCode from 'react-native-qrcode-svg';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import type { HomeStackParamList } from '../../app/navigation/types';
 import { useCart } from './cart';
+import { openIntent } from './openIntent';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'Qr'>;
 
@@ -39,11 +40,22 @@ export function QrScreen({ navigation, route }: Props) {
   const scanned = intent.status === 'scanned';
 
   useEffect(() => {
+    openIntent.set(intent.id);
+  }, [intent.id]);
+
+  useEffect(() => {
     if (intent.status === 'paid') {
       clearCart();
+      openIntent.clear();
       navigation.replace('Paid', { intent });
     }
   }, [intent, navigation, clearCart]);
+
+  /** Leaving on purpose (cancel or a new code) forgets the QR; being locked out does not. */
+  const leave = () => {
+    openIntent.clear();
+    navigation.goBack();
+  };
 
   useEffect(() => {
     if (scanned) haptic.tap();
@@ -57,7 +69,7 @@ export function QrScreen({ navigation, route }: Props) {
       <SafeArea className="flex-1 px-6" edges={['top', 'bottom']}>
         <View className="flex-row items-center justify-between py-2">
           <PressableScale
-            onPress={() => navigation.goBack()}
+            onPress={leave}
             hapticOnPress
             accessibilityRole="button"
             accessibilityLabel={t('till.cancel')}
@@ -139,7 +151,7 @@ export function QrScreen({ navigation, route }: Props) {
             <Text variant="footnote" tone="on-ink-muted" className="text-center">
               {t('till.expiredBody')}
             </Text>
-            <Button title={t('payment.actions.newCode')} icon="qr" onPress={() => navigation.goBack()} />
+            <Button title={t('payment.actions.newCode')} icon="qr" onPress={leave} />
           </Animated.View>
         ) : (
           <View

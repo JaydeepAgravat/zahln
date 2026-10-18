@@ -42,6 +42,11 @@ export type AttemptEvent =
   | { type: 'CHECK_PENDING' }
   /** The server confirms it never saw this key, so the same key is safe to send again. */
   | { type: 'KEY_NOT_FOUND' }
+  /**
+   * The app was killed while a payment was in flight. On the next launch we only know the saved key,
+   * so the one honest state is `checking`: ask the server, never re-send blindly.
+   */
+  | { type: 'RESUME'; intent: PaymentIntent; idempotencyKey: string; at: number }
   | { type: 'RESET' };
 
 export const initialAttemptState: AttemptState = { status: 'idle' };
@@ -102,7 +107,16 @@ export function attemptReducer(
 
   switch (state.status) {
     case 'idle':
-      return event.type === 'SCANNED' ? { status: 'scanned', intentRef: event.intentRef } : state;
+      if (event.type === 'SCANNED') return { status: 'scanned', intentRef: event.intentRef };
+      if (event.type === 'RESUME')
+        return {
+          status: 'checking',
+          intent: event.intent,
+          idempotencyKey: event.idempotencyKey,
+          since: event.at,
+          checks: 0,
+        };
+      return state;
 
     case 'scanned':
       switch (event.type) {

@@ -29,3 +29,20 @@ describe('pay URLs', () => {
     }
   });
 });
+
+describe('static handle URLs', () => {
+  it('round-trips a merchant handle and rejects lookalikes', async () => {
+    const { handleUrlFor, parseHandleUrl } = await import('../src/payUrl');
+    expect(handleUrlFor('doener-ali')).toBe('https://pay.zahln.de/@doener-ali');
+    expect(parseHandleUrl(handleUrlFor('doener-ali'))).toBe('doener-ali');
+    expect(parseHandleUrl('zahln://@cafe-mila')).toBe('cafe-mila');
+    for (const bad of [
+      '@doener-ali',
+      'https://evil.example/@doener-ali',
+      'https://pay.zahln.de/@Ali',
+      'https://pay.zahln.de/@-x-',
+    ]) {
+      expect(parseHandleUrl(bad)).toBeNull();
+    }
+  });
+});

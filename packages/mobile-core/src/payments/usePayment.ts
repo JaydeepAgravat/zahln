@@ -6,13 +6,17 @@ import {
   type PaymentIntent,
 } from '@zahln/shared';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { ApiRequestError } from '../api';
 import { uuid } from '../random';
 import { payments } from './client';
-import { pendingPayment } from './pending';
+import { type PendingPayment, pendingPayment } from './pending';
 
-/** How long we keep asking "did it go through?" before showing the honest "still checking" copy. */
-const CHECK_BACKOFF_MS = [800, 1500, 2500, 4000, 6000];
+/** How often we ask "did it go through?": quickly at first, then calmer. */
+const CHECK_BACKOFF_MS = [800, 1500, 2500, 4000, 6000, 8000];
+/** After this long we stop implying it's about to finish, and check every 15 s in the background. */
+export const LONG_CHECK_MS = 60_000;
+const LONG_CHECK_INTERVAL_MS = 15_000;
 
 const reducer = (state: AttemptState, event: AttemptEvent) => attemptReducer(state, event, Date.now());
 
@@ -42,9 +46,22 @@ export function usePayment() {
   /** The intent as it is *after* payment (receipt number, paid time), for the receipt. */
   const [paidIntent, setPaidIntent] = useState<PaymentIntent | null>(null);
   const authorisedAt = useRef<number | null>(null);
+  const [tipCents, setTipCents] = useState(0);
+  // Read by the send effect: the tip is fixed once the person authorised, so changing it must not resend.
+  const tipRef = useRef(0);
+  tipRef.current = tipCents;
+  /** Bumped when the app returns to the foreground: check right away instead of waiting out the backoff. */
+  const [nudge, setNudge] = useState(0);
+  const lastNudge = useRef(0);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => s === 'active' && setNudge((n) => n + 1));
+    return () => sub.remove();
+  }, []);
 
   const load = useCallback(async (ref: string) => {
     dispatch({ type: 'RESET' });
+    setTipCents(0);
     dispatch({ type: 'SCANNED', intentRef: ref });
     try {
       const intent = await payments.intentByRef(ref);
@@ -71,6 +88,24 @@ export function usePayment() {
     dispatch({ type: 'AUTH_SUCCEEDED', idempotencyKey: uuid() });
   }, []);
 
+  /**
+   * The app was killed mid-payment and this is the next launch. All we trust is the saved key:
+   * go straight to `checking` and let the server tell us what happened.
+   */
+  const resume = useCallback(async (pending: PendingPayment) => {
+    setTipCents(pending.tipCents ?? 0);
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const intent = await payments.intent(pending.intentId);
+        dispatch({ type: 'RESUME', intent, idempotencyKey: pending.idempotencyKey, at: pending.startedAt });
+        return;
+      } catch {
+        // Offline right after launch: keep the key, try again shortly.
+        await new Promise<void>((r) => setTimeout(r, Math.min(8000, 1000 * 2 ** attempt)));
+      }
+    }
+  }, []);
+
   /** The QR ran out while the person was still looking at it. */
   const expire = useCallback(() => dispatch({ type: 'INTENT_EXPIRED' }), []);
 
@@ -84,9 +119,10 @@ export function usePayment() {
       intentId: submitting.intent.id,
       idempotencyKey: submitting.idempotencyKey,
       startedAt: Date.now(),
+      tipCents: tipRef.current,
     });
     payments
-      .pay(submitting.intent.id, submitting.idempotencyKey)
+      .pay(submitting.intent.id, submitting.idempotencyKey, tipRef.current)
       .then((result) => alive && dispatch({ type: 'SERVER_RESULT', attempt: result.attempt }))
       .catch((error: unknown) => {
         if (!alive) return;
@@ -102,7 +138,15 @@ export function usePayment() {
   useEffect(() => {
     if (!checking) return;
     let alive = true;
-    const delay = CHECK_BACKOFF_MS[Math.min(checking.checks, CHECK_BACKOFF_MS.length - 1)];
+    const long = Date.now() - checking.since > LONG_CHECK_MS;
+    // Back in the foreground (often: back online): ask right away instead of waiting out the backoff.
+    const nudged = nudge !== lastNudge.current;
+    lastNudge.current = nudge;
+    const delay = nudged
+      ? 0
+      : long
+        ? LONG_CHECK_INTERVAL_MS
+        : (CHECK_BACKOFF_MS[Math.min(checking.checks, CHECK_BACKOFF_MS.length - 1)] ?? 8000);
     const timer = setTimeout(() => {
       payments
         .attemptByKey(checking.idempotencyKey)
@@ -118,7 +162,7 @@ export function usePayment() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [checking]);
+  }, [checking, nudge]);
 
   // A final answer: forget the pending key and record the time to confirmation.
   useEffect(() => {
@@ -137,5 +181,20 @@ export function usePayment() {
     }
   }, [state]);
 
-  return { state, load, confirm, authorised, cancelAuthorisation, expire, confirmedInMs, paidIntent };
+  const stillChecking = state.status === 'checking' && Date.now() - state.since > LONG_CHECK_MS;
+
+  return {
+    state,
+    load,
+    resume,
+    confirm,
+    authorised,
+    cancelAuthorisation,
+    expire,
+    tipCents,
+    setTipCents,
+    stillChecking,
+    confirmedInMs,
+    paidIntent,
+  };
 }

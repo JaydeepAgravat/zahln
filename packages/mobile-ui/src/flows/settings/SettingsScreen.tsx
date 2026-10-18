@@ -2,6 +2,7 @@ import {
   api,
   enableBiometricUnlock,
   haptic,
+  payments,
   prettyPhone,
   queryClient,
   randomSecret,
@@ -11,11 +12,11 @@ import {
   useSession,
   useT,
 } from '@zahln/mobile-core';
-import type { ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { ScrollView, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
-import { Avatar, ListRow, Logo, PressableScale, Text, useTheme } from '../../ds';
+import { Avatar, ListRow, Logo, PressableScale, Text, toast, useTheme } from '../../ds';
 
 function Segmented<T extends string>(props: {
   value: T;
@@ -71,6 +72,62 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 const Divider = () => <View className="ml-14 h-px bg-border" />;
+
+const CHAOS_MODES = ['ok', 'drop_after_settle', 'reject', 'slow', 'insufficient'] as const;
+
+/**
+ * Debug builds only: flip the API's chaos mode from the phone to rehearse Act 2
+ * (the internal console takes this over on Day 6).
+ */
+function DevChaos() {
+  const { t } = useT();
+  const [mode, setMode] = useState<string | null>(null);
+  useEffect(() => {
+    payments
+      .chaos()
+      .then((r) => setMode(r.mode))
+      .catch(() => setMode(null));
+  }, []);
+  const choose = async (next: string) => {
+    haptic.select();
+    try {
+      setMode((await payments.setChaos(next)).mode);
+    } catch {
+      toast(t('common.networkError'), 'warning');
+    }
+  };
+  return (
+    <Section title={t('dev.chaos')}>
+      <View className="gap-3 py-4">
+        <Text variant="footnote" tone="secondary">
+          {t('dev.chaosHint')}
+        </Text>
+        <View className="flex-row flex-wrap gap-2">
+          {CHAOS_MODES.map((m) => {
+            const active = m === mode;
+            return (
+              <PressableScale
+                key={m}
+                onPress={() => void choose(m)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: active }}
+                className={`min-h-[36px] justify-center rounded-full px-3 ${active ? 'bg-ink' : 'bg-surface-muted'}`}
+              >
+                <Text
+                  variant="footnote"
+                  tone={active ? 'on-ink' : 'secondary'}
+                  style={{ fontFamily: 'Inter-SemiBold' }}
+                >
+                  {m}
+                </Text>
+              </PressableScale>
+            );
+          })}
+        </View>
+      </View>
+    </Section>
+  );
+}
 
 export function SettingsScreen() {
   const { t } = useT();
@@ -172,6 +229,8 @@ export function SettingsScreen() {
             onPress={() => void signOut()}
           />
         </Section>
+
+        {__DEV__ ? <DevChaos /> : null}
 
         <View className="items-center gap-2 pt-2">
           <Logo size={36} />

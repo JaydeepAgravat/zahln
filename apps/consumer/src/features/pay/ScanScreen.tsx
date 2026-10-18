@@ -2,7 +2,7 @@ import { useIsFocused } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { haptic, payments, useT } from '@zahln/mobile-core';
 import { Button, Icon, PressableScale, SafeArea, Text, toast, useTheme } from '@zahln/mobile-ui';
-import { parsePayUrl } from '@zahln/shared';
+import { handleUrlFor, parseHandleUrl, parsePayUrl } from '@zahln/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Linking, StatusBar, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -79,12 +79,24 @@ export function ScanScreen({ navigation }: Props) {
     [navigation],
   );
 
+  const openHandle = useCallback(
+    (handle: string) => {
+      if (handled.current) return;
+      handled.current = true;
+      haptic.success();
+      navigation.replace('Handle', { handle });
+    },
+    [navigation],
+  );
+
   const onCodes = useCallback(
     (values: string[]) => {
       if (handled.current) return;
       for (const value of values) {
         const parsed = parsePayUrl(value);
         if (parsed) return open(parsed.ref);
+        const handle = parseHandleUrl(value);
+        if (handle) return openHandle(handle);
       }
       // A QR that isn't ours: say so once every few seconds, not 30 times a second.
       if (Date.now() - lastInvalid.current > 3000) {
@@ -93,7 +105,7 @@ export function ScanScreen({ navigation }: Props) {
         toast(t('pay.invalidCode'), 'warning');
       }
     },
-    [open, t],
+    [open, openHandle, t],
   );
 
   const scanner = useQrOutput(onCodes);
@@ -196,6 +208,16 @@ export function ScanScreen({ navigation }: Props) {
               loading={loadingDemo}
               onPress={() => void loadDemo()}
             />
+            {/* The static QR of a Free-plan merchant, as if scanned from a sticker on the counter. */}
+            <PressableScale
+              onPress={() => onCodes([handleUrlFor('doener-ali')])}
+              accessibilityRole="button"
+              className="min-h-[44px] items-center justify-center"
+            >
+              <Text variant="footnote" tone="on-ink-muted">
+                Demo: @doener-ali
+              </Text>
+            </PressableScale>
           </View>
         ) : null}
       </SafeArea>
