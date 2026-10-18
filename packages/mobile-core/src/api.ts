@@ -24,6 +24,13 @@ export function setAuth(next: Auth) {
   auth = next;
 }
 
+/** Headers for clients that can't go through `api()`, like the SSE stream. */
+export function authHeaders(): Record<string, string> {
+  return auth
+    ? { authorization: `Bearer ${auth.token}`, 'x-device-id': auth.deviceId, 'x-app': appKind() }
+    : { 'x-app': appKind() };
+}
+
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'DELETE';
   body?: unknown;

@@ -18,8 +18,10 @@ import {
   WelcomeScreen,
 } from '@zahln/mobile-ui';
 import { WalletScreen } from '../../features/home/WalletScreen';
-
-export type TabParamList = { Wallet: undefined; Settings: undefined };
+import { PayScreen } from '../../features/pay/PayScreen';
+import { ReceiptScreen } from '../../features/pay/ReceiptScreen';
+import { ScanScreen } from '../../features/pay/ScanScreen';
+import type { HomeStackParamList, TabParamList } from './types';
 
 declare global {
   namespace ReactNavigation {
@@ -29,6 +31,7 @@ declare global {
 
 const Onboarding = createNativeStackNavigator<OnboardingStackParamList>();
 const Tabs = createBottomTabNavigator<TabParamList>();
+const Home = createNativeStackNavigator<HomeStackParamList>();
 
 function OnboardingStack() {
   const { t } = useT();
@@ -49,13 +52,29 @@ function OnboardingStack() {
   );
 }
 
-function Home() {
+function TabsScreen() {
   const { t } = useT();
   return (
     <Tabs.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
       <Tabs.Screen name="Wallet" component={WalletScreen} options={{ title: t('tabs.wallet') }} />
       <Tabs.Screen name="Settings" component={SettingsScreen} options={{ title: t('tabs.profile') }} />
     </Tabs.Navigator>
+  );
+}
+
+/** Paying sits on top of the tabs: the camera slides up, the result replaces it, closing returns to the wallet. */
+function HomeStack() {
+  return (
+    <Home.Navigator screenOptions={{ headerShown: false }}>
+      <Home.Screen name="Tabs" component={TabsScreen} />
+      <Home.Screen
+        name="Scan"
+        component={ScanScreen}
+        options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+      />
+      <Home.Screen name="Pay" component={PayScreen} options={{ animation: 'fade', gestureEnabled: false }} />
+      <Home.Screen name="Receipt" component={ReceiptScreen} options={{ animation: 'slide_from_bottom' }} />
+    </Home.Navigator>
   );
 }
 
@@ -69,7 +88,7 @@ export function RootNavigator() {
   if (status === 'booting') return null;
   return (
     <NavigationContainer theme={theme}>
-      {status === 'onboarding' ? <OnboardingStack /> : status === 'locked' ? <LockScreen /> : <Home />}
+      {status === 'onboarding' ? <OnboardingStack /> : status === 'locked' ? <LockScreen /> : <HomeStack />}
     </NavigationContainer>
   );
 }

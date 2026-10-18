@@ -8,6 +8,7 @@ const app = await buildApp({
   db,
   chaosEnabled: env.CHAOS_ENABLED,
   devAuth: env.DEV_AUTH,
+  intentSigningSecret: env.INTENT_SIGNING_SECRET,
   logger: {
     level: env.LOG_LEVEL,
     redact: ['req.headers.authorization', 'req.headers["x-user-id"]', 'req.headers["x-device-id"]'],

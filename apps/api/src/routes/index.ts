@@ -1,6 +1,7 @@
 import {
   CreateIntentRequestSchema,
   IdempotencyKeySchema,
+  type PaymentIntent,
   PayRequestSchema,
   RefundRequestSchema,
   type RemoteConfig,
@@ -12,13 +13,18 @@ import { z } from 'zod';
 import type { Db } from '../db/client';
 import { seed } from '../db/seed';
 import { ApiError } from '../lib/errors';
+import { publishIntent } from '../lib/eventBus';
 import { type IdempotentResult, readIdempotencyKey, withIdempotency } from '../lib/idempotency';
+import { verifyIntentRef } from '../lib/intentRef';
 import { accountId } from '../lib/ledger';
 import {
   createIntent,
   getAttemptByKey,
+  getCatalogue,
   getIntent,
   getWallet,
+  latestOpenIntent,
+  markScanned,
   payIntent,
   refundIntent,
   requireMerchantStaff,
@@ -27,11 +33,19 @@ import {
 import { requireActor } from '../plugins/auth';
 import { CHAOS_MODES, type Chaos } from '../rail/chaos';
 import type { PaymentRail } from '../rail/types';
+import { eventRoutes } from './events';
 
 export type RouteDeps = { db: Db; rail: PaymentRail; chaos: Chaos; chaosEnabled: boolean };
 
 const IntentParams = z.object({ intentId: z.uuid() });
 const MerchantParams = z.object({ merchantId: z.string().min(1) });
+const RefParams = z.object({ ref: z.string().min(10).max(80) });
+
+/** Live status goes out only after the transaction that changed it has committed. */
+function publishCommitted(result: IdempotentResult) {
+  const body = result.body as { intent?: PaymentIntent } | null;
+  if (result.statusCode < 300 && body?.intent) publishIntent(body.intent);
+}
 
 function send(reply: FastifyReply, result: IdempotentResult) {
   if (result.replayed) reply.header('idempotent-replayed', 'true');
@@ -43,6 +57,13 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
   const { db, rail, chaos } = deps;
 
   app.get('/health', async () => ({ ok: true, rail: rail.name }));
+  await eventRoutes(fastify, { db });
+
+  // ---------- Merchant: the till's catalogue ----------
+  app.get('/merchants/:merchantId/catalogue', { schema: { params: MerchantParams } }, async (req) => {
+    const actor = requireActor(req);
+    return getCatalogue(db, req.params.merchantId, actor.userId);
+  });
 
   // ---------- Merchant: create a one-time payment intent (the dynamic QR) ----------
   app.post(
@@ -72,7 +93,25 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
     },
   );
 
-  // ---------- Anyone signed in: look up an intent after scanning ----------
+  // ---------- Consumer: resolve a scanned QR (signed reference) ----------
+  app.get('/intents/by-ref/:ref', { schema: { params: RefParams } }, async (req) => {
+    requireActor(req);
+    const intentId = verifyIntentRef(req.params.ref);
+    // A forged or mistyped reference looks exactly like a missing one: nothing to learn from probing.
+    if (!intentId || !z.uuid().safeParse(intentId).success)
+      throw new ApiError(404, 'not_found', 'payment code not found');
+    return getIntent(db, intentId);
+  });
+
+  // ---------- Consumer: "I'm looking at this payment" (the till shows "Kunde prüft…") ----------
+  app.post('/intents/:intentId/scanned', { schema: { params: IntentParams } }, async (req) => {
+    requireActor(req);
+    const intent = await db.transaction((tx) => markScanned(tx, req.params.intentId));
+    publishIntent(intent);
+    return intent;
+  });
+
+  // ---------- Anyone signed in: look up an intent by ID ----------
   app.get('/intents/:intentId', { schema: { params: IntentParams } }, async (req) => {
     requireActor(req);
     return getIntent(db, req.params.intentId);
@@ -117,10 +156,12 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
         result.statusCode === 201
       ) {
         req.log.warn({ intentId: req.params.intentId }, 'chaos: dropping response after settlement');
+        publishCommitted(result);
         reply.hijack();
         reply.raw.destroy();
         return;
       }
+      publishCommitted(result);
       return send(reply, result);
     },
   );
@@ -150,6 +191,7 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
           body: await refundIntent(tx, { intentId: req.params.intentId, userId: actor.userId, ...req.body }),
         }),
       );
+      publishCommitted(result);
       return send(reply, result);
     },
   );
@@ -201,6 +243,11 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
       chaos.set(req.body.mode);
       req.log.warn({ mode: chaos.mode }, 'chaos mode changed');
       return { mode: chaos.mode };
+    });
+    // A simulator has no camera: this hands the newest open QR link to the consumer app's dev button.
+    app.get('/dev/latest-intent', async () => {
+      const intent = await latestOpenIntent(db);
+      return { ref: intent?.ref ?? null };
     });
     app.post('/dev/reset', async () => {
       await seed(db, { history: true });

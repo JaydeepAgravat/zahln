@@ -9,6 +9,7 @@ import {
 
 const intent: PaymentIntent = {
   id: '6f1e1a51-8b8a-4bd0-9a43-0c8d0b0f7a11',
+  ref: '6f1e1a51-8b8a-4bd0-9a43-0c8d0b0f7a11.AbCdEf0123_-xyZ9',
   merchant: { id: 'cafe-mila', name: 'Café Mila', handle: 'cafe-mila', city: 'Augsburg' },
   amountCents: 630,
   currency: 'EUR',

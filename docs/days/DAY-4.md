@@ -1,4 +1,14 @@
-# Day 4: The payment moment (Act 1)
+# Day 4: The payment moment (Act 1) ✅ Done
+
+> **Status: complete (2026-10-18).** Act 1 runs across two devices with no manual API calls: ZYSYGY on the Android
+> emulator rings up an order and shows a one-time QR; Zahln on the iOS simulator opens it, the till flips to
+> "Kunde prüft…" by itself (SSE), the payer confirms with the PIN, and both phones show **Bezahlt** within the same
+> second (**254 ms** time to confirmation on iOS, 953 ms on a loaded Android emulator).
+> **153 tests green:** 96 shared, 48 API (including a real SSE stream), 9 mobile-core (the payment hook's idempotency rules).
+>
+> ![Act 1](../screenshots/act1-payment-moment.png)
+>
+> *Screens 3, 5 and 6 were captured before three small fixes listed under "As built" (countdown, 24 h time, receipt number).*
 
 ## Goal
 "Café Mila's till builds an order from the catalogue, shows a one-time QR valid for 5 minutes, Lena scans it,
@@ -78,6 +88,27 @@ Raise brightness while the QR is visible, and restore it afterwards. A tiny nati
 - [ ] Receipt screen: receipt number (sequential per merchant), timestamp, items, VAT 7 % / 19 % breakdown, payment ID
 
 ---
+
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| Tabs Wallet / Bezahlen / Verlauf (consumer), Kasse / Wallet / Mehr (merchant) | Kept two/three tabs; **Bezahlen** is the primary wallet action that opens the scanner as a full-screen modal; the QR panel and Bezahlt sit on a stack above the till's tabs | Paying is a modal moment, not a place you browse to; history is already on the wallet |
+| `useCodeScanner` from VisionCamera | **iOS:** VisionCamera's object output (AVFoundation's native QR detector). **Android:** `react-native-vision-camera-barcode-scanner` (ML Kit). One hook, `useQrOutput`, with `.ios.ts` / `.android.ts` files | VisionCamera 5's code scanner is iOS-only. ML Kit ships no arm64 iOS-simulator binaries (with it linked, Xcode can't target a simulator on Apple Silicon) and adds ~20 MB, so iOS keeps the native detector and the ML Kit pod is unlinked on iOS via `react-native.config.js` |
+| Dev "Link kopieren" / "QR-Link einfügen" via the clipboard | A dev-only **"Demo: QR der Kasse laden"** button that asks `GET /dev/latest-intent` (only when chaos/dev routes are on) | No clipboard native module needed, and it works across two different simulators |
+| Face ID via a keychain read | Biometrics if enabled, otherwise a **PIN sheet** with the same cooldown rules as the lock screen | The emulator and fresh simulators have no enrolled biometrics; the PIN path is the honest fallback |
+| Brightness up on the QR panel | Not done | Moved to Day 11 with the other native modules |
+| Merchant "Jetzt auszahlen" (mock payout) | Not done | Moved to Day 5; the wallet tab now shows today's takings and the payout schedule |
+| `react-native-sse` | Used, wrapped in `useIntentStatus`: SSE first, polling every 2 s on error, refetch on foreground, final states are sticky | SSE is a hint, not the truth |
+
+Fixes found while testing on devices (all done):
+- **Safe area in native full-screen modals (iOS):** `SafeAreaView` reported zero insets there, so headers sat under the Dynamic Island. New `SafeArea` (mobile-ui) applies the root provider's insets explicitly.
+- **Countdown:** first version counted 5 minutes from when the *screen* opened, so a payer saw "4:57" for a code that had 1:30 left. It now counts down to the server's `expiresAt`.
+- **Receipt number:** the pay screen kept the pre-payment intent; the hook now fetches the paid intent (`paidIntent`) for the receipt.
+- **Till time** used the device locale ("6:41 PM"); it now follows the app language ("18:41").
+- **Radius scale:** `rounded-t-2xl` doesn't exist in our tokens (scale ends at `xl`), so it silently rendered square corners, the same failure mode as the spacing keys on Day 2. A lint check for unknown utility classes is on the Day 12 list.
+- **Env:** `INTENT_SIGNING_SECRET` must now be ≥ 32 characters (validated at startup); `.env.example` says how to generate one.
+
+Known edge case (Day 5): if the till auto-locks while a QR is open, unlocking returns to the till, not the open QR, and the cart isn't cleared even if the customer paid. Day 5 restores an open intent after unlock.
 
 ## Files you'll create
 ```

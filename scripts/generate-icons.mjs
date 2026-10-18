@@ -143,4 +143,4 @@ png(
 <g transform="translate(370 10)">${tileSvg(BRANDS.merchant.dark.glyph, INK_DARK)}</g></svg>`,
   1380,
 );
-console.log('icons, launch logos and splash assets written for Zahln and ZYSYGY');
+process.stdout.write('icons, launch logos and splash assets written for Zahln and ZYSYGY\n');

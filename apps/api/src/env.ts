@@ -12,6 +12,8 @@ const EnvSchema = z.object({
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
+  /** HMAC key for QR intent references. The default only exists so local dev works out of the box. */
+  INTENT_SIGNING_SECRET: z.string().min(32).default('dev-only-intent-signing-secret-change-me'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });
 

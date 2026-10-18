@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useMe, useT, useWallet } from '@zahln/mobile-core';
 import {
   Avatar,
@@ -15,6 +17,7 @@ import {
 import { RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import type { HomeStackParamList } from '../../app/navigation/types';
 
 function QuickAction({
   icon,
@@ -61,6 +64,7 @@ export function WalletScreen() {
   const wallet = useWallet();
   const name = me.data?.user.name ?? '';
   const soon = () => toast(t('home.soon'), 'sparkle');
+  const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
 
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
@@ -92,7 +96,12 @@ export function WalletScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.duration(420).delay(120)} className="flex-row gap-2">
-          <QuickAction primary icon="scan" label={t('home.actions.pay')} onPress={soon} />
+          <QuickAction
+            primary
+            icon="scan"
+            label={t('home.actions.pay')}
+            onPress={() => navigation.navigate('Scan')}
+          />
           <QuickAction icon="plus" label={t('home.actions.topUp')} onPress={soon} />
           <QuickAction icon="send" label={t('home.actions.send')} onPress={soon} />
           <QuickAction icon="receipt" label={t('home.actions.receipts')} onPress={soon} />

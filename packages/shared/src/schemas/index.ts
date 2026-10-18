@@ -29,6 +29,14 @@ export const LineItemSchema = z.object({
 });
 export type LineItem = z.infer<typeof LineItemSchema>;
 
+export const CatalogueItemSchema = z.object({
+  sku: z.string(),
+  name: z.string(),
+  priceCents: PositiveCentsSchema,
+  vatRate: VatRateSchema,
+});
+export type CatalogueItem = z.infer<typeof CatalogueItemSchema>;
+
 // ---------- Payment intents (merchant side) ----------
 
 export const INTENT_STATUSES = [
@@ -59,6 +67,8 @@ export type CreateIntentRequest = z.infer<typeof CreateIntentRequestSchema>;
 
 export const PaymentIntentSchema = z.object({
   id: z.uuid(),
+  /** Signed reference the QR encodes (see payUrl.ts). */
+  ref: z.string(),
   merchant: MerchantPublicSchema,
   amountCents: PositiveCentsSchema,
   currency: z.literal('EUR'),
@@ -96,6 +106,10 @@ export const PaymentAttemptSchema = z.object({
   settledAt: z.iso.datetime({ offset: true }).nullable(),
 });
 export type PaymentAttempt = z.infer<typeof PaymentAttemptSchema>;
+
+/** What `POST /intents/:id/pay` answers (also what an idempotent replay returns). */
+export const PayResultSchema = z.object({ attempt: PaymentAttemptSchema, intent: PaymentIntentSchema });
+export type PayResult = z.infer<typeof PayResultSchema>;
 
 // ---------- Refunds ----------
 

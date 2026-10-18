@@ -1,9 +1,13 @@
-export { API_URL, ApiRequestError, api, setAuth } from './api';
+export { API_URL, ApiRequestError, api, authHeaders, setAuth } from './api';
 export { type AppKind, appKind, configureApp } from './app';
 export { type BiometryInfo, prefetchBiometry, useBiometry } from './biometrics';
 export { prettyPhone } from './format';
 export { haptic } from './haptics';
 export { i18n, useT } from './i18n';
+export { payments } from './payments/client';
+export { type PendingPayment, pendingPayment } from './payments/pending';
+export { useIntentStatus } from './payments/useIntentStatus';
+export { usePayment } from './payments/usePayment';
 export { type Role, usePrefs } from './prefs';
 export { queryClient, useMe, useMerchantWallet, useWallet } from './queries';
 export { randomSecret, uuid } from './random';

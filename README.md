@@ -11,7 +11,7 @@ Five front ends on one realistic payment backend:
 | 4 | **Zahln Web**: merchant dashboard, consumer web wallet, pay-link checkout | Next.js 16 |
 | 5 | **The Zahln Edition**: Editions-style landing page | Next.js 16 + Lenis + Motion + OGL |
 
-> Days 1–3 are built: the API, both mobile apps and their shared packages. The web front ends come on Days 6–10.
+> Days 1–4 are built: the API, both mobile apps, and **Act 1**, a real payment from the ZYSYGY till to the Zahln wallet. The web front ends come on Days 6–10.
 
 > Work in progress. The code is built day by day following the guides in [`docs/days`](docs/days/README.md).
 
@@ -31,6 +31,8 @@ For faster Android dev builds: `./gradlew assembleDebug -PreactNativeArchitectur
 Demo logins: `0151 0000 0001` (Lena, student, in **Zahln**) · `0151 0000 0010` (Mila, Café Mila, in **ZYSYGY**).
 
 ![App icons: Zahln and ZYSYGY](docs/screenshots/app-icons.png)
+
+![Act 1: the payment moment](docs/screenshots/act1-payment-moment.png)
 
 ![Onboarding](docs/screenshots/showcase-onboarding.png)
 ![App](docs/screenshots/showcase-app.png)

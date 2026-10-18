@@ -1,4 +1,5 @@
 import {
+  type CatalogueItem,
   type CreateIntentRequest,
   canTransitionIntent,
   type Feature,
@@ -31,6 +32,7 @@ import {
 import type { Chaos } from '../rail/chaos';
 import type { PaymentRail } from '../rail/types';
 import { ApiError, forbidden, notFound } from './errors';
+import { signIntentRef } from './intentRef';
 import { accountId, balanceOf, lockAccount, postTransaction } from './ledger';
 
 type IntentRow = typeof paymentIntents.$inferSelect;
@@ -42,6 +44,7 @@ const iso = (d: Date) => d.toISOString();
 export function toIntentDto(row: IntentRow, merchant: MerchantRow): PaymentIntent {
   return {
     id: row.id,
+    ref: signIntentRef(row.id),
     merchant: { id: merchant.id, name: merchant.name, handle: merchant.handle, city: merchant.city },
     amountCents: row.amountCents,
     currency: 'EUR',
@@ -184,6 +187,79 @@ export async function getIntent(db: DbOrTx, intentId: string): Promise<PaymentIn
     .where(eq(paymentIntents.id, intentId));
   if (!row) throw notFound('payment intent');
   return toIntentDto(row.intent, row.merchant);
+}
+
+/**
+ * The consumer app reports a scan so the till can show "Kunde prüft…". Repeated scans are a no-op,
+ * and a scan never revives an intent that is already paid, expired or cancelled.
+ */
+export async function markScanned(tx: Tx, intentId: string): Promise<PaymentIntent> {
+  const { intent, pastExpiry } = await lockIntent(tx, intentId);
+  const merchant = await loadMerchant(tx, intent.merchantId);
+  if (pastExpiry && isPayable(intent.status)) return expire(tx, intent, merchant);
+  if (intent.status !== 'awaiting_scan') return toIntentDto(intent, merchant);
+  assertTransition(intent.status, 'scanned');
+  const [updated] = await tx
+    .update(paymentIntents)
+    .set({ status: 'scanned' })
+    .where(eq(paymentIntents.id, intent.id))
+    .returning();
+  if (!updated) throw new Error('intent vanished');
+  await recordEvent(tx, intent.id, 'intent.scanned');
+  return toIntentDto(updated, merchant);
+}
+
+/** Mark the intent expired if its 5 minutes are up (by the database clock). Returns the current intent. */
+export async function expireIfDue(tx: Tx, intentId: string): Promise<PaymentIntent> {
+  const { intent, pastExpiry } = await lockIntent(tx, intentId);
+  const merchant = await loadMerchant(tx, intent.merchantId);
+  return pastExpiry && isPayable(intent.status)
+    ? expire(tx, intent, merchant)
+    : toIntentDto(intent, merchant);
+}
+
+async function expire(tx: Tx, intent: IntentRow, merchant: MerchantRow): Promise<PaymentIntent> {
+  assertTransition(intent.status, 'expired');
+  const [updated] = await tx
+    .update(paymentIntents)
+    .set({ status: 'expired' })
+    .where(eq(paymentIntents.id, intent.id))
+    .returning();
+  if (!updated) throw new Error('intent vanished');
+  await recordEvent(tx, intent.id, 'intent.expired');
+  return toIntentDto(updated, merchant);
+}
+
+export async function getCatalogue(db: DbOrTx, merchantId: string, userId: string): Promise<CatalogueItem[]> {
+  await requireStaff(db, merchantId, userId);
+  const rows = await db
+    .select()
+    .from(catalogueItems)
+    .where(and(eq(catalogueItems.merchantId, merchantId), eq(catalogueItems.active, true)))
+    .orderBy(catalogueItems.id);
+  return rows.map((r) => ({
+    sku: r.sku,
+    name: r.name,
+    priceCents: r.priceCents,
+    vatRate: r.vatRate as VatRate,
+  }));
+}
+
+/** Dev only: the newest payable intent, so a simulator without a camera can "scan" the till's QR. */
+export async function latestOpenIntent(db: DbOrTx): Promise<PaymentIntent | null> {
+  const [row] = await db
+    .select({ intent: paymentIntents, merchant: merchants })
+    .from(paymentIntents)
+    .innerJoin(merchants, eq(merchants.id, paymentIntents.merchantId))
+    .where(
+      and(
+        inArray(paymentIntents.status, ['awaiting_scan', 'scanned']),
+        sql`${paymentIntents.expiresAt} > now()`,
+      ),
+    )
+    .orderBy(sql`${paymentIntents.createdAt} desc`)
+    .limit(1);
+  return row ? toIntentDto(row.intent, row.merchant) : null;
 }
 
 // ---------- Pay ----------

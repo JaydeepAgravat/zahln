@@ -7,6 +7,7 @@ import {
 } from 'fastify-type-provider-zod';
 import type { Db } from './db/client';
 import { ApiError } from './lib/errors';
+import { configureIntentSigning } from './lib/intentRef';
 import { authPlugin } from './plugins/auth';
 import { Chaos } from './rail/chaos';
 import { SimulatedSepaInstantRail } from './rail/simulatedSepaInstant';
@@ -37,11 +38,13 @@ export type AppOptions = {
   /** Allow the `x-user-id` shortcut and fixed OTP codes. Never in production. */
   devAuth?: boolean;
   logger?: FastifyServerOptions['logger'];
+  intentSigningSecret?: string;
 };
 
 export async function buildApp(options: AppOptions) {
   const chaos = options.chaos ?? new Chaos();
   const rail = options.rail ?? new SimulatedSepaInstantRail(chaos);
+  if (options.intentSigningSecret) configureIntentSigning(options.intentSigningSecret);
 
   const app = Fastify({
     logger: options.logger ?? { level: 'info', redact: REDACT },

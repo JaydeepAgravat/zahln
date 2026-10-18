@@ -18,9 +18,10 @@ import {
   useOnboardingScreenOptions,
   WelcomeScreen,
 } from '@zahln/mobile-ui';
+import { PaidScreen } from '../../features/till/PaidScreen';
+import { QrScreen } from '../../features/till/QrScreen';
 import { MerchantWalletScreen, TillScreen } from '../../features/till/TillScreens';
-
-export type TabParamList = { Till: undefined; MerchantWallet: undefined; Settings: undefined };
+import type { HomeStackParamList, TabParamList } from './types';
 
 declare global {
   namespace ReactNavigation {
@@ -30,6 +31,7 @@ declare global {
 
 const Onboarding = createNativeStackNavigator<OnboardingStackParamList>();
 const Tabs = createBottomTabNavigator<TabParamList>();
+const Home = createNativeStackNavigator<HomeStackParamList>();
 
 function OnboardingStack() {
   const { t } = useT();
@@ -51,7 +53,7 @@ function OnboardingStack() {
   );
 }
 
-function Home() {
+function TabsScreen() {
   const { t } = useT();
   return (
     <Tabs.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
@@ -66,6 +68,25 @@ function Home() {
   );
 }
 
+/** The QR panel slides up over the tabs like a card turned towards the customer; "Bezahlt" fades in. */
+function HomeStack() {
+  return (
+    <Home.Navigator screenOptions={{ headerShown: false }}>
+      <Home.Screen name="Tabs" component={TabsScreen} />
+      <Home.Screen
+        name="Qr"
+        component={QrScreen}
+        options={{ presentation: 'fullScreenModal', animation: 'slide_from_bottom', gestureEnabled: false }}
+      />
+      <Home.Screen
+        name="Paid"
+        component={PaidScreen}
+        options={{ animation: 'fade', gestureEnabled: false }}
+      />
+    </Home.Navigator>
+  );
+}
+
 /**
  * Separate roots per session state, so nothing behind the lock (or onboarding) is reachable,
  * even through a deep link: the money screens simply aren't mounted until the app is unlocked.
@@ -76,7 +97,7 @@ export function RootNavigator() {
   if (status === 'booting') return null;
   return (
     <NavigationContainer theme={theme}>
-      {status === 'onboarding' ? <OnboardingStack /> : status === 'locked' ? <LockScreen /> : <Home />}
+      {status === 'onboarding' ? <OnboardingStack /> : status === 'locked' ? <LockScreen /> : <HomeStack />}
     </NavigationContainer>
   );
 }
