@@ -49,7 +49,7 @@ export function setupTestApp() {
   });
 
   const call = async (
-    method: 'GET' | 'POST' | 'DELETE',
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     url: string,
     opts: { user?: string; key?: string; body?: unknown; headers?: Record<string, string> } = {},
   ) => {

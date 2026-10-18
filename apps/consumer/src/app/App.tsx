@@ -5,6 +5,7 @@ import {
   prefetchBiometry,
   queryClient,
   startAutoLock,
+  startRemoteConfig,
   useSession,
   uuid,
 } from '@zahln/mobile-core';
@@ -25,7 +26,12 @@ export function App() {
   useEffect(() => {
     void getOrCreateDeviceId(uuid).then(boot);
     void prefetchBiometry();
-    return startAutoLock();
+    const stopConfig = startRemoteConfig();
+    const stopLock = startAutoLock();
+    return () => {
+      stopConfig();
+      stopLock();
+    };
   }, [boot]);
 
   return (

@@ -18,7 +18,9 @@ import { CloudSlashIcon } from 'phosphor-react-native/src/icons/CloudSlash';
 import { CoffeeIcon } from 'phosphor-react-native/src/icons/Coffee';
 import { CoffeeBeanIcon } from 'phosphor-react-native/src/icons/CoffeeBean';
 import { CoinsIcon } from 'phosphor-react-native/src/icons/Coins';
+import { ContactlessPaymentIcon } from 'phosphor-react-native/src/icons/ContactlessPayment';
 import { DotsNineIcon } from 'phosphor-react-native/src/icons/DotsNine';
+import { DownloadSimpleIcon } from 'phosphor-react-native/src/icons/DownloadSimple';
 import { EyeIcon } from 'phosphor-react-native/src/icons/Eye';
 import { EyeSlashIcon } from 'phosphor-react-native/src/icons/EyeSlash';
 import { FingerprintIcon } from 'phosphor-react-native/src/icons/Fingerprint';
@@ -108,6 +110,8 @@ const ICONS = {
   keypad: DotsNineIcon,
   grid: SquaresFourIcon,
   cloudOff: CloudSlashIcon,
+  contactless: ContactlessPaymentIcon,
+  download: DownloadSimpleIcon,
 } as const;
 
 export type IconName = keyof typeof ICONS;

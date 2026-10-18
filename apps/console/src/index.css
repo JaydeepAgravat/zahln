@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "@zahln/web-ui/theme.css";
+@source "../../../packages/web-ui/src";
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* A row that just changed live flashes ember, then settles. */
+@keyframes flash {
+  from {
+    background-color: var(--color-brand-subtle);
+  }
+}

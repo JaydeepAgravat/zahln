@@ -159,19 +159,6 @@ export const WalletSchema = z.object({
 });
 export type Wallet = z.infer<typeof WalletSchema>;
 
-// ---------- Remote config (filled in on Day 5) ----------
-
-export const RemoteConfigSchema = z.object({
-  version: z.number().int(),
-  minSupportedVersion: z.string(),
-  latestVersion: z.string(),
-  killSwitches: z.record(z.string(), z.boolean()),
-  flags: z.record(z.string(), z.boolean()),
-  limits: z.object({ reauthAboveCents: CentsSchema, maxPaymentCents: CentsSchema }),
-  ttlSeconds: z.number().int().positive(),
-});
-export type RemoteConfig = z.infer<typeof RemoteConfigSchema>;
-
 // ---------- Errors ----------
 
 export const API_ERROR_CODES = [
@@ -192,6 +179,7 @@ export const API_ERROR_CODES = [
   'intent_not_payable',
   'refund_exceeds_payment',
   'insufficient_merchant_balance',
+  'feature_disabled',
   'internal',
 ] as const;
 export const ApiErrorSchema = z.object({

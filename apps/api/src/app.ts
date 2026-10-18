@@ -13,7 +13,9 @@ import { Chaos } from './rail/chaos';
 import { SimulatedSepaInstantRail } from './rail/simulatedSepaInstant';
 import type { PaymentRail } from './rail/types';
 import { routes } from './routes';
+import { adminRoutes } from './routes/admin';
 import { authRoutes } from './routes/auth';
+import { configRoutes } from './routes/config';
 
 /** Never log credentials, account identifiers or balances. */
 const REDACT = [
@@ -39,6 +41,7 @@ export type AppOptions = {
   devAuth?: boolean;
   logger?: FastifyServerOptions['logger'];
   intentSigningSecret?: string;
+  adminToken?: string;
 };
 
 export async function buildApp(options: AppOptions) {
@@ -63,11 +66,18 @@ export async function buildApp(options: AppOptions) {
     return reply.status(500).send({ error: 'internal', message: 'internal error' });
   });
 
-  await app.register(cors, { origin: true });
+  await app.register(cors, { origin: true, methods: ['GET', 'HEAD', 'POST', 'PUT'] });
   const devAuth = options.devAuth ?? false;
   await app.register(authPlugin, { db: options.db, devAuth });
   await app.register(authRoutes, { db: options.db, devOtp: devAuth });
   await app.register(routes, { db: options.db, rail, chaos, chaosEnabled: options.chaosEnabled ?? false });
+  await app.register(configRoutes, { db: options.db });
+  await app.register(adminRoutes, {
+    db: options.db,
+    adminToken: options.adminToken ?? 'dev-admin-token-change-me-please',
+    chaos,
+    chaosEnabled: options.chaosEnabled ?? false,
+  });
 
   return Object.assign(app, { chaos });
 }

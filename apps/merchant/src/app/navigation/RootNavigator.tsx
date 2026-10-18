@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useSession, useT } from '@zahln/mobile-core';
+import { useSession, useT, useUpdateStatus } from '@zahln/mobile-core';
 import {
   BiometricsScreen,
   LockScreen,
@@ -14,6 +14,7 @@ import {
   PinCreateScreen,
   SettingsScreen,
   TabBar,
+  UpdateRequiredScreen,
   useNavigationTheme,
   useOnboardingScreenOptions,
   WelcomeScreen,
@@ -102,7 +103,10 @@ function HomeStack() {
 export function RootNavigator() {
   const status = useSession((s) => s.status);
   const theme = useNavigationTheme();
+  const update = useUpdateStatus();
   if (status === 'booting') return null;
+  // Above onboarding, the lock and every deep link: an unsupported version gets nothing else.
+  if (update === 'required') return <UpdateRequiredScreen />;
   return (
     <NavigationContainer theme={theme}>
       {status === 'onboarding' ? <OnboardingStack /> : status === 'locked' ? <LockScreen /> : <HomeStack />}

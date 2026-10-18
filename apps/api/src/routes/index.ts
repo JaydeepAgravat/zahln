@@ -2,18 +2,17 @@ import {
   CreateIntentRequestSchema,
   HandleIntentRequestSchema,
   IdempotencyKeySchema,
+  type KillSwitch,
   type PaymentIntent,
   PayRequestSchema,
   RefundRequestSchema,
-  type RemoteConfig,
   TopUpRequestSchema,
 } from '@zahln/shared';
 import type { FastifyInstance, FastifyReply } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 import type { Db } from '../db/client';
-import { devices, users } from '../db/schema';
-import { seed } from '../db/seed';
+import { getStoredConfig } from '../lib/config';
 import { ApiError } from '../lib/errors';
 import { publishIntent } from '../lib/eventBus';
 import { type IdempotentResult, readIdempotencyKey, withIdempotency } from '../lib/idempotency';
@@ -37,6 +36,7 @@ import {
 import { requireActor } from '../plugins/auth';
 import { CHAOS_MODES, type Chaos } from '../rail/chaos';
 import type { PaymentRail } from '../rail/types';
+import { resetDemo } from './admin';
 import { eventRoutes } from './events';
 
 export type RouteDeps = { db: Db; rail: PaymentRail; chaos: Chaos; chaosEnabled: boolean };
@@ -61,6 +61,14 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
   const { db, rail, chaos } = deps;
 
   app.get('/health', async () => ({ ok: true, rail: rail.name }));
+
+  /** Kill switches are enforced here too: hiding a button in the app isn't a security boundary. */
+  async function requireNotKilled(feature: KillSwitch) {
+    const { data } = await getStoredConfig(db);
+    if (data.killSwitches[feature]) {
+      throw new ApiError(503, 'feature_disabled', `${feature} is temporarily switched off`);
+    }
+  }
   await eventRoutes(fastify, { db });
 
   // ---------- Merchant: the till's catalogue ----------
@@ -214,13 +222,18 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
     { schema: { params: IntentParams, body: RefundRequestSchema } },
     async (req, reply) => {
       const actor = requireActor(req);
+      await requireNotKilled('refunds');
       const key = readIdempotencyKey(req);
       const result = await withIdempotency(
         db,
         { scope: actor.userId, key, route: `POST /intents/${req.params.intentId}/refunds`, body: req.body },
         async (tx) => ({
           statusCode: 201,
-          body: await refundIntent(tx, { intentId: req.params.intentId, userId: actor.userId, ...req.body }),
+          body: await refundIntent(tx, {
+            intentId: req.params.intentId,
+            by: { userId: actor.userId },
+            ...req.body,
+          }),
         }),
       );
       publishCommitted(result);
@@ -237,6 +250,7 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
 
   app.post('/wallets/me/topups', { schema: { body: TopUpRequestSchema } }, async (req, reply) => {
     const actor = requireActor(req);
+    await requireNotKilled('topup');
     const key = readIdempotencyKey(req);
     const result = await withIdempotency(
       db,
@@ -255,20 +269,6 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
     return getWallet(db, accountId.merchant(req.params.merchantId));
   });
 
-  // ---------- Remote config (stub; real one on Day 5) ----------
-  app.get(
-    '/config',
-    async (): Promise<RemoteConfig> => ({
-      version: 1,
-      minSupportedVersion: '0.1.0',
-      latestVersion: '0.1.0',
-      killSwitches: { nfc_pay: false, refunds: false, topup: false },
-      flags: { tips: true },
-      limits: { reauthAboveCents: 5000, maxPaymentCents: 50000 },
-      ttlSeconds: 60,
-    }),
-  );
-
   // ---------- Dev only ----------
   if (deps.chaosEnabled) {
     app.get('/dev/chaos', async () => ({ mode: chaos.mode }));
@@ -285,11 +285,7 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
     // Rehearsal reset: money, intents and history go back to the seed, but the demo phones stay signed in
     // (their device sessions are kept for users that still exist), so nobody re-onboards two devices.
     app.post('/dev/reset', async () => {
-      const keep = await db.select().from(devices);
-      await seed(db, { history: true });
-      const userIds = new Set((await db.select({ id: users.id }).from(users)).map((u) => u.id));
-      const survivors = keep.filter((d) => userIds.has(d.userId));
-      if (survivors.length) await db.insert(devices).values(survivors).onConflictDoNothing();
+      await resetDemo(db);
       chaos.set('ok');
       return { ok: true };
     });

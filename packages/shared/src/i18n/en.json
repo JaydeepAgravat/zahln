@@ -266,7 +266,8 @@
     "managerOnly": "Only owners and managers can refund.",
     "pinTitle": "PIN for the refund",
     "refundedSoFar": "Already refunded",
-    "payment": "Payment"
+    "payment": "Payment",
+    "paused": "Refunds are paused right now. Zahln support can help."
   },
   "myQr": {
     "title": "My QR",
@@ -276,5 +277,20 @@
   "dev": {
     "chaos": "Development · Chaos mode",
     "chaosHint": "Simulates network and bank failures for Act 2. Debug builds only."
+  },
+  "update": {
+    "title": "Please update",
+    "body": "This version is no longer supported. Get the new version to keep paying. Your money is safe.",
+    "action": "Open the App Store",
+    "actionAndroid": "Open Google Play",
+    "version": "Version {{current}} · needs {{min}}",
+    "available": "A new version is available"
+  },
+  "offline": {
+    "banner": "Offline: you're seeing saved data."
+  },
+  "tapToPay": {
+    "label": "Tap to Pay",
+    "soon": "Tap to Pay arrives on Day 11 (NFC)."
   }
 }

@@ -1,3 +1,4 @@
+export { ConfigBanner } from './ConfigBanner';
 export * from './ds';
 export { LockScreen } from './flows/lock/LockScreen';
 export { BiometricsScreen } from './flows/onboarding/BiometricsScreen';
@@ -9,6 +10,7 @@ export { PinConfirmScreen, PinCreateScreen, PinLayout, usePinEntry } from './flo
 export type { OnboardingStackParamList } from './flows/onboarding/types';
 export { WelcomeScreen } from './flows/onboarding/WelcomeScreen';
 export { SettingsScreen } from './flows/settings/SettingsScreen';
+export { UpdateRequiredScreen } from './flows/UpdateRequiredScreen';
 export { useNavigationTheme, useOnboardingScreenOptions } from './navigation';
 export { CountdownRing, PaidFlood, useCountdown } from './payments';
 export { SafeArea } from './SafeArea';

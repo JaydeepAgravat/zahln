@@ -1,9 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { pendingPayment, useMe, useT, useWallet } from '@zahln/mobile-core';
+import { pendingPayment, useKillSwitch, useMe, useT, useWallet } from '@zahln/mobile-core';
 import {
   Avatar,
   BalanceCard,
+  ConfigBanner,
   greetingKey,
   Icon,
   IconButton,
@@ -66,6 +67,7 @@ export function WalletScreen() {
   const name = me.data?.user.name ?? '';
   const soon = () => toast(t('home.soon'), 'sparkle');
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  const topupKilled = useKillSwitch('topup');
 
   // A payment was in flight when the app was killed: pick it up before anything else.
   useEffect(() => {
@@ -97,6 +99,7 @@ export function WalletScreen() {
           </View>
           <IconButton icon="bell" label="Mitteilungen" onPress={soon} />
         </Animated.View>
+        <ConfigBanner />
 
         <Animated.View entering={FadeInDown.duration(420).delay(60)}>
           <BalanceCard label={t('home.balance')} cents={wallet.data?.balanceCents} footnote="SEPA Instant" />
@@ -109,7 +112,7 @@ export function WalletScreen() {
             label={t('home.actions.pay')}
             onPress={() => navigation.navigate('Scan')}
           />
-          <QuickAction icon="plus" label={t('home.actions.topUp')} onPress={soon} />
+          {topupKilled ? null : <QuickAction icon="plus" label={t('home.actions.topUp')} onPress={soon} />}
           <QuickAction icon="send" label={t('home.actions.send')} onPress={soon} />
           <QuickAction
             icon="receipt"

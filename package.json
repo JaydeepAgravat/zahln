@@ -23,7 +23,8 @@
     "merchant:ios": "pnpm --filter @zahln/merchant ios",
     "merchant:android": "pnpm --filter @zahln/merchant android",
     "pods": "pnpm --filter @zahln/consumer pods && pnpm --filter @zahln/merchant pods",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "console": "pnpm --filter @zahln/console dev"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

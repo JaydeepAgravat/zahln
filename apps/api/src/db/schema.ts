@@ -1,4 +1,4 @@
-import { ATTEMPT_STATUSES, INTENT_STATUSES, type LineItem, PLANS } from '@zahln/shared';
+import { type AdminConfig, ATTEMPT_STATUSES, INTENT_STATUSES, type LineItem, PLANS } from '@zahln/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigserial,
@@ -185,18 +185,23 @@ export const paymentAttempts = pgTable(
   ],
 );
 
-export const refunds = pgTable('refunds', {
-  id: uuid().primaryKey().defaultRandom(),
-  intentId: uuid()
-    .notNull()
-    .references(() => paymentIntents.id),
-  amountCents: integer().notNull(),
-  reason: text().notNull(),
-  createdByUserId: text()
-    .notNull()
-    .references(() => users.id),
-  createdAt: createdAt(),
-});
+export const refunds = pgTable(
+  'refunds',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    intentId: uuid()
+      .notNull()
+      .references(() => paymentIntents.id),
+    amountCents: integer().notNull(),
+    reason: text().notNull(),
+    /** A merchant's owner/manager in the app… */
+    createdByUserId: text().references(() => users.id),
+    /** …or Zahln ops in the internal console (e.g. "console:ops"). Exactly one is set. */
+    createdByOps: text(),
+    createdAt: createdAt(),
+  },
+  (t) => [check('refund_actor', sql`(${t.createdByUserId} IS NULL) <> (${t.createdByOps} IS NULL)`)],
+);
 
 // ---------- Idempotency and events ----------
 
@@ -265,4 +270,29 @@ export const devices = pgTable(
     revokedAt: timestamp({ withTimezone: true }),
   },
   (t) => [index().on(t.userId)],
+);
+
+// ---------- Remote config + audit (Day 6) ----------
+
+/** One row: the global server-driven config. `version` increases on every change so apps can tell. */
+export const appConfig = pgTable('app_config', {
+  id: text().primaryKey().default('global'),
+  version: integer().notNull().default(1),
+  data: jsonb().$type<AdminConfig>().notNull(),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Every write from the internal console: who did what to which thing, and why. Append-only. */
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: bigserial({ mode: 'number' }).primaryKey(),
+    actor: text().notNull(),
+    action: text().notNull(),
+    target: text().notNull(),
+    reason: text().notNull(),
+    data: jsonb().notNull().default({}),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.createdAt)],
 );

@@ -1,5 +1,5 @@
 export { API_URL, ApiRequestError, api, authHeaders, setAuth } from './api';
-export { type AppKind, appKind, configureApp } from './app';
+export { type AppKind, appKind, appVersion, configureApp } from './app';
 export { type BiometryInfo, prefetchBiometry, useBiometry } from './biometrics';
 export { prettyPhone } from './format';
 export { haptic } from './haptics';
@@ -11,6 +11,17 @@ export { usePayment } from './payments/usePayment';
 export { type Role, usePrefs } from './prefs';
 export { queryClient, useMe, useMerchantWallet, useWallet } from './queries';
 export { randomSecret, uuid } from './random';
+export {
+  currentConfig,
+  refreshConfig,
+  startRemoteConfig,
+  useConfigOffline,
+  useConfigStore,
+  useFeature,
+  useKillSwitch,
+  useRemoteConfig,
+  useUpdateStatus,
+} from './remoteConfig';
 export {
   type BiometricUnlock,
   biometryType,

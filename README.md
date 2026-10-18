@@ -24,6 +24,7 @@ pnpm api                 # API on :4000 (OTP is always 123456 in dev)
 pnpm pods                # CocoaPods for both apps
 pnpm consumer            # Metro for Zahln on :8081, then: pnpm consumer:ios | consumer:android
 pnpm merchant            # Metro for ZYSYGY on :8082, then: pnpm merchant:ios | merchant:android
+pnpm console             # Zahln Ops (internal console) on :5174; sign in with your name + ADMIN_TOKEN
 ```
 On Android 16, allow "nearby devices" on first launch of a debug build (it's the local-network access Metro needs).
 For faster Android dev builds: `./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a`.

@@ -435,12 +435,20 @@ export async function getAttemptByKey(db: DbOrTx, payerUserId: string, key: stri
 
 export async function refundIntent(
   tx: Tx,
-  input: { intentId: string; userId: string; amountCents: number; reason: string },
+  input: {
+    intentId: string;
+    /** Merchant staff go through role and plan checks; ops (console) is the support fallback and is audited instead. */
+    by: { userId: string } | { ops: string };
+    amountCents: number;
+    reason: string;
+  },
 ): Promise<{ refund: Refund; intent: PaymentIntent }> {
   const { intent } = await lockIntent(tx, input.intentId);
   const merchant = await loadMerchant(tx, intent.merchantId);
-  await requireStaff(tx, merchant.id, input.userId, ['owner', 'manager']);
-  requireFeature(merchant, 'refunds');
+  if ('userId' in input.by) {
+    await requireStaff(tx, merchant.id, input.by.userId, ['owner', 'manager']);
+    requireFeature(merchant, 'refunds');
+  }
 
   if (!isRefundable(intent.status))
     throw new ApiError(409, 'intent_not_payable', `intent is ${intent.status}`);
@@ -475,7 +483,8 @@ export async function refundIntent(
       intentId: intent.id,
       amountCents: input.amountCents,
       reason: input.reason,
-      createdByUserId: input.userId,
+      createdByUserId: 'userId' in input.by ? input.by.userId : null,
+      createdByOps: 'ops' in input.by ? input.by.ops : null,
     })
     .returning();
   if (!refund) throw new Error('failed to create refund');
@@ -501,7 +510,7 @@ export async function refundIntent(
   await recordEvent(tx, intent.id, 'intent.refunded', {
     refundId: refund.id,
     amountCents: input.amountCents,
-    by: input.userId,
+    by: 'userId' in input.by ? input.by.userId : input.by.ops,
   });
 
   return {

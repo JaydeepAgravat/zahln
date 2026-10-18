@@ -1,8 +1,10 @@
+import { INITIAL_ADMIN_CONFIG } from '@zahln/shared';
 import { eq, sql } from 'drizzle-orm';
 import { accountId, postTransaction } from '../lib/ledger';
 import { createDb, type Db } from './client';
 import {
   accounts,
+  appConfig,
   catalogueItems,
   events,
   ledgerTransactions,
@@ -83,6 +85,7 @@ const HISTORY: {
 ];
 
 const TABLES = [
+  'app_config',
   'devices',
   'auth_challenges',
   'events',
@@ -109,6 +112,7 @@ export async function seed(db: Db, options: { history?: boolean } = {}) {
   await resetDatabase(db);
 
   await db.transaction(async (tx) => {
+    await tx.insert(appConfig).values({ id: 'global', version: 1, data: INITIAL_ADMIN_CONFIG });
     await tx.insert(users).values(Object.values(U));
     await tx.insert(merchants).values(Object.values(M));
     await tx.insert(staff).values([

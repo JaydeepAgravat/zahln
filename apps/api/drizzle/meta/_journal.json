@@ -22,6 +22,20 @@
       "when": 1792309492018,
       "tag": "0002_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792336651284,
+      "tag": "0003_config_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792336871287,
+      "tag": "0004_ops_refunds",
+      "breakpoints": true
     }
   ]
 }

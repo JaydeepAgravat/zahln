@@ -6,7 +6,15 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/drizzle/meta", "!**/*.gen.*", "!**/global.css", "!**/ios", "!**/android"]
+    "includes": [
+      "**",
+      "!**/drizzle/meta",
+      "!**/*.gen.*",
+      "!**/global.css",
+      "!**/ios",
+      "!**/android",
+      "!packages/web-ui/src/theme.css"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -71,5 +79,10 @@
         }
       }
     }
-  ]
+  ],
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  }
 }

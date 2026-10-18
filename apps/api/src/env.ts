@@ -14,6 +14,8 @@ const EnvSchema = z.object({
     .transform((v) => v === 'true'),
   /** HMAC key for QR intent references. The default only exists so local dev works out of the box. */
   INTENT_SIGNING_SECRET: z.string().min(32).default('dev-only-intent-signing-secret-change-me'),
+  /** Internal console access (stand-in for SSO). The default only exists so local dev works out of the box. */
+  ADMIN_TOKEN: z.string().min(24).default('dev-admin-token-change-me-please'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
 });
 

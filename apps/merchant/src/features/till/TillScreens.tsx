@@ -5,6 +5,8 @@ import {
   ApiRequestError,
   haptic,
   payments,
+  useFeature,
+  useKillSwitch,
   useMe,
   useMerchantWallet,
   usePrefs,
@@ -15,6 +17,7 @@ import {
   AmountDisplay,
   BalanceCard,
   Button,
+  ConfigBanner,
   greetingKey,
   Icon,
   IconButton,
@@ -46,6 +49,7 @@ export function useCurrentMerchant() {
 
 function MerchantHeader({ onMyQr }: { onMyQr?: () => void }) {
   const { t } = useT();
+  const nfcKilled = useKillSwitch('nfc_pay');
   const merchant = useCurrentMerchant();
   const firstName = usePrefs((s) => s.firstName);
   return (
@@ -69,6 +73,14 @@ function MerchantHeader({ onMyQr }: { onMyQr?: () => void }) {
           label={merchant.plan[0]?.toUpperCase() + merchant.plan.slice(1)}
         />
       ) : null}
+      {/* Tap to Pay (NFC, Day 11) disappears the moment ops flips the nfc_pay kill switch. */}
+      {nfcKilled ? null : (
+        <IconButton
+          icon="contactless"
+          label={t('tapToPay.label')}
+          onPress={() => toast(t('tapToPay.soon'), 'info')}
+        />
+      )}
       {onMyQr ? <IconButton icon="qr" label={t('myQr.title')} onPress={onMyQr} /> : null}
     </Animated.View>
   );
@@ -270,13 +282,17 @@ export function TillScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
   const merchant = useCurrentMerchant();
   const cart = useCart();
+  // Live from server config (falls back to the membership's last known plan before the first answer).
+  const canDynamic = useFeature('dynamic_qr', merchant?.plan);
+  const hasCatalogue = useFeature('catalogue', merchant?.plan);
+  const mode = hasCatalogue ? cart.mode : 'amount';
   const catalogue = useQuery({
     queryKey: ['catalogue', merchant?.merchantId],
     queryFn: () => payments.catalogue(merchant?.merchantId ?? ''),
     enabled: !!merchant,
     staleTime: 5 * 60_000,
   });
-  const total = cartTotal(cart, catalogue.data);
+  const total = cartTotal({ ...cart, mode }, catalogue.data);
   const clearCart = useCart((s) => s.clear);
 
   // Back from an auto-lock (or an app restart) mid-payment: show the open QR again, or the result.
@@ -308,7 +324,7 @@ export function TillScreen() {
     setCreating(true);
     try {
       const body =
-        cart.mode === 'amount'
+        mode === 'amount'
           ? { amountCents: cart.amountCents }
           : { items: Object.entries(cart.lines).map(([sku, qty]) => ({ sku, qty })) };
       const intent = await payments.createIntent(merchant.merchantId, body, orderKey.current);
@@ -328,7 +344,8 @@ export function TillScreen() {
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <View className="flex-1 gap-4 px-5 pt-2">
         <MerchantHeader onMyQr={() => navigation.navigate('MyQr')} />
-        {merchant?.plan === 'free' ? (
+        <ConfigBanner />
+        {!canDynamic ? (
           // Free plan: no one-time QR codes. Say so up front and point to what does work.
           <View className="flex-1 items-center justify-center gap-4 px-2">
             <TillIllustration width={220} />
@@ -340,8 +357,8 @@ export function TillScreen() {
             </View>
           </View>
         ) : null}
-        {merchant?.plan === 'free' ? null : <ModeSwitch />}
-        {merchant?.plan === 'free' ? null : cart.mode === 'catalogue' ? (
+        {canDynamic && hasCatalogue ? <ModeSwitch /> : null}
+        {!canDynamic ? null : mode === 'catalogue' ? (
           <ScrollView contentContainerClassName="pb-4" showsVerticalScrollIndicator={false}>
             <CatalogueGrid catalogue={catalogue.data} />
           </ScrollView>
@@ -349,7 +366,7 @@ export function TillScreen() {
           <AmountEntry />
         )}
       </View>
-      {merchant?.plan === 'free' ? null : (
+      {!canDynamic ? null : (
         <View className="gap-3 border-t border-border bg-surface px-5 pb-4 pt-3">
           <View className="flex-row items-center justify-between">
             <Text variant="footnote" tone="secondary">

@@ -5,9 +5,8 @@ import { z } from 'zod';
 import type { Db } from '../db/client';
 import { publishIntent, subscribeIntent } from '../lib/eventBus';
 import { expireIfDue, getIntent, requireMerchantStaff } from '../lib/payments';
+import { openSse } from '../lib/sse';
 import { requireActor } from '../plugins/auth';
-
-const HEARTBEAT_MS = 15_000;
 
 /**
  * Server-Sent Events for one intent: the till's live "Warten auf Scan → Kunde prüft → Bezahlt".
@@ -29,20 +28,11 @@ export async function eventRoutes(fastify: FastifyInstance, deps: { db: Db }) {
       // Only the merchant's own staff may watch a till; payers learn the outcome from their own request.
       await requireMerchantStaff(db, current.merchant.id, actor.userId);
 
-      reply.hijack();
-      const res = reply.raw;
-      res.writeHead(200, {
-        ...(reply.getHeaders() as Record<string, string>),
-        'content-type': 'text/event-stream; charset=utf-8',
-        'cache-control': 'no-cache, no-transform',
-        connection: 'keep-alive',
-        'x-accel-buffering': 'no',
-      });
-
-      const send = (intent: PaymentIntent) => res.write(`event: status\ndata: ${JSON.stringify(intent)}\n\n`);
+      let cleanup = () => {};
+      const write = openSse(req, reply, () => cleanup());
+      const send = (intent: PaymentIntent) => write('status', intent);
       send(current);
       const unsubscribe = subscribeIntent(intentId, send);
-      const heartbeat = setInterval(() => res.write(': ping\n\n'), HEARTBEAT_MS);
 
       // Nobody else flips an unpaid intent to `expired` at minute five, so the open stream does it.
       const expiry = isPayable(current.status)
@@ -59,11 +49,10 @@ export async function eventRoutes(fastify: FastifyInstance, deps: { db: Db }) {
           )
         : null;
 
-      req.raw.on('close', () => {
+      cleanup = () => {
         unsubscribe();
-        clearInterval(heartbeat);
         if (expiry) clearTimeout(expiry);
-      });
+      };
     },
   );
 }

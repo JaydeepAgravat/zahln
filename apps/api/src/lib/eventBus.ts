@@ -15,6 +15,26 @@ const channel = (intentId: string) => `intent:${intentId}`;
 
 export function publishIntent(intent: PaymentIntent) {
   bus.emit(channel(intent.id), intent);
+  bus.emit('intents', intent);
+}
+
+/** Every intent change, for the internal console's live payments list. */
+export function subscribeAllIntents(listener: (intent: PaymentIntent) => void): () => void {
+  bus.on('intents', listener);
+  return () => bus.off('intents', listener);
+}
+
+/**
+ * "Config changed" (switches, versions, or a merchant's plan). Clients refetch `GET /config`:
+ * the event carries no data, so a client can never apply a config it wasn't allowed to see.
+ */
+export function publishConfigChanged(version: number) {
+  bus.emit('config', version);
+}
+
+export function subscribeConfig(listener: (version: number) => void): () => void {
+  bus.on('config', listener);
+  return () => bus.off('config', listener);
 }
 
 export function subscribeIntent(intentId: string, listener: (intent: PaymentIntent) => void): () => void {

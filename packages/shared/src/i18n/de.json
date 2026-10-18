@@ -266,7 +266,8 @@
     "managerOnly": "Erstatten dürfen nur Inhaber:innen und Manager:innen.",
     "pinTitle": "PIN für die Erstattung",
     "refundedSoFar": "Bereits erstattet",
-    "payment": "Zahlung"
+    "payment": "Zahlung",
+    "paused": "Erstattungen sind gerade pausiert. Der Zahln-Support kann helfen."
   },
   "myQr": {
     "title": "Mein QR",
@@ -276,5 +277,20 @@
   "dev": {
     "chaos": "Entwicklung · Chaos-Modus",
     "chaosHint": "Simuliert Netz- und Bankfehler für Akt 2. Nur in Debug-Builds."
+  },
+  "update": {
+    "title": "Bitte aktualisieren",
+    "body": "Diese Version wird nicht mehr unterstützt. Lade die neue Version, um weiter zu bezahlen. Dein Geld ist sicher.",
+    "action": "Zum App Store",
+    "actionAndroid": "Zum Play Store",
+    "version": "Version {{current}} · benötigt {{min}}",
+    "available": "Neue Version verfügbar"
+  },
+  "offline": {
+    "banner": "Offline: Du siehst gespeicherte Daten."
+  },
+  "tapToPay": {
+    "label": "Tap to Pay",
+    "soon": "Tap to Pay kommt an Tag 11 (NFC)."
   }
 }

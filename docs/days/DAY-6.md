@@ -95,6 +95,36 @@ a threshold need a reason. Four-eyes approval is "next".
 
 ---
 
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| `PATCH /admin/config` | `PUT /admin/config` with the whole `AdminConfig` (zod-validated) **plus a required reason**; the server diffs it, bumps the version, writes `{changed: [...]}` to the audit log and nudges phones over `GET /config/events` (SSE) | A whole-document write is simpler to validate and diff than a patch; the diff is what the audit log needs |
+| One `/config` per device + merchant | `GET /config` works **signed out** (`x-app` header), so the forced-update gate works before login; a signed-in till also gets its merchant's `plan` + `features`; each app has its **own** min/latest version | Two binaries, two release trains |
+| `<Feature>` gate component | `useFeature(feature, fallbackPlan)` and `useKillSwitch()` hooks in mobile-core; `UpdateRequiredScreen` + `ConfigBanner` in mobile-ui | Hooks were enough at every call site |
+| Bundled defaults | `bundledDefaults(app)` in shared: no kill switch fired, flags off, no plan features, **never** a forced update | A stale default must not lock anyone out of their money |
+| Login with a dev password | Ops token + operator name (`x-admin-token`, `x-admin-name`), checked in an `onRequest` hook **before** validation, timing-safe; kept in `sessionStorage` | Stand-in for SSO; every audit row says `console:<name>` |
+| Audit log | Append-only **in Postgres** (trigger rejects UPDATE/DELETE), tested | "Append-only" enforced by convention isn't append-only |
+| Console refunds | `POST /admin/payments/:id/refunds`, idempotent, by ops (`refunds.created_by_ops`, a check constraint says exactly one actor) and **still allowed while the `refunds` kill switch is on** | Support must be able to fix things during an incident |
+| shadcn/ui in `packages/web-ui` | Hand-rolled primitives (Button, Field, Dialog on `<dialog>`, Switch, Badge, StatusBadge) and a **Tailwind 4 theme generated from the shared tokens**; `src/theme.css` is a file snapshot (`pnpm --filter @zahln/web-ui theme`), a test fails if it drifts | Eight small components didn't justify a generator and Radix; the tokens stay the single source |
+| TanStack Table | v9 (`useTable` + `tableFeatures({})`), search and status filter done on the server | Search is by amount (`6,30`), merchant, payer or ID prefix |
+| Live rows via SSE | `GET /admin/events` streamed with `fetch` (EventSource can't send headers), parsed by hand, reconnect with backoff; changed rows are patched into the query cache and flash | — |
+| Control room | Edits are a **draft**: a publish bar lists the changed paths, the dialog shows old → new and needs a reason; release cards preview what a 0.1.0 phone will see (blocked / banner / up to date) | No accidental one-click forced update |
+| `pnpm demo:reset` | "Reset demo data" in the control room (`POST /admin/reset`): seed balances, plans and config; phones stay signed in; the audit log is kept | — |
+| Wallet top-up kill switch | Hidden in the app **and** refused by the API (`503 feature_disabled`) | Hiding a button isn't security |
+
+Found and fixed while verifying: the API's CORS allowed only GET/HEAD/POST, so every console `PUT` failed in the browser
+(tests use `inject`, which skips CORS). Now PUT is allowed.
+
+**Verified live (iOS simulator + console, 18 Oct):** publishing a banner + the `topup` kill switch → banner shown, Aufladen
+gone; raising the consumer's `minSupportedVersion` to 0.2.0 → "Bitte aktualisieren" within 1.5 s, no reload; reset →
+back to the wallet, still signed in; console refund of 1,00 € → +1,00 € on Lena's phone after pull-to-refresh.
+Free → Pro for Döner Ali from the console → audited, `/config` for Ali's till now lists `dynamic_qr`.
+
+**Not verified on a device:** the till side of Act 3 (Pro unlocking the one-time QR on screen, `nfc_pay` hiding Tap to Pay),
+because no ZYSYGY build was running; both are covered by API tests and typecheck. The wallet balance doesn't update
+live after a console refund (the consumer only listens to SSE during a payment); a wallet push channel is a follow-up.
+The offline banner wasn't exercised with the API stopped today.
+
 ## Files you'll create
 ```
 apps/api/src/{routes/config.ts, routes/admin/*.ts, lib/features.ts, lib/audit.ts}

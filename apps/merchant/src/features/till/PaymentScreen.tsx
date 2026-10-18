@@ -1,6 +1,16 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import { ApiRequestError, checkPin, haptic, payments, queryClient, useT, uuid } from '@zahln/mobile-core';
+import {
+  ApiRequestError,
+  checkPin,
+  haptic,
+  payments,
+  queryClient,
+  useFeature,
+  useKillSwitch,
+  useT,
+  uuid,
+} from '@zahln/mobile-core';
 import {
   AmountDisplay,
   Button,
@@ -198,7 +208,10 @@ export function PaymentScreen({ navigation, route }: Props) {
   });
   const [refunding, setRefunding] = useState(false);
   const intent = query.data;
-  const canRefund = merchant?.role === 'owner' || merchant?.role === 'manager';
+  const isManager = merchant?.role === 'owner' || merchant?.role === 'manager';
+  const planHasRefunds = useFeature('refunds', merchant?.plan);
+  const refundsKilled = useKillSwitch('refunds');
+  const canRefund = isManager && planHasRefunds && !refundsKilled;
 
   return (
     <SafeArea className="flex-1 bg-bg" edges={['top']}>
@@ -279,7 +292,11 @@ export function PaymentScreen({ navigation, route }: Props) {
               />
             ) : (
               <Text variant="footnote" tone="tertiary" className="text-center">
-                {t('refund.managerOnly')}
+                {refundsKilled
+                  ? t('refund.paused')
+                  : !planHasRefunds
+                    ? t('till.planRequired')
+                    : t('refund.managerOnly')}
               </Text>
             )
           ) : null}
