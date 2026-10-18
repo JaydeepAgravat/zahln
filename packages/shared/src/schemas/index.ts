@@ -180,6 +180,15 @@ export const API_ERROR_CODES = [
   'refund_exceeds_payment',
   'insufficient_merchant_balance',
   'feature_disabled',
+  // Zahln Web (Day 7)
+  'csrf',
+  'step_up_required',
+  'no_account',
+  'not_a_manager',
+  'nothing_to_pay_out',
+  'already_member',
+  'own_role',
+  'owner_locked',
   'internal',
 ] as const;
 export const ApiErrorSchema = z.object({

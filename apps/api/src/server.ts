@@ -10,9 +10,17 @@ const app = await buildApp({
   devAuth: env.DEV_AUTH,
   intentSigningSecret: env.INTENT_SIGNING_SECRET,
   adminToken: env.ADMIN_TOKEN,
+  webOrigins: env.WEB_ORIGINS,
+  secureCookies: env.COOKIE_SECURE,
   logger: {
     level: env.LOG_LEVEL,
-    redact: ['req.headers.authorization', 'req.headers["x-user-id"]', 'req.headers["x-device-id"]'],
+    redact: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+      'req.headers["x-user-id"]',
+      'req.headers["x-device-id"]',
+      'req.headers["x-admin-token"]',
+    ],
     transport: process.stdout.isTTY ? { target: 'pino-pretty' } : undefined,
   },
 });

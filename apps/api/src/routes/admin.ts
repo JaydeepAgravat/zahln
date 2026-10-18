@@ -1,6 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
-import { AdminConfigSchema, includedVat, PLANS, type VatRate } from '@zahln/shared';
-import { and, desc, eq, gte, ilike, inArray, lt, or, sql } from 'drizzle-orm';
+import { AdminConfigSchema, PLANS } from '@zahln/shared';
+import { and, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';
@@ -17,12 +17,14 @@ import {
   refunds,
   staff,
   users,
+  webSessions,
 } from '../db/schema';
 import { seed } from '../db/seed';
 import { audit } from '../lib/audit';
 import { getStoredConfig, saveConfig } from '../lib/config';
 import { ApiError, notFound } from '../lib/errors';
 import { publishConfigChanged, publishIntent, subscribeAllIntents, subscribeConfig } from '../lib/eventBus';
+import { merchantCsv } from '../lib/export';
 import { readIdempotencyKey, withIdempotency } from '../lib/idempotency';
 import { getIntent, refundIntent, toIntentDto } from '../lib/payments';
 import { openSse } from '../lib/sse';
@@ -339,49 +341,18 @@ export async function adminRoutes(fastify: FastifyInstance, deps: AdminDeps) {
     },
     async (req, reply) => {
       const actor = ops(req);
-      const conds = [
-        eq(paymentIntents.merchantId, req.params.merchantId),
-        sql`${paymentIntents.paidAt} IS NOT NULL`,
-      ];
-      if (req.query.from) conds.push(gte(paymentIntents.paidAt, new Date(`${req.query.from}T00:00:00Z`)));
-      if (req.query.to) conds.push(lt(paymentIntents.paidAt, new Date(`${req.query.to}T23:59:59Z`)));
-      const rows = await db
-        .select()
-        .from(paymentIntents)
-        .where(and(...conds))
-        .orderBy(paymentIntents.paidAt);
-      const euro = (c: number) => (c / 100).toFixed(2).replace('.', ',');
-      const lines = ['Datum;Beleg-Nr.;Betrag;MwSt.-Satz;MwSt.;Zahlungs-ID;Status'];
-      for (const r of rows) {
-        const byRate = new Map<number, number>();
-        for (const item of r.items)
-          byRate.set(item.vatRate, (byRate.get(item.vatRate) ?? 0) + item.unitPriceCents * item.qty);
-        if (byRate.size === 0) byRate.set(0, r.amountCents);
-        for (const [rate, gross] of byRate) {
-          lines.push(
-            [
-              r.paidAt?.toISOString().slice(0, 10),
-              r.receiptNumber ?? '',
-              euro(gross),
-              `${rate} %`,
-              euro(includedVat(gross, rate as VatRate)),
-              r.id,
-              r.status,
-            ].join(';'),
-          );
-        }
-      }
+      const { csv, rows } = await merchantCsv(db, req.params.merchantId, req.query);
       await audit(db, {
         actor,
         action: 'merchant.export',
         target: req.params.merchantId,
         reason: 'CSV export',
-        data: { rows: rows.length, from: req.query.from ?? null, to: req.query.to ?? null },
+        data: { rows, from: req.query.from ?? null, to: req.query.to ?? null },
       });
       return reply
         .header('content-type', 'text/csv; charset=utf-8')
         .header('content-disposition', `attachment; filename="zahln-${req.params.merchantId}.csv"`)
-        .send(`﻿${lines.join('\r\n')}\r\n`);
+        .send(csv);
     },
   );
 
@@ -445,8 +416,12 @@ export async function adminRoutes(fastify: FastifyInstance, deps: AdminDeps) {
  */
 export async function resetDemo(db: Db) {
   const keep = await db.select().from(devices);
+  const keepWeb = await db.select().from(webSessions).where(isNull(webSessions.revokedAt));
   await seed(db, { history: true });
   const userIds = new Set((await db.select({ id: users.id }).from(users)).map((u) => u.id));
   const survivors = keep.filter((d) => userIds.has(d.userId));
   if (survivors.length) await db.insert(devices).values(survivors).onConflictDoNothing();
+  // The dashboard stays signed in too (merchants survive a reset; their IDs are fixed in the seed).
+  const webSurvivors = keepWeb.filter((s) => userIds.has(s.userId));
+  if (webSurvivors.length) await db.insert(webSessions).values(webSurvivors).onConflictDoNothing();
 }

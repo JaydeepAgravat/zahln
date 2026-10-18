@@ -11,7 +11,15 @@ const ACTION: Record<string, { label: string; tone: Tone }> = {
   'merchant.export': { label: 'Export', tone: 'neutral' },
   'chaos.set': { label: 'Rail', tone: 'danger' },
   'demo.reset': { label: 'Reset', tone: 'danger' },
+  'merchant.payout': { label: 'Payout', tone: 'success' },
+  'staff.add': { label: 'Team', tone: 'neutral' },
+  'staff.role': { label: 'Team', tone: 'neutral' },
+  'staff.remove': { label: 'Team', tone: 'neutral' },
 };
+
+/** `console:Jaydeep` → "Jaydeep"; `web:usr_mila` → "usr_mila (merchant, web)". */
+const who = (actor: string) =>
+  actor.startsWith('web:') ? `${actor.slice(4)} (merchant, web)` : actor.replace(/^console:/, '');
 
 function Target({ entry }: { entry: AuditEntry }) {
   if (entry.action === 'payment.refund')
@@ -20,7 +28,7 @@ function Target({ entry }: { entry: AuditEntry }) {
         {entry.target.slice(0, 8)}
       </Link>
     );
-  if (entry.action.startsWith('merchant.'))
+  if (entry.action.startsWith('merchant.') || entry.action.startsWith('staff.'))
     return (
       <Link to={`/merchants/${entry.target}`} className="underline-offset-2 hover:underline">
         {entry.target}
@@ -75,7 +83,7 @@ export function AuditPage() {
                     <td className="px-5 py-3 font-mono text-footnote whitespace-nowrap text-text-secondary tabular-nums">
                       {when(e.createdAt)}
                     </td>
-                    <td className="px-5 py-3 whitespace-nowrap">{e.actor.replace(/^console:/, '')}</td>
+                    <td className="px-5 py-3 whitespace-nowrap">{who(e.actor)}</td>
                     <td className="px-5 py-3">
                       <span className="flex flex-wrap items-center gap-2">
                         <Badge tone={action.tone}>{action.label}</Badge>

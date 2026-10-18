@@ -17,3 +17,8 @@ apps/mobile/android/local.properties
 *.keystore
 !debug.keystore
 .metro-health-check*
+
+# Next.js
+.next
+next-env.d.ts
+*.tsbuildinfo

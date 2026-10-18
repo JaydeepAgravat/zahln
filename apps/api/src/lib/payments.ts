@@ -84,7 +84,7 @@ async function loadMerchant(db: DbOrTx, merchantId: string): Promise<MerchantRow
   return merchant;
 }
 
-function requireFeature(merchant: MerchantRow, feature: Feature) {
+export function requireFeature(merchant: Pick<MerchantRow, 'plan'>, feature: Feature) {
   if (!hasFeature(merchant.plan, feature)) {
     throw new ApiError(
       403,

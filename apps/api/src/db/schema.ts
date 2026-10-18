@@ -272,6 +272,31 @@ export const devices = pgTable(
   (t) => [index().on(t.userId)],
 );
 
+// ---------- Web sessions (Day 7) ----------
+
+/**
+ * A signed-in browser (Zahln Web). The cookie holds a random token; only its SHA-256 is stored, like devices.
+ * A business session is bound to one merchant, so dashboard routes never take a merchant ID from the URL.
+ * `csrfHash` binds the double-submit CSRF token to this session; `authenticatedAt` is the last OTP (step-up).
+ */
+export const webSessions = pgTable(
+  'web_sessions',
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    tokenHash: text().notNull().unique(),
+    csrfHash: text().notNull(),
+    userId: text()
+      .notNull()
+      .references(() => users.id),
+    merchantId: text().references(() => merchants.id),
+    authenticatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    revokedAt: timestamp({ withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.userId)],
+);
+
 // ---------- Remote config + audit (Day 6) ----------
 
 /** One row: the global server-driven config. `version` increases on every change so apps can tell. */

@@ -86,6 +86,7 @@ const HISTORY: {
 
 const TABLES = [
   'app_config',
+  'web_sessions',
   'devices',
   'auth_challenges',
   'events',

@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@import "@zahln/web-ui/theme.css";
+@source "../../../packages/web-ui/src";
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    background: var(--color-bg);
+    color: var(--color-text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* A payment that just arrived slides in and glows ember, then settles. */
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+    background-color: var(--color-brand-subtle);
+  }
+  30% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-arrive {
+  animation: arrive 2.4s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-arrive {
+    animation: none;
+  }
+}

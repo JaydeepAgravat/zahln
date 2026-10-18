@@ -249,7 +249,7 @@ still ends with a check that passes before the next day starts.
 | 4 ✅ | Merchant till: catalogue + keypad, 5-min dynamic QR; consumer scan → confirm → pay; SSE; receipts; wallets | **Act 1 works** |
 | 5 ✅ | Every payment state, `checking` reconciliation, chaos modes, static @handle QR, tips, refunds, history | **Act 2 works** |
 | 6 ✅ | Remote config, plan gating, kill switches, per-app forced update, internal console | **Act 3 works** |
-| 7 | Zahln Web I: web auth (cookie + CSRF), `web-ui` package, merchant dashboard (live takings, transactions, payouts, refunds, staff, plan, export) | Act 1 payment appears live on the dashboard |
+| 7 ✅ | Zahln Web I: web auth (cookie + CSRF), `web-ui` package, merchant dashboard (live takings, transactions, payouts, refunds, staff, plan, export) | Act 1 payment appears live on the dashboard |
 | 8 | Zahln Web II: pay-link checkout, consumer web wallet, static QR poster PDF, Playwright | Pay a link from a browser on a phone; Playwright green |
 | 9 | Landing I: content, art sourcing (CC0, recorded), lettering, typography, layout of all 10 chapters, static, no motion | Reads beautifully with JS off; Lighthouse a11y 100 |
 | 10 | Landing II: Lenis + Motion, frame → index, sticky heroes, torn-paper transitions, shader, app videos | Budgets green on Lighthouse CI; reduced motion verified |

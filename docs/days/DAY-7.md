@@ -68,6 +68,34 @@ Refunds, plan changes and staff changes require the `owner` role **and** a fresh
 
 ---
 
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| `/merchants/:id/summary`, `/transactions`, … | `/web/business/*`, and the merchant comes **from the session**, never from the URL | A business session is bound to one merchant, so there is no ID to tamper with (another merchant's payment is a plain 404) |
+| Double-submit CSRF cookie | Double submit **bound to the session**: header = cookie, and its hash must match the session's `csrf_hash` | A token planted from another session (cookie tossing) is refused too; tested |
+| 12 h idle timeout | `last_seen_at` checked on every request; sign-out revokes the row, not just the cookie | Tested: replaying the old cookie after sign-out → 401 |
+| Owner-only + step-up | Refunds: owner or manager (same rule as the app). Payouts, plan, team: owner. All four need an OTP from the last 10 minutes; the step-up code must belong to the signed-in user | The dialog catches `step_up_required`, sends a code, then **retries the same action** with the same idempotency key |
+| Roles in the cookie | Role is read fresh on every request | Demote or remove someone and they're out on their next click (tested) |
+| Server actions for mutations | Client `fetch` straight to the API (`credentials: 'include'` + `x-csrf-token`); server components forward the cookie for the first paint | One security model (the API's) instead of two; the API is the only thing that decides access |
+| `GET /merchants/:id/events` SSE | `/web/business/events`, cookie auth, **Pro only** (`live_dashboard`); Free sees "Live-Ansicht ab Pro" | The plan page on zysygy.de sells the live dashboard as Pro |
+| CORS | `origin: true` replaced with an **allowlist** (`WEB_ORIGINS`) + credentials | Reflecting any origin with cookies would let any site read the dashboard |
+| shadcn set restyled | The same hand-rolled `web-ui` primitives as the console (now `'use client'`), plus Toast, Step-up dialog, receipt sheet on `<dialog>` | No Radix needed for this surface |
+| Inter via `next/font` | `@fontsource-variable/inter` (self-hosted, no build-time download) | Same file as the console |
+| Payouts | Balance, next automatic payout at 23:00 Berlin (Business), "Jetzt auszahlen" posts merchant wallet → `settlement_outbound`, idempotent, audited | The real rail call is the simulator's job; the ledger side is real |
+| Invite by phone | Adds an **existing** Zahln user; an unknown number says so | Production: SMS invite + pending membership |
+| Export | Same DATEV builder as the console (`lib/export.ts`), Business only, days are Berlin calendar days | One CSV implementation |
+
+**Verified in the browser (18 Oct):** sign-in with OTP → Heute; a till payment (API) appeared in **< 0.8 s** with the ember
+count-up and the row glow; refund from the receipt sheet → step-up dialog (session aged past 10 min) → code → refund
+retried and the takings card showed "erstattet"; search "4,20"; payout 22,10 € → balance 0, history row, audited;
+team, plan and export pages; the CSV link carries the cookie and starts with the BOM; Döner Ali (Free) sees "Live-Ansicht
+ab Pro", upgrades to Pro → his till's `/config` lists `dynamic_qr`, audited as `web:usr_ali`; German/English switch;
+phone width. `next build` passes.
+
+**Not verified:** the till app showing the one-time QR on screen after the web upgrade (no ZYSYGY build running; covered
+by API tests), and the CSV opened in Numbers/Excel (bytes checked: BOM, `;`, decimal comma, CRLF). Payments were
+created through the API, not a phone, for the live test.
+
 ## Files you'll create
 ```
 apps/api/src/{routes/web.ts, lib/webSession.ts, lib/csrf.ts}  apps/api/drizzle/0003_web_sessions.sql

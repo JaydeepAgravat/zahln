@@ -36,6 +36,13 @@
       "when": 1792336871287,
       "tag": "0004_ops_refunds",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792339488286,
+      "tag": "0005_web_sessions",
+      "breakpoints": true
     }
   ]
 }

@@ -16,10 +16,13 @@ import { routes } from './routes';
 import { adminRoutes } from './routes/admin';
 import { authRoutes } from './routes/auth';
 import { configRoutes } from './routes/config';
+import { webRoutes } from './routes/web';
 
 /** Never log credentials, account identifiers or balances. */
 const REDACT = [
   'req.headers.authorization',
+  'req.headers.cookie',
+  'req.headers["x-admin-token"]',
   'req.headers["x-user-id"]',
   'req.headers["x-device-id"]',
   '*.sessionToken',
@@ -42,6 +45,9 @@ export type AppOptions = {
   logger?: FastifyServerOptions['logger'];
   intentSigningSecret?: string;
   adminToken?: string;
+  /** Browser origins allowed to send cookies (CORS with credentials). Never `*` with cookies. */
+  webOrigins?: string[];
+  secureCookies?: boolean;
 };
 
 export async function buildApp(options: AppOptions) {
@@ -66,12 +72,23 @@ export async function buildApp(options: AppOptions) {
     return reply.status(500).send({ error: 'internal', message: 'internal error' });
   });
 
-  await app.register(cors, { origin: true, methods: ['GET', 'HEAD', 'POST', 'PUT'] });
+  // Cookies + CORS: only listed origins get credentialed responses. Phones send no Origin, so they're unaffected.
+  const origins = options.webOrigins ?? ['http://localhost:3000', 'http://localhost:5174'];
+  await app.register(cors, {
+    origin: (origin, cb) => cb(null, !origin || origins.includes(origin)),
+    credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'],
+  });
   const devAuth = options.devAuth ?? false;
   await app.register(authPlugin, { db: options.db, devAuth });
   await app.register(authRoutes, { db: options.db, devOtp: devAuth });
   await app.register(routes, { db: options.db, rail, chaos, chaosEnabled: options.chaosEnabled ?? false });
   await app.register(configRoutes, { db: options.db });
+  await app.register(webRoutes, {
+    db: options.db,
+    devOtp: devAuth,
+    secureCookies: options.secureCookies ?? true,
+  });
   await app.register(adminRoutes, {
     db: options.db,
     adminToken: options.adminToken ?? 'dev-admin-token-change-me-please',
