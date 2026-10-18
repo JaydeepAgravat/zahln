@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { haptic, useIntentStatus, useT } from '@zahln/mobile-core';
+import { haptic, useIntentStatus, useKillSwitch, useT } from '@zahln/mobile-core';
 import {
   AmountDisplay,
   Button,
@@ -12,6 +12,7 @@ import {
   useCountdown,
   useTheme,
 } from '@zahln/mobile-ui';
+import { nfcPay } from '@zahln/nfc-pay';
 import { payUrlFor } from '@zahln/shared';
 import { useEffect } from 'react';
 import { StatusBar, View } from 'react-native';
@@ -38,6 +39,10 @@ export function QrScreen({ navigation, route }: Props) {
   const clearCart = useCart((s) => s.clear);
   const expired = intent.status === 'expired' || (countdown.expired && intent.status !== 'paid');
   const scanned = intent.status === 'scanned';
+  const nfcKilled = useKillSwitch('nfc_pay');
+  // While the QR is open (and payable), the till is also a contactless "card" holding the same reference.
+  const nfcOn = nfcPay.supported && !nfcKilled && !expired && (intent.status === 'awaiting_scan' || scanned);
+  useEffect(() => (nfcOn ? nfcPay.offer(payUrlFor(intent.ref)) : undefined), [nfcOn, intent.ref]);
 
   useEffect(() => {
     openIntent.set(intent.id);
@@ -141,6 +146,11 @@ export function QrScreen({ navigation, route }: Props) {
             {items ? (
               <Text variant="footnote" tone="on-ink-muted" numberOfLines={2} className="text-center">
                 {items}
+              </Text>
+            ) : null}
+            {nfcOn ? (
+              <Text variant="caption" tone="on-ink-muted" className="pt-1 text-center">
+                {t('tapToPay.hold')}
               </Text>
             ) : null}
           </View>

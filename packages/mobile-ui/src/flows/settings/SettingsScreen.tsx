@@ -1,4 +1,5 @@
 import {
+  ApiRequestError,
   api,
   enableBiometricUnlock,
   haptic,
@@ -13,10 +14,11 @@ import {
   useT,
 } from '@zahln/mobile-core';
 import { type ReactNode, useEffect, useState } from 'react';
-import { ScrollView, Switch, View } from 'react-native';
+import { Alert, ScrollView, Share, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 import { Avatar, ListRow, Logo, PressableScale, Text, toast, useTheme } from '../../ds';
+import { PinGate } from '../PinGate';
 
 function Segmented<T extends string>(props: {
   value: T;
@@ -150,6 +152,31 @@ export function SettingsScreen() {
     await session.signOut();
   };
 
+  // GDPR: both need the PIN (requiredAuth 'data_export'); the server re-checks balance and ownership on delete.
+  const [gate, setGate] = useState<'export' | 'delete' | null>(null);
+  const exportData = async () => {
+    const data = await api('/me/export', z.unknown());
+    await Share.share({ title: t('settings.exportTitle'), message: JSON.stringify(data, null, 2) });
+  };
+  const deleteAccount = async () => {
+    try {
+      await api('/me', z.null(), { method: 'DELETE' });
+      toast(t('settings.deleted'), 'checkCircle');
+      queryClient.clear();
+      await session.signOut();
+    } catch (e) {
+      const code = e instanceof ApiRequestError ? e.code : '';
+      toast(
+        code === 'balance_not_zero'
+          ? t('settings.deleteBalance')
+          : code === 'owner_cannot_delete'
+            ? t('settings.deleteOwner')
+            : t('refund.failed'),
+        'warning',
+      );
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <ScrollView contentContainerClassName="gap-6 px-5 pb-12 pt-2">
@@ -230,7 +257,42 @@ export function SettingsScreen() {
           />
         </Section>
 
+        <Section title={t('settings.sectionPrivacy')}>
+          <ListRow
+            icon="download"
+            title={t('settings.exportData')}
+            chevron
+            onPress={() => setGate('export')}
+          />
+          <Divider />
+          <ListRow
+            icon="warning"
+            iconColor="danger"
+            iconBackground="bg-danger-subtle"
+            title={t('settings.deleteAccount')}
+            chevron
+            onPress={() =>
+              Alert.alert(t('settings.deleteTitle'), t('settings.deleteBody'), [
+                { text: t('common.cancel'), style: 'cancel' },
+                { text: t('settings.deleteConfirm'), style: 'destructive', onPress: () => setGate('delete') },
+              ])
+            }
+          />
+        </Section>
+
         {__DEV__ ? <DevChaos /> : null}
+
+        <PinGate
+          visible={gate !== null}
+          title={t('settings.pinToContinue')}
+          subtitle={gate === 'delete' ? t('settings.deleteAccount') : t('settings.exportData')}
+          onCancel={() => setGate(null)}
+          onSuccess={() => {
+            const action = gate;
+            setGate(null);
+            void (action === 'delete' ? deleteAccount() : exportData());
+          }}
+        />
 
         <View className="items-center gap-2 pt-2">
           <Logo size={36} />

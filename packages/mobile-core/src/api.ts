@@ -2,6 +2,7 @@ import { type ApiErrorCode, ApiErrorSchema } from '@zahln/shared';
 import { Platform } from 'react-native';
 import type { z } from 'zod';
 import { appKind } from './app';
+import { logger } from './logger';
 
 /** The Android emulator reaches the host machine at 10.0.2.2; the iOS simulator shares localhost. */
 export const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
@@ -76,7 +77,8 @@ export async function api<S extends z.ZodType>(
       body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
       signal: controller.signal,
     });
-  } catch {
+  } catch (err) {
+    logger.warn(`network error on ${opts.method ?? 'GET'} ${path}`, err);
     throw new ApiRequestError(0, 'network', 'network error');
   } finally {
     clearTimeout(timer);

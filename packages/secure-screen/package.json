@@ -1,0 +1,29 @@
+{
+  "name": "@zahln/secure-screen",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Our own TurboModule: blocks screenshots on Android (FLAG_SECURE), blurs the iOS app-switcher snapshot, reports screen recording, and gives a root/jailbreak hint.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "react-native": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "codegenConfig": {
+    "name": "ZahlnSecureScreenSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "de.zahln.securescreen"
+    },
+    "ios": {
+      "modulesProvider": {
+        "ZahlnSecureScreen": "ZahlnSecureScreen"
+      }
+    }
+  },
+  "peerDependencies": {
+    "react": "19.3.0",
+    "react-native": "0.88.0"
+  }
+}

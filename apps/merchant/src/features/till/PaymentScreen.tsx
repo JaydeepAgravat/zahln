@@ -26,6 +26,7 @@ import {
   toast,
   usePinEntry,
 } from '@zahln/mobile-ui';
+import { useSecureScreen } from '@zahln/secure-screen';
 import {
   applyKeypadKey,
   isRefundable,
@@ -70,6 +71,8 @@ function RefundSheet({
   visible: boolean;
   onClose: () => void;
 }) {
+  // A manager's PIN is typed on this sheet: no screenshots, no recordings.
+  useSecureScreen();
   const { t, money } = useT();
   const remaining = intent.amountCents - intent.refundedCents;
   const [cents, setCents] = useState(remaining);

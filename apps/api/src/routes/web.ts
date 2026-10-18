@@ -27,6 +27,7 @@ import {
   staff,
   users,
 } from '../db/schema';
+import { exportAccount } from '../lib/account';
 import { audit } from '../lib/audit';
 import { requestOtp, sha256, verifyOtp } from '../lib/auth';
 import { getStoredConfig } from '../lib/config';
@@ -833,37 +834,12 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
   app.get('/web/wallet/export.json', async (req, reply) => {
     const s = consumer(req);
     requireStepUp(s);
-    const [user] = await db.select().from(users).where(eq(users.id, s.user.id));
-    const attempts = await db
-      .select()
-      .from(paymentAttempts)
-      .where(eq(paymentAttempts.payerUserId, s.user.id));
-    const myDevices = await db
-      .select({
-        id: devices.id,
-        platform: devices.platform,
-        createdAt: devices.createdAt,
-        lastSeenAt: devices.lastSeenAt,
-        revokedAt: devices.revokedAt,
-      })
-      .from(devices)
-      .where(eq(devices.userId, s.user.id));
-    const memberships = await db.select().from(staff).where(eq(staff.userId, s.user.id));
-    const wallet = await getWallet(db, accountId.consumer(s.user.id), 10_000);
     return reply
       .header(
         'content-disposition',
         `attachment; filename="zahln-daten-${new Date().toISOString().slice(0, 10)}.json"`,
       )
       .header('cache-control', 'no-store')
-      .send({
-        exportedAt: new Date().toISOString(),
-        user,
-        memberships,
-        devices: myDevices,
-        wallet,
-        paymentAttempts: attempts,
-        note: 'Ledger entries are kept for 10 years (German commercial and tax law, § 147 AO) even after deletion.',
-      });
+      .send(await exportAccount(db, s.user.id));
   });
 }

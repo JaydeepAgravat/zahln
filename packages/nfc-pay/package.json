@@ -1,0 +1,24 @@
+{
+  "name": "@zahln/nfc-pay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Our own Android-only TurboModule: the till emulates a card (HCE) that holds the open payment's reference; the payer's phone reads it in reader mode.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "react-native": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "codegenConfig": {
+    "name": "ZahlnNfcPaySpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "de.zahln.nfcpay"
+    }
+  },
+  "peerDependencies": {
+    "react": "19.3.0",
+    "react-native": "0.88.0"
+  }
+}

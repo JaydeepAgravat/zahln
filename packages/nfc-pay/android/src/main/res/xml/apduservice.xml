@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A proprietary AID (F0 prefix) in the "other" category. "payment" would make Zahln compete to be the
+  phone's default payment app (and needs the user to choose it in Settings): not what a till reference is.
+-->
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/nfc_pay_service"
+    android:requireDeviceUnlock="false">
+    <aid-group android:category="other" android:description="@string/nfc_pay_service">
+        <aid-filter android:name="F05A41484C4E01" />
+    </aid-group>
+</host-apdu-service>

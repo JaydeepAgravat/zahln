@@ -168,8 +168,9 @@ Interviewers at a founding-team stage want to hear the trade-off, not a library 
 ### 4.4 Native modules (written by hand)
 - **SecureScreen** (Swift + Kotlin): `FLAG_SECURE` on Android; blur the iOS app-switcher snapshot and react to screen
   recording. Used on PIN, balance and receipt screens.
-- **NfcPay** (Kotlin, Android HCE): the consumer phone emulates a card-like service; the merchant phone reads the
-  payment intent reference over APDU. On iOS: QR fallback, and an ADR on Apple's EEA HCE entitlement.
+- **NfcPay** (Kotlin, Android HCE): the *till* emulates a card that answers with the open payment's reference; the
+  payer's phone reads it in reader mode and pays as with a QR. On iOS: QR, and ADR 0004 on Apple's EEA HCE
+  entitlement (`docs/adr/0004-nfc.md`).
 - **If they ask** *"When do you drop below RN?"*: "When the platform API has no maintained library, or when the
   library is a thin wrapper I'd have to fork anyway. A screenshot flag is ten lines of native code; adding a
   dependency for it is a supply-chain risk on a payments app. A QR scanner, though, I'd never write myself."

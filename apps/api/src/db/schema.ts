@@ -40,6 +40,8 @@ export const users = pgTable('users', {
   name: text().notNull(),
   phone: text().notNull().unique(),
   createdAt: createdAt(),
+  /** Soft delete (GDPR Art. 17): name and phone are cleared, the ledger is kept (§ 147 AO, 10 years). */
+  deletedAt: timestamp({ withTimezone: true }),
 });
 
 export const merchants = pgTable('merchants', {

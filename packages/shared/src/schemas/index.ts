@@ -191,6 +191,8 @@ export const API_ERROR_CODES = [
   'already_member',
   'own_role',
   'owner_locked',
+  'balance_not_zero',
+  'owner_cannot_delete',
   'internal',
 ] as const;
 export const ApiErrorSchema = z.object({

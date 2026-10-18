@@ -22,6 +22,7 @@ import {
   Icon,
   IconButton,
   type IconName,
+  IntegrityNotice,
   Keypad,
   PressableScale,
   Skeleton,
@@ -32,6 +33,7 @@ import {
   toast,
   useTheme,
 } from '@zahln/mobile-ui';
+import { nfcPay } from '@zahln/nfc-pay';
 import { applyKeypadKey, type CatalogueItem, isPayable } from '@zahln/shared';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
@@ -73,12 +75,12 @@ function MerchantHeader({ onMyQr }: { onMyQr?: () => void }) {
           label={merchant.plan[0]?.toUpperCase() + merchant.plan.slice(1)}
         />
       ) : null}
-      {/* Tap to Pay (NFC, Day 11) disappears the moment ops flips the nfc_pay kill switch. */}
-      {nfcKilled ? null : (
+      {/* Tap to Pay (NFC): Android tills only, and gone the moment ops flips the nfc_pay kill switch. */}
+      {nfcKilled || !nfcPay.supported ? null : (
         <IconButton
           icon="contactless"
           label={t('tapToPay.label')}
-          onPress={() => toast(t('tapToPay.soon'), 'info')}
+          onPress={() => toast(nfcPay.enabled() ? t('tapToPay.hint') : t('tapToPay.off'), 'info')}
         />
       )}
       {onMyQr ? <IconButton icon="qr" label={t('myQr.title')} onPress={onMyQr} /> : null}
@@ -345,6 +347,7 @@ export function TillScreen() {
       <View className="flex-1 gap-4 px-5 pt-2">
         <MerchantHeader onMyQr={() => navigation.navigate('MyQr')} />
         <ConfigBanner />
+        <IntegrityNotice />
         {!canDynamic ? (
           // Free plan: no one-time QR codes. Say so up front and point to what does work.
           <View className="flex-1 items-center justify-center gap-4 px-2">

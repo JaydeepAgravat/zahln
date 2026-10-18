@@ -25,7 +25,7 @@ One file per day. Each one has the same sections:
 | [Day 8](DAY-8.md) ✅ | Zahln Web II: pay-link checkout, consumer web wallet, Playwright | Pay a link in a browser |
 | [Day 9](DAY-9.md) | The Zahln Edition I: content, CC0 art, lettering, static layout | Reads perfectly with JS off |
 | [Day 10](DAY-10.md) | The Zahln Edition II: motion, shader, Lighthouse CI budgets | Budgets green |
-| [Day 11](DAY-11.md) | Native modules (SecureScreen, NFC HCE), security hardening | Security checklist |
+| [Day 11](DAY-11.md) ✅ | Native modules (SecureScreen, NFC HCE), security hardening | Security checklist |
 | [Day 12](DAY-12.md) | Storybook, accessibility, Maestro + Playwright, one CI pipeline | CI green on a clean clone |
 | [Day 13](DAY-13.md) | ADRs, README, video, rehearsal | 5-minute demo, no surprises |
 

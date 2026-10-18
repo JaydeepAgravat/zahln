@@ -3,6 +3,8 @@ export * from './config';
 export * from './money';
 export * from './payUrl';
 export * from './plans';
+export * from './reauth';
 export * from './schemas';
+export * from './scrub';
 export * from './state/paymentAttempt';
 export * from './state/paymentIntent';

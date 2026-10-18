@@ -1,4 +1,8 @@
 module.exports = {
   // Inter lives in the shared design system; `npx react-native-asset` links it into the native projects.
   assets: ['../../packages/mobile-ui/assets/fonts'],
+  dependencies: {
+    // Phone-to-phone NFC is Android only (see docs/adr/0004-nfc.md): not linked into the iOS app at all.
+    '@zahln/nfc-pay': { platforms: { ios: null } },
+  },
 };

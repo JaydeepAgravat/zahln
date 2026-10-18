@@ -1,12 +1,14 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   checkPin,
+  currentConfig,
   haptic,
   queryClient,
   unlockWithBiometrics,
   useBiometry,
   usePayment,
   usePrefs,
+  useRemoteConfig,
   useT,
   useWallet,
 } from '@zahln/mobile-core';
@@ -26,7 +28,12 @@ import {
   usePinEntry,
   useTheme,
 } from '@zahln/mobile-ui';
-import { type AttemptState, MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN, type PaymentIntent } from '@zahln/shared';
+import {
+  type AttemptState,
+  MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN,
+  type PaymentIntent,
+  requiredAuth,
+} from '@zahln/shared';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Platform, StatusBar, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -149,7 +156,11 @@ function ConfirmView({
   const { intent } = state;
   const countdown = useCountdown(intent);
   const busy = state.status !== 'confirming';
-  const useBio = biometricsEnabled && biometry?.available;
+  const { limits } = useRemoteConfig();
+  // Above the remote-config threshold, Face ID isn't enough: the PIN is.
+  const pinOnly =
+    requiredAuth('payment', { amountCents: intent.amountCents + tipCents, ...limits }) === 'pin';
+  const useBio = biometricsEnabled && biometry?.available && !pinOnly;
 
   useEffect(() => {
     if (countdown.expired && state.status === 'confirming') onExpire();
@@ -382,6 +393,8 @@ function CheckingView({
  * One screen, one state machine. Each status of the shared `attemptReducer` has exactly one view,
  * so there is no screen the app can show that the reducer doesn't know about.
  */
+const currentLimits = () => currentConfig().limits;
+
 export function PayScreen({ navigation, route }: Props) {
   const { t, money } = useT();
   const pay = usePayment();
@@ -407,7 +420,11 @@ export function PayScreen({ navigation, route }: Props) {
   const startPayment = async () => {
     if (state.status !== 'confirming') return;
     pay.confirm();
-    if (biometricsEnabled && biometry?.available) {
+    const method = requiredAuth('payment', {
+      amountCents: state.intent.amountCents + pay.tipCents,
+      ...currentLimits(),
+    });
+    if (method === 'biometric_or_pin' && biometricsEnabled && biometry?.available) {
       const result = await unlockWithBiometrics({
         title: t('pay.authPrompt', {
           amount: money(state.intent.amountCents + pay.tipCents),

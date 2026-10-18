@@ -64,7 +64,8 @@
     "skip": "Überspringen",
     "tryAgain": "Erneut versuchen",
     "networkError": "Keine Verbindung. Bitte prüfe dein Internet.",
-    "devHint": "Demo: Code {{code}}"
+    "devHint": "Demo: Code {{code}}",
+    "cancel": "Abbrechen"
   },
   "onboarding": {
     "welcome": {
@@ -183,7 +184,18 @@
     "account": "Konto",
     "sectionApp": "App",
     "sectionSecurity": "Sicherheit",
-    "version": "Zahln 0.1 · Gebaut in Augsburg"
+    "version": "Zahln 0.1 · Gebaut in Augsburg",
+    "sectionPrivacy": "Deine Daten",
+    "exportData": "Meine Daten exportieren",
+    "exportTitle": "Daten exportieren",
+    "deleteAccount": "Konto löschen",
+    "deleteTitle": "Konto wirklich löschen?",
+    "deleteBody": "Name, Nummer und Anmeldungen werden gelöscht. Zahlungsbelege bleiben 10 Jahre gespeichert (gesetzliche Aufbewahrung).",
+    "deleteConfirm": "Mit PIN löschen",
+    "deleteBalance": "Bitte zahle zuerst dein Guthaben aus. Dann kannst du das Konto löschen.",
+    "deleteOwner": "Du bist Inhaber:in eines Geschäfts. Übergib es zuerst.",
+    "deleted": "Dein Konto ist gelöscht.",
+    "pinToContinue": "PIN zur Bestätigung"
   },
   "merchant": {
     "tillTitle": "Kasse bereit",
@@ -291,6 +303,12 @@
   },
   "tapToPay": {
     "label": "Tap to Pay",
-    "soon": "Tap to Pay kommt an Tag 11 (NFC)."
+    "hold": "Oder das Telefon des Kunden an die Kasse halten (NFC).",
+    "hint": "NFC startet, sobald ein QR-Code offen ist.",
+    "off": "NFC ist ausgeschaltet. Einschalten in den Einstellungen."
+  },
+  "security": {
+    "rooted": "Dieses Gerät ist möglicherweise gerootet oder gejailbreakt. Zahln funktioniert weiter, aber deine Daten sind hier weniger geschützt.",
+    "captured": "Bildschirmaufnahme läuft: Beträge sind ausgeblendet."
   }
 }

@@ -316,9 +316,9 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-Zahln.release.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Zahln/Zahln.entitlements;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = Zahln/Zahln.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = Zahln/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;

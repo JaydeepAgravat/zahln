@@ -17,6 +17,8 @@
     "@tanstack/react-query": "5.104.4",
     "@zahln/mobile-core": "workspace:*",
     "@zahln/mobile-ui": "workspace:*",
+    "@zahln/nfc-pay": "workspace:*",
+    "@zahln/secure-screen": "workspace:*",
     "@zahln/shared": "workspace:*",
     "i18next": "26.5.2",
     "nativewind": "4.2.7",

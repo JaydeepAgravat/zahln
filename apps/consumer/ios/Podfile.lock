@@ -2285,6 +2285,29 @@ PODS:
     - Yoga
   - Yoga (0.0.0):
     - React-Core-prebuilt
+  - ZahlnSecureScreen (0.1.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-cxxstableapi
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
 
 DEPENDENCIES:
   - boost (from `build/rndeps-facades/boost`)
@@ -2387,6 +2410,7 @@ DEPENDENCIES:
   - SocketRocket (from `build/rndeps-facades/SocketRocket`)
   - VisionCamera (from `../../../node_modules/react-native-vision-camera`)
   - Yoga (from `build/rncore-facades/Yoga`)
+  - "ZahlnSecureScreen (from `../node_modules/@zahln/secure-screen`)"
 
 SPEC REPOS:
   trunk:
@@ -2592,6 +2616,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-vision-camera"
   Yoga:
     :path: build/rncore-facades/Yoga
+  ZahlnSecureScreen:
+    :path: "../node_modules/@zahln/secure-screen"
 
 SPEC CHECKSUMS:
   boost: 8502bfdc46e2804408af2e163049ece181009af4
@@ -2694,6 +2720,7 @@ SPEC CHECKSUMS:
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
   VisionCamera: be24451f0306c50a98d0dcd21bf46b2ca2068c39
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
+  ZahlnSecureScreen: bf4c5f5b7b7c4b1acb1b6b35178db4d8dc68682c
 
 PODFILE CHECKSUM: 2b7c415d4bd7636479782ebb4d07d4757adba313
 

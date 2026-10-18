@@ -2,6 +2,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
 import { payments, useT } from '@zahln/mobile-core';
 import { AmountDisplay, Icon, PressableScale, ReceiptEdge, SafeArea, Skeleton, Text } from '@zahln/mobile-ui';
+import { useSecureScreen } from '@zahln/secure-screen';
 import { includedVat, type VatRate } from '@zahln/shared';
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
@@ -36,6 +37,7 @@ const Rule = () => <View className="border-t border-dashed border-border-strong"
  * The TSE signature from a real Fiskaltrust integration would go in the footer.
  */
 export function ReceiptScreen({ navigation, route }: Props) {
+  useSecureScreen();
   const { t, money, locale } = useT();
   const { intentId, attempt } = route.params;
   // Always fetched fresh: the receipt must show refunds made after the payment.

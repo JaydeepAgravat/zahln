@@ -81,6 +81,36 @@ One `logger` used everywhere (Biome bans `console.*`). It redacts keys (`token`,
 
 ---
 
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| `packages/secure-screen` TurboModule | Done: Codegen spec with typed **event emitters** (`onCaptureChanged`, `onScreenshot`); iOS logic in **Swift** behind an ObjC++ `.mm` shim; Android in **Kotlin** (`FLAG_SECURE` on the UI thread, reference-counted) | The `.mm` interface is deliberately *not* a public header: a public header imports the C++ codegen headers into the pod's Swift module and the build fails (`'utility' file not found`). Found on the first build |
+| `useSecureScreen()` on PIN, wallet, receipt, refund | Lock screen, `BalanceCard` (both apps' wallets), consumer receipt, merchant refund sheet, and the new `PinGate`; while the iOS screen is recorded the balance hides itself | |
+| `modules/nfc-pay` | `packages/nfc-pay` (Android only): the **till emulates** (`HostApduService`, AID `F0 5A 41 48 4C 4E 01`, category `other`, service disabled in the manifest and enabled only while a QR is open); the **payer reads** (reader mode on the scan screen) and gets the same pay URL as the QR. Not linked on iOS (`react-native.config.js`); Tap to Pay hidden there | The plan text had both directions; the till holds the reference, so it must be the card. ADR: `docs/adr/0004-nfc.md` |
+| Brightness module | Not done | Day 4 kept the QR at full contrast on ink instead |
+| Pinning | iOS `NSPinnedDomains` (CA SPKI + backup) and Android `network_security_config.xml` (`<pin-set>` with expiry, system CAs only, cleartext only in `src/debug`) for `api.zahln.example`; pins are placeholders | The domain doesn't exist yet; `docs/SECURITY.md` has the command and rotation plan |
+| Logger + scrubber | `scrub()` in shared (keys + IBAN/JWT/bearer/card/phone patterns, errors, cycles; tested) and `logger` in mobile-core (scrubs before sinks, ring buffer, console only in `__DEV__`; tested). API/network and config errors now log through it | Sentry's `beforeSend` would be the same function |
+| Re-auth rules | `requiredAuth()` in shared (tested): payments above `limits.reauthAboveCents` → PIN, not Face ID; refunds, PIN change, data export, device sign-out → PIN. Used by the pay screen (button label and flow) and the new `PinGate` | Thresholds come from remote config, so ops can tighten them in an incident |
+| Root/jailbreak heuristics | `integrity()` in SecureScreen (files, sandbox write, test-keys, emulator); `IntegrityNotice` warns on both home screens, never blocks | Reasons in `IntegrityNotice.tsx` and SECURITY.md |
+| GDPR export + delete | `GET /me/export` and `DELETE /me` (soft delete: name/phone cleared, devices + web sessions revoked, memberships removed, audited; refused with money left or for an owner); Settings → "Deine Daten" with `PinGate`. The web export reuses the same function | Ledger kept 10 years (§ 147 AO) |
+| `docs/SECURITY.md` | Written | |
+
+**Verified:**
+- iOS simulator, Zahln rebuilt with the Swift module:
+  - The app runs, and the lock screen uses SecureScreen.
+  - In the **app switcher the Zahln card is blurred**; ZYSYGY's unprotected onboarding card next to it stays readable.
+  - The blur lifts on return.
+  - Settings shows the new section.
+  - "Konto löschen" → confirm → PIN gate → the server refused (Lena has a balance), and the account is untouched.
+- Android: ZYSYGY `assembleDebug` compiles both Kotlin modules. The merged manifest has the HCE service with
+  `enabled="false"` and the network security config. `PackageList` autolinks `SecureScreenPackage` and `NfcPayPackage`.
+- Tests: scrubber, logger, re-auth and account deletion all pass.
+
+**Not verified:**
+- `FLAG_SECURE` and NFC on a device (no Android device or emulator was running; the phone-to-phone tap needs two real NFC phones).
+- Pins against a real certificate.
+- The data-export share sheet: the tap went to "Konto löschen" instead.
+
 ## Files you'll create
 ```
 packages/secure-screen/{package.json, src/NativeSecureScreen.ts, ios/*.swift, ios/*.mm, android/**/*.kt}

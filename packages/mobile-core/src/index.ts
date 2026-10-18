@@ -4,6 +4,7 @@ export { type BiometryInfo, prefetchBiometry, useBiometry } from './biometrics';
 export { prettyPhone } from './format';
 export { haptic } from './haptics';
 export { i18n, useT } from './i18n';
+export * from './logger';
 export { payments } from './payments/client';
 export { type PendingPayment, pendingPayment } from './payments/pending';
 export { useIntentStatus } from './payments/useIntentStatus';

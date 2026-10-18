@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import type { Db } from '../db/client';
@@ -35,7 +35,10 @@ export const authPlugin = fp(async (app: FastifyInstance, opts: { db: Db; devAut
     if (!opts.devAuth) return;
     const header = req.headers['x-user-id'];
     if (typeof header !== 'string' || header.length === 0) return;
-    const [user] = await opts.db.select({ id: users.id }).from(users).where(eq(users.id, header));
+    const [user] = await opts.db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.id, header), isNull(users.deletedAt)));
     if (user) req.actor = { userId: user.id, deviceId: null };
   });
 });

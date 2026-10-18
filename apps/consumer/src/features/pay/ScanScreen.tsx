@@ -1,7 +1,8 @@
 import { useIsFocused } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { haptic, payments, useT } from '@zahln/mobile-core';
+import { haptic, payments, useKillSwitch, useT } from '@zahln/mobile-core';
 import { Button, Icon, PressableScale, SafeArea, Text, toast, useTheme } from '@zahln/mobile-ui';
+import { useNfcReader } from '@zahln/nfc-pay';
 import { handleUrlFor, parseHandleUrl, parsePayUrl } from '@zahln/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Linking, StatusBar, StyleSheet, View } from 'react-native';
@@ -107,6 +108,11 @@ export function ScanScreen({ navigation }: Props) {
     },
     [open, openHandle, t],
   );
+
+  // Android: holding the phone against a ZYSYGY till delivers the same reference the QR carries.
+  const nfcKilled = useKillSwitch('nfc_pay');
+  const onNfc = useCallback((ref: string) => onCodes([ref]), [onCodes]);
+  useNfcReader(focused && appActive && !nfcKilled, onNfc);
 
   const scanner = useQrOutput(onCodes);
 

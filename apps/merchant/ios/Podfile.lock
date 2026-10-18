@@ -2234,6 +2234,29 @@ PODS:
     - ReactNativeDependencies
   - Yoga (0.0.0):
     - React-Core-prebuilt
+  - ZahlnSecureScreen (0.1.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-cxxstableapi
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
 
 DEPENDENCIES:
   - boost (from `build/rndeps-facades/boost`)
@@ -2334,6 +2357,7 @@ DEPENDENCIES:
   - RNWorklets (from `../../../node_modules/react-native-worklets`)
   - SocketRocket (from `build/rndeps-facades/SocketRocket`)
   - Yoga (from `build/rncore-facades/Yoga`)
+  - "ZahlnSecureScreen (from `../node_modules/@zahln/secure-screen`)"
 
 SPEC REPOS:
   trunk:
@@ -2535,6 +2559,8 @@ EXTERNAL SOURCES:
     :path: build/rndeps-facades/SocketRocket
   Yoga:
     :path: build/rncore-facades/Yoga
+  ZahlnSecureScreen:
+    :path: "../node_modules/@zahln/secure-screen"
 
 SPEC CHECKSUMS:
   boost: 8502bfdc46e2804408af2e163049ece181009af4
@@ -2635,6 +2661,7 @@ SPEC CHECKSUMS:
   RNWorklets: 0d23420091001705e895540acae9fa4f67d6c21e
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
   Yoga: d1c536142c5ff8ec8cd856ab2a7c227a1d875c8e
+  ZahlnSecureScreen: bf4c5f5b7b7c4b1acb1b6b35178db4d8dc68682c
 
 PODFILE CHECKSUM: 47c0a9237693a4dd3a7b168db6433e6cb86c93b3
 

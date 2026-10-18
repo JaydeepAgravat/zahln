@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release: HTTPS only, system CAs only (no user-installed CAs), and the release API pinned to two SPKI hashes
+  (the CA key plus a backup) with an expiry, so a rotation can never brick old app versions forever.
+  Pins are placeholders until the domain exists; docs/SECURITY.md has the openssl command and rotation plan.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">api.zahln.example</domain>
+        <pin-set expiration="2027-10-01">
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>

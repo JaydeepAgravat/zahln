@@ -2,6 +2,7 @@ import { RegisterDeviceSchema, RequestOtpSchema, VerifyOtpSchema } from '@zahln/
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import type { Db } from '../db/client';
+import { deleteAccount, exportAccount } from '../lib/account';
 import { me, registerDevice, requestOtp, revokeDevice, verifyOtp } from '../lib/auth';
 import { ApiError } from '../lib/errors';
 import { requireActor } from '../plugins/auth';
@@ -28,6 +29,18 @@ export async function authRoutes(fastify: FastifyInstance, deps: { db: Db; devOt
   });
 
   app.get('/me', async (req) => me(db, requireActor(req).userId));
+
+  /** "Meine Daten exportieren". The app asks for the PIN first (requiredAuth 'data_export'). */
+  app.get('/me/export', async (req, reply) => {
+    reply.header('cache-control', 'no-store');
+    return exportAccount(db, requireActor(req).userId);
+  });
+
+  /** "Konto löschen". The app asks for the PIN first; the server checks balance and ownership. */
+  app.delete('/me', async (req, reply) => {
+    await deleteAccount(db, requireActor(req).userId);
+    return reply.status(204).send();
+  });
 
   /** Sign out: revoke this device's session. */
   app.delete('/devices/current', async (req, reply) => {

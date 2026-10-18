@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@zahln/mobile-core": "workspace:*",
+    "@zahln/secure-screen": "workspace:*",
     "@zahln/shared": "workspace:*"
   },
   "peerDependencies": {

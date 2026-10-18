@@ -13,6 +13,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import { API_URL, api, authHeaders } from './api';
 import { appKind, appVersion } from './app';
+import { logger } from './logger';
 import { usePrefs } from './prefs';
 import { useSession } from './session';
 import { storage } from './storage';
@@ -95,7 +96,8 @@ export function refreshConfig(): Promise<void> {
         },
       );
       useConfigStore.getState().set({ config, offline: false });
-    } catch {
+    } catch (err) {
+      logger.info('config fetch failed, using the saved config', err);
       useConfigStore.getState().set({ offline: true });
     } finally {
       inFlight = null;

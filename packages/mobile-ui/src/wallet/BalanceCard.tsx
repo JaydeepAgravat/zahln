@@ -1,4 +1,5 @@
 import { useT } from '@zahln/mobile-core';
+import { useSecureScreen } from '@zahln/secure-screen';
 import { spokenMoney } from '@zahln/shared';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -19,7 +20,10 @@ export function BalanceCard({
   footnote?: string;
 }) {
   const { t, money, locale } = useT();
-  const [discreet, setDiscreet] = useState(false);
+  const [discreetChoice, setDiscreet] = useState(false);
+  // Protected while visible; while the screen is recorded or mirrored (iOS), the balance hides itself.
+  const { captured } = useSecureScreen();
+  const discreet = discreetChoice || captured;
   const formatted = cents === undefined ? '' : money(cents);
   return (
     <View>

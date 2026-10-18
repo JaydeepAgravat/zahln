@@ -64,7 +64,8 @@
     "skip": "Skip",
     "tryAgain": "Try again",
     "networkError": "No connection. Please check your internet.",
-    "devHint": "Demo: code {{code}}"
+    "devHint": "Demo: code {{code}}",
+    "cancel": "Cancel"
   },
   "onboarding": {
     "welcome": {
@@ -183,7 +184,18 @@
     "account": "Account",
     "sectionApp": "App",
     "sectionSecurity": "Security",
-    "version": "Zahln 0.1 · Built in Augsburg"
+    "version": "Zahln 0.1 · Built in Augsburg",
+    "sectionPrivacy": "Your data",
+    "exportData": "Export my data",
+    "exportTitle": "Export data",
+    "deleteAccount": "Delete account",
+    "deleteTitle": "Really delete your account?",
+    "deleteBody": "Your name, number and sign-ins are deleted. Payment records are kept for 10 years (legal retention).",
+    "deleteConfirm": "Delete with PIN",
+    "deleteBalance": "Please pay out your balance first. Then you can delete the account.",
+    "deleteOwner": "You own a business. Hand it over first.",
+    "deleted": "Your account has been deleted.",
+    "pinToContinue": "Confirm with your PIN"
   },
   "merchant": {
     "tillTitle": "Till ready",
@@ -291,6 +303,12 @@
   },
   "tapToPay": {
     "label": "Tap to Pay",
-    "soon": "Tap to Pay arrives on Day 11 (NFC)."
+    "hold": "Or hold the customer's phone against the till (NFC).",
+    "hint": "NFC starts as soon as a QR code is open.",
+    "off": "NFC is off. Turn it on in Settings."
+  },
+  "security": {
+    "rooted": "This device may be rooted or jailbroken. Zahln keeps working, but your data is less protected here.",
+    "captured": "Screen recording is on: amounts are hidden."
   }
 }

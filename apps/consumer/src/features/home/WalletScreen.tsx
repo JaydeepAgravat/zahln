@@ -9,6 +9,7 @@ import {
   Icon,
   IconButton,
   type IconName,
+  IntegrityNotice,
   PressableScale,
   Text,
   TransactionList,
@@ -102,6 +103,7 @@ export function WalletScreen() {
           <IconButton icon="bell" label="Mitteilungen" onPress={soon} />
         </Animated.View>
         <ConfigBanner />
+        <IntegrityNotice />
 
         <Animated.View entering={FadeInDown.duration(420).delay(60)}>
           <BalanceCard label={t('home.balance')} cents={wallet.data?.balanceCents} footnote="SEPA Instant" />

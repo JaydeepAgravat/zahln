@@ -8,6 +8,7 @@ import {
   useSession,
   useT,
 } from '@zahln/mobile-core';
+import { useSecureScreen } from '@zahln/secure-screen';
 import { MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN } from '@zahln/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -19,6 +20,8 @@ import { PinLayout, usePinEntry } from '../onboarding/PinScreens';
  * Biometrics first (if enabled), PIN as the fallback, with a growing cooldown after 5 wrong PINs.
  */
 export function LockScreen() {
+  // No screenshots of the PIN pad, and no app-switcher snapshot of it.
+  useSecureScreen();
   const { t } = useT();
   const unlock = useSession((s) => s.unlock);
   const firstName = usePrefs((s) => s.firstName);
