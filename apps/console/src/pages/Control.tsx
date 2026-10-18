@@ -243,7 +243,7 @@ export function ControlPage() {
                     chaos.data.mode === c.mode
                       ? c.mode === 'ok'
                         ? 'bg-text-primary text-bg'
-                        : 'bg-danger text-on-flood'
+                        : 'bg-danger text-bg'
                       : 'border border-border hover:bg-surface-muted',
                   )}
                 >

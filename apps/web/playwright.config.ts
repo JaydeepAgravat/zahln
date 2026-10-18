@@ -22,13 +22,25 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-      testMatch: /dashboard.*\.spec\.ts/,
+      testMatch: /(dashboard|a11y).*\.spec\.ts/,
+    },
+    {
+      name: 'console',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        baseURL: process.env.CONSOLE_URL ?? 'http://localhost:5174',
+      },
+      testMatch: /console.*\.spec\.ts/,
     },
   ],
-  webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000/login',
-    reuseExistingServer: true,
-    timeout: 120_000,
-  },
+  webServer: [
+    { command: 'pnpm dev', url: 'http://localhost:3000/login', reuseExistingServer: true, timeout: 120_000 },
+    {
+      command: 'pnpm --filter @zahln/console dev',
+      url: 'http://localhost:5174',
+      reuseExistingServer: true,
+      timeout: 120_000,
+    },
+  ],
 });

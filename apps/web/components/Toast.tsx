@@ -22,7 +22,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={x.id}
             className={cx(
               'animate-arrive max-w-sm rounded-md px-4 py-3 text-callout shadow-lg',
-              x.tone === 'success' ? 'bg-text-primary text-bg' : 'bg-danger text-on-flood',
+              x.tone === 'success' ? 'bg-text-primary text-bg' : 'bg-danger text-bg',
             )}
           >
             {x.text}

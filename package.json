@@ -25,7 +25,10 @@
     "pods": "pnpm --filter @zahln/consumer pods && pnpm --filter @zahln/merchant pods",
     "icons": "node scripts/generate-icons.mjs",
     "console": "pnpm --filter @zahln/console dev",
-    "landing": "pnpm --filter @zahln/landing dev"
+    "landing": "pnpm --filter @zahln/landing dev",
+    "e2e": "pnpm --filter @zahln/web e2e",
+    "e2e:mobile": "maestro test apps/consumer/e2e/happy-path.yaml apps/consumer/e2e/network-drop.yaml",
+    "storybook": "pnpm --filter @zahln/web-ui storybook"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

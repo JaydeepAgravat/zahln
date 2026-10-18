@@ -49,7 +49,8 @@ const variants: Record<Variant, string> = {
   primary: 'bg-text-primary text-bg hover:bg-text-primary/85',
   secondary: 'border border-border bg-surface text-text-primary hover:bg-surface-muted',
   ghost: 'text-text-secondary hover:bg-surface-muted hover:text-text-primary',
-  danger: 'bg-danger text-on-flood hover:bg-danger/90',
+  // Text in the page colour: dark ink on light raspberry in dark mode, cream on deep raspberry in light (both >= 4.5:1).
+  danger: 'bg-danger text-bg hover:bg-danger/90',
 };
 
 export function Button({

@@ -35,7 +35,7 @@ import {
   requiredAuth,
 } from '@zahln/shared';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Platform, StatusBar, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, Modal, Platform, StatusBar, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import type { HomeStackParamList } from '../../app/navigation/types';
 
@@ -317,6 +317,10 @@ function OutcomeView({
     if (outcome.tone === 'danger') haptic.error();
     else haptic.warning();
   }, [outcome.tone]);
+  // iOS ignores accessibilityLiveRegion: say the outcome out loud on both platforms.
+  useEffect(() => {
+    AccessibilityInfo.announceForAccessibility(`${outcome.title}. ${outcome.body}`);
+  }, [outcome.title, outcome.body]);
   return (
     <SafeArea className="flex-1 bg-bg px-5" edges={['top', 'bottom']}>
       <View className="flex-row py-2">
@@ -362,6 +366,11 @@ function CheckingView({
 }) {
   const { t } = useT();
   const { colors } = useTheme();
+  useEffect(() => {
+    AccessibilityInfo.announceForAccessibility(
+      `${t('payment.status.checking')}. ${t('payment.explain.checking')}`,
+    );
+  }, [t]);
   return (
     <SafeArea className="flex-1 bg-bg px-5" edges={['top', 'bottom']}>
       <View className="flex-1 items-center justify-center gap-4 px-4" accessibilityLiveRegion="polite">

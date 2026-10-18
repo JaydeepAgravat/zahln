@@ -1,0 +1,27 @@
+# Act 1 from the payer's side: a till opens a QR, the link opens Zahln, PIN, Bezahlt.
+# Run: maestro test apps/consumer/e2e/happy-path.yaml   (API + Metro running, Lena signed in on the simulator)
+appId: de.zahln.app
+name: Zahln · pay a till QR
+---
+- launchApp
+- runFlow: unlock.yaml
+- extendedWaitUntil:
+    visible: "Guthaben"
+    timeout: 10000
+- runScript: scripts/till-intent.js
+- openLink: "zahln://i/${output.ref}"
+- extendedWaitUntil:
+    visible: "Café Mila"
+    timeout: 10000
+# The amount on screen is read out as "sechs Euro dreißig"; the button carries the figure.
+- tapOn:
+    text: "Mit PIN bezahlen · 6,30.€"  # Intl puts a no-break space before €
+- runFlow: pin.yaml
+- extendedWaitUntil:
+    visible: "Bezahlt"
+    timeout: 10000
+- runScript:
+    file: scripts/ledger-count.js
+    env:
+      INTENT: ${output.intentId}
+- assertTrue: ${output.ledgerTransactions == 1}

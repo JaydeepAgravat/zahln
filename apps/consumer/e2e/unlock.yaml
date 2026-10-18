@@ -1,0 +1,13 @@
+# Sub-flow: unlock with the demo PIN (271828). Only runs if the lock screen is showing.
+appId: de.zahln.app
+---
+- runFlow:
+    when:
+      visible: "Gib deine PIN ein"
+    commands:
+      - tapOn: "2"
+      - tapOn: "7"
+      - tapOn: "1"
+      - tapOn: "8"
+      - tapOn: "2"
+      - tapOn: "8"

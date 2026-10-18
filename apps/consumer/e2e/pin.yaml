@@ -1,0 +1,12 @@
+# Sub-flow: confirm a payment with the PIN sheet.
+appId: de.zahln.app
+---
+- extendedWaitUntil:
+    visible: "PIN eingeben"
+    timeout: 5000
+- tapOn: "2"
+- tapOn: "7"
+- tapOn: "1"
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "8"

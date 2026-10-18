@@ -1,4 +1,3 @@
-import '../../global.css';
 import { QueryClientProvider } from '@tanstack/react-query';
 import {
   getOrCreateDeviceId,

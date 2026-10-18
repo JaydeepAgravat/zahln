@@ -1,0 +1,120 @@
+# One pipeline for the five front ends and the API, on every push and pull request.
+# Maestro (mobile E2E) runs locally for now: it needs macOS runners with simulators ("next").
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  checks:
+    name: Lint, types, unit and API tests
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: zahln
+          POSTGRES_PASSWORD: zahln
+          POSTGRES_DB: zahln
+        ports: ['5432:5432']
+        # Wait for pg_isready before any migration runs (the classic CI race).
+        options: >-
+          --health-cmd "pg_isready -U zahln -d zahln" --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://zahln:zahln@localhost:5432/zahln
+      TEST_DATABASE_URL: postgres://zahln:zahln@localhost:5432/zahln_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create the test database
+        run: psql postgres://zahln:zahln@localhost:5432/zahln -f scripts/init-test-db.sql
+      - name: Biome (lint + format)
+        run: pnpm exec biome ci .
+      - name: Typecheck
+        run: pnpm turbo run typecheck
+      - name: Unit + API tests (Vitest, Jest, API against Postgres)
+        run: pnpm turbo run test
+      - name: web-ui theme is in sync with the tokens, and Storybook builds
+        run: pnpm --filter @zahln/web-ui build-storybook
+
+  e2e:
+    name: Playwright (web, checkout, dashboard, console, axe)
+    runs-on: ubuntu-24.04
+    needs: checks
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: zahln
+          POSTGRES_PASSWORD: zahln
+          POSTGRES_DB: zahln
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U zahln -d zahln" --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://zahln:zahln@localhost:5432/zahln
+      PORT: 4000
+      HOST: 0.0.0.0
+      CHAOS_ENABLED: true
+      DEV_AUTH: true
+      INTENT_SIGNING_SECRET: ci-only-intent-signing-secret-0123456789
+      ADMIN_TOKEN: ci-only-admin-token-0123456789
+      COOKIE_SECURE: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Migrate and seed
+        run: |
+          pnpm --filter @zahln/api exec tsx src/db/migrate.ts
+          pnpm --filter @zahln/api exec tsx src/db/seed.ts
+      - name: Start the API
+        run: |
+          pnpm --filter @zahln/api exec tsx src/server.ts > api.log 2>&1 &
+          npx --yes wait-on@8.0.3 http://localhost:4000/health --timeout 60000
+      # Google Chrome is preinstalled on the Ubuntu runners; the specs use channel: 'chrome'.
+      - name: Playwright
+        run: pnpm --filter @zahln/web e2e
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright
+          path: |
+            apps/web/test-results
+            api.log
+
+  lighthouse:
+    name: Lighthouse CI (landing)
+    runs-on: ubuntu-24.04
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @zahln/landing build
+      - run: pnpm --filter @zahln/landing lhci

@@ -9,7 +9,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "storybook": "pnpm --filter @zahln/consumer storybook"
   },
   "dependencies": {
     "@zahln/mobile-core": "workspace:*",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@react-native/typescript-config": "0.88.0",
+    "@storybook/react-native": "10.7.0",
     "@types/react": "^19.2.0",
     "typescript": "5.9.3"
   }

@@ -59,6 +59,20 @@ the web. Maestro and Playwright run the critical paths. One CI pipeline checks e
 
 ---
 
+## As built (deviations and honest caveats)
+| Plan said | What happened | Why |
+|---|---|---|
+| Web Storybook for `web-ui` | Storybook 10 (Vite) with the a11y addon (`a11y.test: 'error'`) and a light/dark toolbar on `data-theme`, the same Tailwind theme as the apps; stories for every primitive; `pnpm storybook`, built in CI | Checkout outcome pages aren't stories yet (they live in `apps/web`) |
+| Mobile Storybook (`@storybook/react-native` 10) | Config in `packages/mobile-ui/.rnstorybook`, stories in `src/stories` (primitives, money, keypad, list rows, wallet, countdown, Bezahlt), each in **light, dark and English**, inside the apps' real providers; `pnpm --filter @zahln/consumer storybook` (= `STORYBOOK=1` Metro) | No on-device control addons (they need native pickers); theme and language are separate stories instead |
+| Storybook never ships | `withStorybook({ enabled: STORYBOOK === '1' })` empties every `@storybook` module and the config folder; the entry reads `.rnstorybook/enabled` and gets `undefined` | Checked: the production bundle has no Storybook code, only the wrapper's 20-line stub |
+| Accessibility pass | axe (WCAG 2.2 AA) in Playwright on every web page **in light and dark**: login, pay link, all 8 dashboard pages, wallet, devices, and the console. Found and fixed: the danger button and toasts (white on light raspberry in dark mode, < 3:1) → page-colour text | Zero violations now |
+| Screen readers (mobile) | Every payment outcome is now **announced** (`announceForAccessibility`), not just "Bezahlt": `accessibilityLiveRegion` is Android-only, so iOS was silent on "Nicht belastet" / "Wird geprüft" | Not yet walked through end to end with VoiceOver/TalkBack by hand |
+| Reduce Motion | The countdown ring becomes plain text, the check stops drawing and zooming (the flood was already a crossfade) | |
+| Maestro | `apps/consumer/e2e/happy-path.yaml` and `network-drop.yaml` **pass on the iOS simulator**: a till intent via the API, `zahln://i/…` link, PIN, Bezahlt, and exactly one ledger transaction (also after `drop_after_settle`). `apps/merchant/e2e/till-to-paid.yaml` written, **not run** (needs ZYSYGY signed in on the simulator) | Found: amounts are read as "6 Euro 30 Cent", and `Intl` puts a no-break space before €, so flows match on the button text with a wildcard |
+| Playwright: console refund + audit | `console.spec.ts`: sign in, search "6,30", refund 1,00 € with a reason, the audit row shows the operator and reason, axe on every console page. **8/8 Playwright specs green** | |
+| CI | `.github/workflows/ci.yml`: Biome (`biome ci`), typecheck, all unit/API tests with Postgres as a service (waits for `pg_isready`), the Storybook build, Playwright against a started API + web + console (Chrome on the runner), Lighthouse CI for the landing page | Not run on GitHub yet (it runs on the next push); Maestro stays local (macOS runners are "next") |
+| Deploy previews | Not set up | Needs a hosting account; never created on the user's behalf |
+
 ## Files you'll create
 ```
 packages/mobile-ui/.storybook/*  packages/mobile-ui/src/**/*.stories.tsx

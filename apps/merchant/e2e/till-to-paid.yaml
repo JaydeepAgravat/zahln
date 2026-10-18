@@ -1,0 +1,29 @@
+# Act 1 from the till: Mila rings up a cappuccino, shows the QR, a customer pays, the till turns green.
+# Precondition: ZYSYGY installed on the simulator and signed in as Mila (0151 0000 0010, PIN 271828).
+appId: de.zysygy.app
+name: ZYSYGY · till to Bezahlt
+---
+- launchApp
+- runFlow:
+    when:
+      visible: "Gib deine PIN ein"
+    commands:
+      - tapOn: "2"
+      - tapOn: "7"
+      - tapOn: "1"
+      - tapOn: "8"
+      - tapOn: "2"
+      - tapOn: "8"
+- extendedWaitUntil:
+    visible: "Cappuccino"
+    timeout: 10000
+- tapOn: "Cappuccino"
+- tapOn:
+    text: "3,80.€ kassieren"  # Intl puts a no-break space before €
+- extendedWaitUntil:
+    visible: "Warten auf Scan.*"
+    timeout: 10000
+- runScript: scripts/customer-pays.js
+- extendedWaitUntil:
+    visible: "Bezahlt"
+    timeout: 5000

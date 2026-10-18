@@ -25,6 +25,9 @@ pnpm pods                # CocoaPods for both apps
 pnpm consumer            # Metro for Zahln on :8081, then: pnpm consumer:ios | consumer:android
 pnpm merchant            # Metro for ZYSYGY on :8082, then: pnpm merchant:ios | merchant:android
 pnpm web                 # Zahln Web (merchant dashboard) on :3000/business, sign in as Mila with OTP 123456
+pnpm storybook           # web-ui Storybook on :6006 (mobile: pnpm --filter @zahln/consumer storybook)
+pnpm e2e                 # Playwright: checkout, Act 2 in the browser, dashboard, console, axe
+pnpm e2e:mobile          # Maestro on the booted iOS simulator (Lena signed in)
 pnpm console             # Zahln Ops (internal console) on :5174; sign in with your name + ADMIN_TOKEN
 ```
 On Android 16, allow "nearby devices" on first launch of a debug build (it's the local-network access Metro needs).

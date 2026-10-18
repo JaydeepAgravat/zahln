@@ -254,7 +254,7 @@ still ends with a check that passes before the next day starts.
 | 9 | Landing I: content, art sourcing (CC0, recorded), lettering, typography, layout of all 10 chapters, static, no motion | Reads beautifully with JS off; Lighthouse a11y 100 |
 | 10 | Landing II: Lenis + Motion, frame → index, sticky heroes, torn-paper transitions, shader, app videos | Budgets green on Lighthouse CI; reduced motion verified |
 | 11 ✅ | Below RN + security: SecureScreen, NFC HCE, cert pinning, scrubber, re-auth, GDPR export/delete | Security checklist done |
-| 12 | Quality: Storybook (mobile + web), a11y pass on all five front ends, Maestro, CI pipeline, deploy previews | CI green on a clean clone |
+| 12 ✅ | Quality: Storybook (mobile + web), a11y pass on all five front ends, Maestro, CI pipeline, deploy previews | CI green on a clean clone |
 | 13 | ADRs, README with GIFs, record the video, rehearse the demo twice | Full 5-minute run with no surprises |
 
 Day 13 is not optional. A rehearsed demo beats one more feature.

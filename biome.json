@@ -13,7 +13,8 @@
       "!**/global.css",
       "!**/ios",
       "!**/android",
-      "!packages/web-ui/src/theme.css"
+      "!packages/web-ui/src/theme.css",
+      "!**/.rnstorybook/storybook.requires.ts"
     ]
   },
   "formatter": {

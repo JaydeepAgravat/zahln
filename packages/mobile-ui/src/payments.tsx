@@ -5,7 +5,9 @@ import { AccessibilityInfo, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
+  ReduceMotion,
   useAnimatedProps,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withTiming,
@@ -63,6 +65,20 @@ export function CountdownRing({
   const animatedProps = useAnimatedProps(() => ({ strokeDashoffset: circumference * (1 - progress.value) }));
   const urgent = left <= 30;
   const track = tone === 'ink' ? 'rgba(255,255,255,0.14)' : colors.border;
+  // Reduce Motion: no emptying ring, just the time as text (still a live timer for VoiceOver/TalkBack).
+  const reduced = useReducedMotion();
+  if (reduced)
+    return (
+      <View accessibilityRole="timer" accessibilityLabel={label} className="min-h-[44px] justify-center">
+        <Text
+          variant="callout"
+          tone={urgent ? 'warning' : tone === 'ink' ? 'on-ink' : 'primary'}
+          style={{ fontFamily: 'Inter-SemiBold', fontVariant: ['tabular-nums'] }}
+        >
+          {label}
+        </Text>
+      </View>
+    );
   return (
     <View
       style={{ width: size, height: size }}
@@ -99,13 +115,16 @@ export function CountdownRing({
 function DrawnCheck({ size = 112 }: { size?: number }) {
   const { colors } = useTheme();
   const length = 60;
-  const offset = useSharedValue(length);
+  // Reduce Motion: the check is simply there (the flood itself is already a crossfade, not a wipe).
+  const reduced = useReducedMotion();
+  const offset = useSharedValue(reduced ? 0 : length);
   useEffect(() => {
+    if (reduced) return;
     offset.value = withDelay(180, withTiming(0, { duration: 420, easing: Easing.out(Easing.cubic) }));
-  }, [offset]);
+  }, [offset, reduced]);
   const props = useAnimatedProps(() => ({ strokeDashoffset: offset.value }));
   return (
-    <Animated.View entering={ZoomIn.springify().damping(12).stiffness(180)}>
+    <Animated.View entering={ZoomIn.springify().damping(12).stiffness(180).reduceMotion(ReduceMotion.System)}>
       <Svg width={size} height={size} viewBox="0 0 100 100">
         <Circle cx={50} cy={50} r={48} fill="rgba(255,255,255,0.16)" />
         <Circle cx={50} cy={50} r={36} fill={colors.onFlood} />

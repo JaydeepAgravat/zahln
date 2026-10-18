@@ -102,6 +102,7 @@ One `logger` used everywhere (Biome bans `console.*`). It redacts keys (`token`,
   - The blur lifts on return.
   - Settings shows the new section.
   - "Konto löschen" → confirm → PIN gate → the server refused (Lena has a balance), and the account is untouched.
+- iOS: ZYSYGY builds too, with SecureScreen in and NfcPay left out.
 - Android: ZYSYGY `assembleDebug` compiles both Kotlin modules. The merged manifest has the HCE service with
   `enabled="false"` and the network security config. `PackageList` autolinks `SecureScreenPackage` and `NfcPayPackage`.
 - Tests: scrubber, logger, re-auth and account deletion all pass.

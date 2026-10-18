@@ -1,0 +1,35 @@
+# Act 2: the bank settles but the answer never reaches the phone. The app must say "Wird geprüft",
+# then find the outcome by its idempotency key and show Bezahlt, with exactly one ledger transaction.
+appId: de.zahln.app
+name: Zahln · lost response, still charged once
+---
+- launchApp
+- runFlow: unlock.yaml
+- extendedWaitUntil:
+    visible: "Guthaben"
+    timeout: 10000
+- runScript: scripts/till-intent.js
+- runScript:
+    file: scripts/chaos.js
+    env:
+      MODE: drop_after_settle
+- openLink: "zahln://i/${output.ref}"
+- extendedWaitUntil:
+    visible: "Café Mila"
+    timeout: 10000
+# The amount on screen is read out as "sechs Euro dreißig"; the button carries the figure.
+- tapOn:
+    text: "Mit PIN bezahlen · 6,30.€"  # Intl puts a no-break space before €
+- runFlow: pin.yaml
+- extendedWaitUntil:
+    visible: "Bezahlt"
+    timeout: 20000
+- runScript:
+    file: scripts/chaos.js
+    env:
+      MODE: ok
+- runScript:
+    file: scripts/ledger-count.js
+    env:
+      INTENT: ${output.intentId}
+- assertTrue: ${output.ledgerTransactions == 1}
