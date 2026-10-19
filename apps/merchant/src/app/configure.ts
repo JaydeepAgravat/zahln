@@ -1,4 +1,4 @@
-import { configureApp, setApiUrl } from '@zahln/mobile-core';
+import { configureApp, setApiUrl } from '@zaster/mobile-core';
 import { PermissionsAndroid, Platform } from 'react-native';
 import pkg from '../../package.json';
 import { API_URL_OVERRIDE } from './env.gen';

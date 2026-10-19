@@ -2,13 +2,13 @@ import type { Locale } from './i18n-messages';
 
 /** The checkout's own small dictionary: it ships to phones without the app, so it carries nothing else. */
 const de = {
-  title: '{merchant} · Zahln',
+  title: '{merchant} · Zaster',
   validFor: 'Gültig noch {time}',
   total: 'Gesamt',
   openApp: 'In der App öffnen',
   payInBrowser: 'Im Browser bezahlen',
-  noApp: 'Keine App? Du kannst hier mit deiner Zahln-Nummer bezahlen.',
-  phone: 'Deine Zahln-Handynummer',
+  noApp: 'Keine App? Du kannst hier mit deiner Zaster-Nummer bezahlen.',
+  phone: 'Deine Zaster-Handynummer',
   sendCode: 'Code senden',
   code: 'Code aus der SMS',
   devCode: 'Entwicklung: Der Code ist {code}.',
@@ -18,7 +18,7 @@ const de = {
   otherNumber: 'Andere Nummer',
   paying: 'Wird bezahlt…',
   paid: 'Bezahlt',
-  paidBody: '{amount} an {merchant}. Den Beleg findest du in deiner Zahln-App und unter zahln.de/wallet.',
+  paidBody: '{amount} an {merchant}. Den Beleg findest du in deiner Zaster-App und unter zaster.de/wallet.',
   checking: 'Wird geprüft',
   checkingBody: 'Dein Geld ist sicher. Wir fragen bei der Bank nach, ob die Zahlung angekommen ist.',
   checkingLong:
@@ -35,7 +35,7 @@ const de = {
   alreadyPaidBody: 'Diese Zahlung ist abgeschlossen.',
   invalid: 'Ungültiger Link',
   invalidBody: 'Diesen Zahlungslink gibt es nicht. Prüfe, ob er vollständig ist.',
-  noAccount: 'Für diese Nummer gibt es noch kein Zahln-Konto. Lade die App, um eins anzulegen.',
+  noAccount: 'Für diese Nummer gibt es noch kein Zaster-Konto. Lade die App, um eins anzulegen.',
   error: 'Das hat nicht geklappt: {message}',
   secure: 'Sicher bezahlt mit SEPA Instant · 0 € Gebühren',
 };
@@ -43,13 +43,13 @@ const de = {
 export type CopyKey = keyof typeof de;
 
 const en: Record<CopyKey, string> = {
-  title: '{merchant} · Zahln',
+  title: '{merchant} · Zaster',
   validFor: 'Valid for {time}',
   total: 'Total',
   openApp: 'Open in the app',
   payInBrowser: 'Pay in the browser',
-  noApp: 'No app? Pay here with your Zahln number.',
-  phone: 'Your Zahln mobile number',
+  noApp: 'No app? Pay here with your Zaster number.',
+  phone: 'Your Zaster mobile number',
   sendCode: 'Send code',
   code: 'Code from the text message',
   devCode: 'Development: the code is {code}.',
@@ -59,7 +59,7 @@ const en: Record<CopyKey, string> = {
   otherNumber: 'Different number',
   paying: 'Paying…',
   paid: 'Paid',
-  paidBody: '{amount} to {merchant}. The receipt is in your Zahln app and at zahln.de/wallet.',
+  paidBody: '{amount} to {merchant}. The receipt is in your Zaster app and at zaster.de/wallet.',
   checking: 'Checking',
   checkingBody: 'Your money is safe. We are asking the bank whether the payment arrived.',
   checkingLong:
@@ -76,7 +76,7 @@ const en: Record<CopyKey, string> = {
   alreadyPaidBody: 'This payment is complete.',
   invalid: 'Invalid link',
   invalidBody: "This payment link doesn't exist. Check that it's complete.",
-  noAccount: 'There is no Zahln account for this number yet. Get the app to create one.',
+  noAccount: 'There is no Zaster account for this number yet. Get the app to create one.',
   error: "That didn't work: {message}",
   secure: 'Paid securely with SEPA Instant · €0 fees',
 };

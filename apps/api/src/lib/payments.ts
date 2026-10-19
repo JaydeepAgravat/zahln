@@ -18,7 +18,7 @@ import {
   sumCents,
   type VatRate,
   type Wallet,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import type { DbOrTx, Tx } from '../db/client';
 import {
@@ -134,7 +134,7 @@ export async function createIntent(
 ): Promise<PaymentIntent> {
   const merchant = await loadMerchant(tx, input.merchantId);
   await requireStaff(tx, merchant.id, input.userId);
-  // A one-time QR for a specific amount is the Pro "dynamic QR" feature (zysygy.de/plans).
+  // A one-time QR for a specific amount is the Pro "dynamic QR" feature.
   requireFeature(merchant, 'dynamic_qr');
 
   let items: LineItem[] = [];

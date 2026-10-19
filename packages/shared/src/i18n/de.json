@@ -38,7 +38,7 @@
     "items_other": "{{count}} Artikel",
     "clear": "Leeren",
     "cancel": "Abbrechen",
-    "scanWithZahln": "Mit Zahln scannen",
+    "scanWithZaster": "Mit Zaster scannen",
     "receiptNo": "Beleg Nr. {{number}}",
     "nextPayment": "Nächste Zahlung",
     "expiredBody": "Der Code ist abgelaufen. Es wurde nichts abgebucht.",
@@ -102,7 +102,7 @@
     "merchant": {
       "title": "Dein Geschäft",
       "subtitle": "Dieses Handy wird zur Kasse für:",
-      "none": "Diese Nummer gehört zu keinem Geschäft. ZYSYGY ist die Kasse für Händler; zum Bezahlen gibt es die Zahln-App. Für die Demo: 0151 0000 0010 (Café Mila).",
+      "none": "Diese Nummer gehört zu keinem Geschäft. Zettel ist die Kasse für Händler; zum Bezahlen gibt es die Zaster-App. Für die Demo: 0151 0000 0010 (Café Mila).",
       "role": {
         "owner": "Inhaber:in",
         "manager": "Manager:in",
@@ -121,7 +121,7 @@
       "subtitle": "Entsperre die App und bestätige Zahlungen mit {{type}}. Deine PIN bleibt der Ersatz.",
       "enable": "{{type}} aktivieren",
       "notAvailable": "Auf diesem Gerät ist keine Biometrie eingerichtet. Du nutzt deine PIN.",
-      "prompt": "Zahln entsperren",
+      "prompt": "Zaster entsperren",
       "doneTitle": "Fast geschafft"
     },
     "finishing": "Gerät wird eingerichtet…",
@@ -133,7 +133,7 @@
     "wrong": "Falsche PIN. Noch {{left}} Versuche vor der Sperre.",
     "locked": "Zu viele Versuche. Warte {{seconds}} Sekunden.",
     "usePin": "PIN verwenden",
-    "prompt": "Zahln entsperren",
+    "prompt": "Zaster entsperren",
     "cancel": "Abbrechen",
     "hello": "Hallo, {{name}}"
   },
@@ -184,7 +184,7 @@
     "account": "Konto",
     "sectionApp": "App",
     "sectionSecurity": "Sicherheit",
-    "version": "Zahln 0.1 · Gebaut in Augsburg",
+    "version": "Zaster 0.1 · Gebaut in Augsburg",
     "sectionPrivacy": "Deine Daten",
     "exportData": "Meine Daten exportieren",
     "exportTitle": "Daten exportieren",
@@ -209,13 +209,13 @@
     "scanTitle": "QR-Code scannen",
     "scanHint": "Richte die Kamera auf den Code an der Kasse.",
     "cameraTitle": "Kamera für QR-Codes",
-    "cameraBody": "Zahln nutzt die Kamera nur, um Zahlungs-Codes zu lesen. Keine Fotos, kein Video.",
+    "cameraBody": "Zaster nutzt die Kamera nur, um Zahlungs-Codes zu lesen. Keine Fotos, kein Video.",
     "allowCamera": "Kamera erlauben",
     "openSettings": "Einstellungen öffnen",
     "noCamera": "Auf diesem Gerät gibt es keine Kamera.",
     "demoQr": "Demo: QR der Kasse laden",
-    "noDemoQr": "Gerade ist kein QR offen. Erstelle einen in ZYSYGY.",
-    "invalidCode": "Das ist kein Zahln-Code.",
+    "noDemoQr": "Gerade ist kein QR offen. Erstelle einen in Zettel.",
+    "invalidCode": "Das ist kein Zaster-Code.",
     "validFor": "Gültig noch {{time}}",
     "payWithPin": "Mit PIN bezahlen · {{amount}}",
     "paying": "Wird bezahlt…",
@@ -248,7 +248,7 @@
     "paymentId": "Zahlungs-ID",
     "vatIncluded": "enth. MwSt. {{rate}} %",
     "method": "Zahlungsart",
-    "methodValue": "Zahln · SEPA Instant",
+    "methodValue": "Zaster · SEPA Instant",
     "gobd": "Elektronischer Beleg. Unveränderbar gespeichert nach GoBD.",
     "refunded": "Erstattet",
     "partiallyRefunded": "Teilweise erstattet"
@@ -279,7 +279,7 @@
     "pinTitle": "PIN für die Erstattung",
     "refundedSoFar": "Bereits erstattet",
     "payment": "Zahlung",
-    "paused": "Erstattungen sind gerade pausiert. Der Zahln-Support kann helfen."
+    "paused": "Erstattungen sind gerade pausiert. Der Zaster-Support kann helfen."
   },
   "myQr": {
     "title": "Mein QR",
@@ -308,7 +308,7 @@
     "off": "NFC ist ausgeschaltet. Einschalten in den Einstellungen."
   },
   "security": {
-    "rooted": "Dieses Gerät ist möglicherweise gerootet oder gejailbreakt. Zahln funktioniert weiter, aber deine Daten sind hier weniger geschützt.",
+    "rooted": "Dieses Gerät ist möglicherweise gerootet oder gejailbreakt. Zaster funktioniert weiter, aber deine Daten sind hier weniger geschützt.",
     "captured": "Bildschirmaufnahme läuft: Beträge sind ausgeblendet."
   }
 }

@@ -11,7 +11,7 @@ import {
   useRemoteConfig,
   useT,
   useWallet,
-} from '@zahln/mobile-core';
+} from '@zaster/mobile-core';
 import {
   AmountDisplay,
   Button,
@@ -27,13 +27,13 @@ import {
   useCountdown,
   usePinEntry,
   useTheme,
-} from '@zahln/mobile-ui';
+} from '@zaster/mobile-ui';
 import {
   type AttemptState,
   MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN,
   type PaymentIntent,
   requiredAuth,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, ActivityIndicator, Modal, Platform, StatusBar, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';

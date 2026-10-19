@@ -10,7 +10,7 @@ import {
   useKillSwitch,
   useT,
   uuid,
-} from '@zahln/mobile-core';
+} from '@zaster/mobile-core';
 import {
   AmountDisplay,
   Button,
@@ -25,14 +25,14 @@ import {
   Text,
   toast,
   usePinEntry,
-} from '@zahln/mobile-ui';
-import { useSecureScreen } from '@zahln/secure-screen';
+} from '@zaster/mobile-ui';
+import { useSecureScreen } from '@zaster/secure-screen';
 import {
   applyKeypadKey,
   isRefundable,
   MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN,
   type PaymentIntent,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { useRef, useState } from 'react';
 import { Modal, Platform, ScrollView, View } from 'react-native';
 import type { HomeStackParamList } from '../../app/navigation/types';

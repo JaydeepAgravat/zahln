@@ -16,7 +16,7 @@ const EnvSchema = z.object({
   INTENT_SIGNING_SECRET: z.string().min(32).default('dev-only-intent-signing-secret-change-me'),
   /** Internal console access (stand-in for SSO). The default only exists so local dev works out of the box. */
   ADMIN_TOKEN: z.string().min(24).default('dev-admin-token-change-me-please'),
-  /** Browser origins allowed to call the API with cookies (Zahln Web, the console). */
+  /** Browser origins allowed to call the API with cookies (Zaster Web, the console). */
   WEB_ORIGINS: z
     .string()
     .default('http://localhost:3000,http://localhost:5174')

@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Card, cx } from '@zahln/web-ui';
+import { Badge, Card, cx } from '@zaster/web-ui';
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '@/components/I18n';
 import { Status } from '@/components/Status';

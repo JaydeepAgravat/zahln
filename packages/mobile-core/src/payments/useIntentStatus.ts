@@ -1,4 +1,4 @@
-import { type PaymentIntent, PaymentIntentSchema } from '@zahln/shared';
+import { type PaymentIntent, PaymentIntentSchema } from '@zaster/shared';
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import EventSource from 'react-native-sse';

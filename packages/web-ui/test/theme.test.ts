@@ -1,4 +1,4 @@
-import { colors } from '@zahln/shared/tokens';
+import { colors } from '@zaster/shared/tokens';
 import { describe, expect, it } from 'vitest';
 import { themeCss } from '../src/themeCss';
 

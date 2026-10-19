@@ -1,8 +1,8 @@
 {
-  "name": "@zahln/console",
+  "name": "@zaster/console",
   "version": "0.1.0",
   "private": true,
-  "description": "Zahln Ops: the internal console (payments, merchants, control room, audit log).",
+  "description": "Zaster Ops: the internal console (payments, merchants, control room, audit log).",
   "type": "module",
   "scripts": {
     "dev": "vite --port 5174",
@@ -13,8 +13,8 @@
   "dependencies": {
     "@tanstack/react-query": "5.104.4",
     "@tanstack/react-table": "9.3.1",
-    "@zahln/shared": "workspace:*",
-    "@zahln/web-ui": "workspace:*",
+    "@zaster/shared": "workspace:*",
+    "@zaster/web-ui": "workspace:*",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-router": "8.4.0"

@@ -1,5 +1,5 @@
 # Sub-flow: unlock with the demo PIN (271828). Only runs if the lock screen is showing.
-appId: de.zahln.app
+appId: de.zaster.app
 ---
 - runFlow:
     when:

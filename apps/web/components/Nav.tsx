@@ -1,6 +1,6 @@
 'use client';
 
-import { cx } from '@zahln/web-ui';
+import { cx } from '@zaster/web-ui';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -72,7 +72,7 @@ export function LocaleSwitch() {
       aria-label={next === 'en' ? 'Switch to English' : 'Auf Deutsch umstellen'}
       onClick={() => {
         // biome-ignore lint/suspicious/noDocumentCookie: a plain preference cookie, read by the server on the next render
-        document.cookie = `zahln_locale=${next}; path=/; max-age=31536000; samesite=lax`;
+        document.cookie = `zaster_locale=${next}; path=/; max-age=31536000; samesite=lax`;
         router.refresh();
       }}
       className="rounded-sm border border-border px-2 py-0.5 text-caption font-semibold text-text-secondary uppercase hover:text-text-primary"

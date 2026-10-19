@@ -14,7 +14,7 @@ export class ApiError extends Error {
 
 /** The readable half of the double-submit pair. The session cookie itself is httpOnly and never visible here. */
 function csrfToken(): string {
-  const match = document.cookie.match(/(?:^|;\s*)zahln_csrf=([^;]+)/);
+  const match = document.cookie.match(/(?:^|;\s*)zaster_csrf=([^;]+)/);
   return match?.[1] ? decodeURIComponent(match[1]) : '';
 }
 

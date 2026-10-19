@@ -1,4 +1,4 @@
-import type { Membership, User } from '@zahln/shared';
+import type { Membership, User } from '@zaster/shared';
 import { AppState, type AppStateStatus } from 'react-native';
 import { create } from 'zustand';
 import { setAuth, setUnauthorizedHandler } from './api';

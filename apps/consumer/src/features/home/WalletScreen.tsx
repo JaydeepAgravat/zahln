@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { pendingPayment, useKillSwitch, useMe, useT, useWallet } from '@zahln/mobile-core';
+import { pendingPayment, useKillSwitch, useMe, useT, useWallet } from '@zaster/mobile-core';
 import {
   Avatar,
   BalanceCard,
@@ -15,7 +15,7 @@ import {
   TransactionList,
   toast,
   useTheme,
-} from '@zahln/mobile-ui';
+} from '@zaster/mobile-ui';
 import { useEffect } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';

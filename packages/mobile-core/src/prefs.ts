@@ -1,4 +1,4 @@
-import type { AppLocale } from '@zahln/shared';
+import type { AppLocale } from '@zaster/shared';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
 import type { AppKind } from './app';

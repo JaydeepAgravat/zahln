@@ -1,12 +1,12 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
-import type { Plan } from '@zahln/shared';
+import type { Plan } from '@zaster/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client';
 import { merchants, staff, users, webSessions } from '../db/schema';
 import { sha256 } from './auth';
 
-export const SESSION_COOKIE = 'zahln_session';
-export const CSRF_COOKIE = 'zahln_csrf';
+export const SESSION_COOKIE = 'zaster_session';
+export const CSRF_COOKIE = 'zaster_csrf';
 export const CSRF_HEADER = 'x-csrf-token';
 /** Signed out after 12 hours without a request. */
 export const IDLE_TIMEOUT_HOURS = 12;

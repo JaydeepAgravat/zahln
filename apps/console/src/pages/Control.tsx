@@ -9,8 +9,8 @@ import {
   KILL_SWITCHES,
   type KillSwitch,
   updateStatus,
-} from '@zahln/shared';
-import { Badge, Button, Card, cx, Dialog, Empty, Field, Input, Spinner, Switch } from '@zahln/web-ui';
+} from '@zaster/shared';
+import { Badge, Button, Card, cx, Dialog, Empty, Field, Input, Spinner, Switch } from '@zaster/web-ui';
 import { type ReactNode, useEffect, useState } from 'react';
 import { api, queryClient } from '../lib/api';
 import { errorText, PageHeader, ReasonDialog } from '../lib/ui';
@@ -32,7 +32,7 @@ const FLAG: Record<Flag, { title: string; body: string }> = {
     body: 'New installs start with balances hidden (for paying in a queue).',
   },
 };
-const APP_NAME: Record<AppName, string> = { consumer: 'Zahln (students)', merchant: 'ZYSYGY (tills)' };
+const APP_NAME: Record<AppName, string> = { consumer: 'Zaster (students)', merchant: 'Zettel (tills)' };
 /** The version the demo phones run: shows the effect of a release window before publishing it. */
 const SHIPPED = '0.1.0';
 const CHAOS: { mode: string; title: string }[] = [

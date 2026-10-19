@@ -3,13 +3,13 @@ import type { Copy } from './types';
 export const de = {
   lang: 'de',
   meta: {
-    title: 'Die Zahln Edition · Herbst ’26',
+    title: 'Die Zaster Edition · Herbst ’26',
     description:
-      'Bezahlen, endlich fertig. Zahln und ZYSYGY in zehn Kapiteln: per QR-Code von Konto zu Konto, 0 % Gebühren, SEPA Instant, gebaut in Augsburg.',
+      'Bezahlen, endlich fertig. Zaster und Zettel in zehn Kapiteln: per QR-Code von Konto zu Konto, 0 % Gebühren, SEPA Instant, gebaut in Augsburg.',
   },
   skip: 'Zum Inhalt springen',
   nav: {
-    home: 'Zahln, zur Startseite',
+    home: 'Zaster, zur Startseite',
     edition: 'Edition Herbst ’26',
     chapters: 'Kapitel',
     index: 'Kapitelübersicht',
@@ -22,7 +22,7 @@ export const de = {
     play: 'Bewegung abspielen',
   },
   intro: {
-    title: 'Die Zahln Edition',
+    title: 'Die Zaster Edition',
     season: 'Herbst ’26',
     line: 'Bezahlen, endlich fertig. 10 Kapitel.',
     chaptersLabel: 'Kapitel',
@@ -47,7 +47,7 @@ export const de = {
           media: {
             kind: 'device',
             screen: 'qr',
-            alt: 'Die ZYSYGY-Kasse zeigt einen QR-Code über 10,80 € und „Kunde prüft…“.',
+            alt: 'Die Zettel-Kasse zeigt einen QR-Code über 10,80 € und „Kunde prüft…“.',
             platform: 'android',
           },
         },
@@ -61,7 +61,7 @@ export const de = {
           media: {
             kind: 'device',
             screen: 'confirm',
-            alt: 'Zahln zeigt Café Mila, drei Positionen und „Mit PIN bezahlen · 10,80 €“.',
+            alt: 'Zaster zeigt Café Mila, drei Positionen und „Mit PIN bezahlen · 10,80 €“.',
             platform: 'ios',
           },
         },
@@ -82,7 +82,7 @@ export const de = {
       title: 'Kasse',
       promise: 'Deine Theke, ohne Kartenleser.',
       statement:
-        'Die ZYSYGY-Kasse läuft auf dem Handy, das schon neben der Kaffeemaschine liegt. Artikel antippen, Code zeigen, „Bezahlt“ sehen. Mehr Hardware braucht ein Café nicht.',
+        'Die Zettel-Kasse läuft auf dem Handy, das schon neben der Kaffeemaschine liegt. Artikel antippen, Code zeigen, „Bezahlt“ sehen. Mehr Hardware braucht ein Café nicht.',
       features: [
         {
           id: 'katalog-oder-betrag',
@@ -146,7 +146,7 @@ export const de = {
           media: {
             kind: 'device',
             screen: 'wallet',
-            alt: 'Die Zahln-Wallet mit 35,40 € Guthaben und den letzten Zahlungen in der Mensa.',
+            alt: 'Die Zaster-Wallet mit 35,40 € Guthaben und den letzten Zahlungen in der Mensa.',
             platform: 'ios',
           },
         },
@@ -225,7 +225,7 @@ export const de = {
       title: 'Funkloch',
       promise: 'Die Verbindung bricht ab. Die Zahlung nicht.',
       statement:
-        'Im Keller der Mensa, im Regionalzug, zwischen zwei Funkmasten: Netz fehlt immer genau dann, wenn du bezahlst. Zahln weiß in jedem Moment, ob Geld geflossen ist, und sagt es dir ehrlich.',
+        'Im Keller der Mensa, im Regionalzug, zwischen zwei Funkmasten: Netz fehlt immer genau dann, wenn du bezahlst. Zaster weiß in jedem Moment, ob Geld geflossen ist, und sagt es dir ehrlich.',
       features: [
         {
           id: 'wird-geprueft',
@@ -305,7 +305,7 @@ export const de = {
           id: 'tse',
           label: 'Bar und digital in einem Kassenbuch',
           blurb:
-            'Wer auch bar kassiert, braucht eine TSE. ZYSYGY bindet eine Cloud-TSE an, damit beides an einem Ort landet.',
+            'Wer auch bar kassiert, braucht eine TSE. Zettel bindet eine Cloud-TSE an, damit beides an einem Ort landet.',
           soon: 'Bald',
           link: null,
           media: { kind: 'none' },
@@ -339,7 +339,7 @@ export const de = {
           media: {
             kind: 'device',
             screen: 'paid',
-            alt: 'Zahln zeigt vollflächig grün: „Bezahlt, 10,80 € an Café Mila, bestätigt in 254 ms“.',
+            alt: 'Zaster zeigt vollflächig grün: „Bezahlt, 10,80 € an Café Mila, bestätigt in 254 ms“.',
             platform: 'ios',
           },
         },
@@ -457,7 +457,7 @@ export const de = {
     },
   ],
   plans: {
-    heading: 'Pläne für ZYSYGY',
+    heading: 'Pläne für Zettel',
     note: 'Pro Monat, zzgl. MwSt. 0 % Transaktionsgebühren auf jedem Plan.',
     recommended: 'Beliebt',
     items: [
@@ -518,7 +518,7 @@ export const de = {
     credits: 'Bildnachweis',
     creditsIntro:
       'Alle Gemälde stammen aus den Open-Access-Sammlungen der Museen und sind gemeinfrei (CC0 bzw. Public Domain Mark). Farbe und Ausschnitt wurden von uns bearbeitet.',
-    note: 'Ein Interview-Prototyp. Zahln und ZYSYGY, gebaut in Augsburg.',
+    note: 'Ein Interview-Prototyp. Zaster und Zettel, gebaut in Augsburg.',
     licence: 'Schriften: Inter, Inter Tight, Instrument Serif, Pinyon Script (SIL OFL 1.1).',
   },
   art: { label: 'Gemälde' },

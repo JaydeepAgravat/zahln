@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   );
 }
 
-/** The Zahln mark as a till receipt with a torn edge: the same Quittung motif as the apps. */
+/** The Zaster mark as a till receipt with a torn edge: the same Quittung motif as the apps. */
 function ReceiptMark() {
   return (
     <svg viewBox="0 0 120 120" aria-hidden className="size-20">

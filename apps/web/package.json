@@ -1,8 +1,8 @@
 {
-  "name": "@zahln/web",
+  "name": "@zaster/web",
   "version": "0.1.0",
   "private": true,
-  "description": "Zahln Web: the merchant dashboard (Day 7) and the pay-link checkout and web wallet (Day 8).",
+  "description": "Zaster Web: the merchant dashboard (Day 7) and the pay-link checkout and web wallet (Day 8).",
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3000",
@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "5.3.0",
-    "@zahln/shared": "workspace:*",
-    "@zahln/web-ui": "workspace:*",
+    "@zaster/shared": "workspace:*",
+    "@zaster/web-ui": "workspace:*",
     "next": "16.4.2",
     "qrcode": "1.5.4",
     "react": "19.3.0",

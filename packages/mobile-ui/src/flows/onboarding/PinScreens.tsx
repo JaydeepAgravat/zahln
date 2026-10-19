@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { haptic, useT } from '@zahln/mobile-core';
-import { isWeakPin, PIN_LENGTH } from '@zahln/shared';
+import { haptic, useT } from '@zaster/mobile-core';
+import { isWeakPin, PIN_LENGTH } from '@zaster/shared';
 import { type ReactNode, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Keypad, type KeypadKey, PinDots, Screen, ShieldIllustration, Text } from '../../ds';

@@ -1,4 +1,4 @@
-import type { PaymentIntent } from '@zahln/shared';
+import type { PaymentIntent } from '@zaster/shared';
 import { useEffect, useState } from 'react';
 import { type AdminPayment, API_URL, queryClient, session } from './api';
 

@@ -1,5 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
-import { AdminConfigSchema, PLANS } from '@zahln/shared';
+import { AdminConfigSchema, PLANS } from '@zaster/shared';
 import { and, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
@@ -353,7 +353,7 @@ export async function adminRoutes(fastify: FastifyInstance, deps: AdminDeps) {
       });
       return reply
         .header('content-type', 'text/csv; charset=utf-8')
-        .header('content-disposition', `attachment; filename="zahln-${req.params.merchantId}.csv"`)
+        .header('content-disposition', `attachment; filename="zaster-${req.params.merchantId}.csv"`)
         .send(csv);
     },
   );

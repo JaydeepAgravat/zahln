@@ -1,4 +1,4 @@
-import { Button, Dialog, Field, Textarea } from '@zahln/web-ui';
+import { Button, Dialog, Field, Textarea } from '@zaster/web-ui';
 import { type ReactNode, useState } from 'react';
 import { ApiError } from './api';
 

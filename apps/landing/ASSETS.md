@@ -44,7 +44,7 @@ Trim the frame edge → crop 16:10 (desktop) and 9:16 (mobile) around a per-pain
 (`scripts/art-manifest.json`) → saturation 0.82, slight contrast → soft-light ember highlight + ink vignette
 (no baked grain: the page overlays it) → AVIF (q40) + WebP (q64) at 640/960/1280/2048 (portrait 640/960/1280) → 16 px blurred
 placeholder in `lib/art.gen.ts`. Output: `public/art/`. Originals (`art-src/*.jpg`, ~26 MB) are git-ignored and
-re-downloaded by `pnpm --filter @zahln/landing fetch-art`.
+re-downloaded by `pnpm --filter @zaster/landing fetch-art`.
 
 ## App screens
 `public/screens/*.{avif,webp}` are crops of our own screenshots in `docs/screenshots/` (`act1-payment-moment.png`,
@@ -60,4 +60,4 @@ Inter, Inter Tight, Instrument Serif, Pinyon Script: all SIL Open Font License 1
 is Inter Tight 800 outlines converted to paths by `scripts/letter-title.mjs`, which the OFL permits for artwork.
 
 ## Marks and icons
-The Zahln receipt mark (`components/Mark.tsx`, `public/icon.svg`) is our own drawing.
+The Zaster receipt mark (`components/Mark.tsx`, `public/icon.svg`) is our own drawing.

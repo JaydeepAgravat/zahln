@@ -184,7 +184,7 @@ export const API_ERROR_CODES = [
   'feature_disabled',
   // The simulated bank has not answered yet (dev chaos `drop_and_hold`): keep checking.
   'rail_unavailable',
-  // Zahln Web (Day 7)
+  // Zaster Web (Day 7)
   'csrf',
   'step_up_required',
   'no_account',

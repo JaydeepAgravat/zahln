@@ -95,7 +95,7 @@ public final class SecureScreenImpl: NSObject {
       for path in paths where FileManager.default.fileExists(atPath: path) {
         signals.append("file:\(path)")
       }
-      let probe = "/private/zahln-jb-probe.txt"
+      let probe = "/private/zaster-jb-probe.txt"
       if (try? "x".write(toFile: probe, atomically: true, encoding: .utf8)) != nil {
         signals.append("sandbox:writable")
         try? FileManager.default.removeItem(atPath: probe)

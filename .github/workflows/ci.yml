@@ -23,16 +23,16 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_USER: zahln
-          POSTGRES_PASSWORD: zahln
-          POSTGRES_DB: zahln
+          POSTGRES_USER: zaster
+          POSTGRES_PASSWORD: zaster
+          POSTGRES_DB: zaster
         ports: ['5432:5432']
         # Wait for pg_isready before any migration runs (the classic CI race).
         options: >-
-          --health-cmd "pg_isready -U zahln -d zahln" --health-interval 2s --health-timeout 3s --health-retries 30
+          --health-cmd "pg_isready -U zaster -d zaster" --health-interval 2s --health-timeout 3s --health-retries 30
     env:
-      DATABASE_URL: postgres://zahln:zahln@localhost:5432/zahln
-      TEST_DATABASE_URL: postgres://zahln:zahln@localhost:5432/zahln_test
+      DATABASE_URL: postgres://zaster:zaster@localhost:5432/zaster
+      TEST_DATABASE_URL: postgres://zaster:zaster@localhost:5432/zaster_test
     steps:
       - uses: actions/checkout@v4
         with:
@@ -44,7 +44,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Create the test database
-        run: psql postgres://zahln:zahln@localhost:5432/zahln -f scripts/init-test-db.sql
+        run: psql postgres://zaster:zaster@localhost:5432/zaster -f scripts/init-test-db.sql
       - name: Biome (lint + format)
         run: pnpm exec biome ci .
       - name: Typecheck
@@ -52,7 +52,7 @@ jobs:
       - name: Unit + API tests (Vitest, Jest, API against Postgres)
         run: pnpm turbo run test
       - name: web-ui theme is in sync with the tokens, and Storybook builds
-        run: pnpm --filter @zahln/web-ui build-storybook
+        run: pnpm --filter @zaster/web-ui build-storybook
 
   e2e:
     name: Playwright (web, checkout, dashboard, console, axe)
@@ -62,14 +62,14 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_USER: zahln
-          POSTGRES_PASSWORD: zahln
-          POSTGRES_DB: zahln
+          POSTGRES_USER: zaster
+          POSTGRES_PASSWORD: zaster
+          POSTGRES_DB: zaster
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U zahln -d zahln" --health-interval 2s --health-timeout 3s --health-retries 30
+          --health-cmd "pg_isready -U zaster -d zaster" --health-interval 2s --health-timeout 3s --health-retries 30
     env:
-      DATABASE_URL: postgres://zahln:zahln@localhost:5432/zahln
+      DATABASE_URL: postgres://zaster:zaster@localhost:5432/zaster
       PORT: 4000
       HOST: 0.0.0.0
       CHAOS_ENABLED: true
@@ -87,15 +87,15 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Migrate and seed
         run: |
-          pnpm --filter @zahln/api exec tsx src/db/migrate.ts
-          pnpm --filter @zahln/api exec tsx src/db/seed.ts
+          pnpm --filter @zaster/api exec tsx src/db/migrate.ts
+          pnpm --filter @zaster/api exec tsx src/db/seed.ts
       - name: Start the API
         run: |
-          pnpm --filter @zahln/api exec tsx src/server.ts > api.log 2>&1 &
+          pnpm --filter @zaster/api exec tsx src/server.ts > api.log 2>&1 &
           npx --yes wait-on@8.0.3 http://localhost:4000/health --timeout 60000
       # Google Chrome is preinstalled on the Ubuntu runners; the specs use channel: 'chrome'.
       - name: Playwright
-        run: pnpm --filter @zahln/web e2e
+        run: pnpm --filter @zaster/web e2e
       - if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -116,5 +116,5 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @zahln/landing build
-      - run: pnpm --filter @zahln/landing lhci
+      - run: pnpm --filter @zaster/landing build
+      - run: pnpm --filter @zaster/landing lhci

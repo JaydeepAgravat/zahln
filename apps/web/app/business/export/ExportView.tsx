@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Field, Input } from '@zahln/web-ui';
+import { Card, Field, Input } from '@zaster/web-ui';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useT } from '@/components/I18n';

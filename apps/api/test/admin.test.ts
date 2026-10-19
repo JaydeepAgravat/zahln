@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { INITIAL_ADMIN_CONFIG } from '@zahln/shared';
+import { INITIAL_ADMIN_CONFIG } from '@zaster/shared';
 import { eq, sql } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
 import { auditLog, refunds } from '../src/db/schema';

@@ -1,4 +1,4 @@
-import { colors, contrastRatio, motion } from '@zahln/shared/tokens';
+import { colors, contrastRatio, motion } from '@zaster/shared/tokens';
 import type { CSSProperties } from 'react';
 
 const c = colors.light;

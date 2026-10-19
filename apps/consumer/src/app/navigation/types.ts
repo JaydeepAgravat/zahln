@@ -1,9 +1,9 @@
-import type { PendingPayment } from '@zahln/mobile-core';
-import type { PaymentAttempt } from '@zahln/shared';
+import type { PendingPayment } from '@zaster/mobile-core';
+import type { PaymentAttempt } from '@zaster/shared';
 
 export type TabParamList = { Wallet: undefined; Settings: undefined };
 
-/** Signed-in Zahln: tabs, plus the pay flow and history on top of them. */
+/** Signed-in Zaster: tabs, plus the pay flow and history on top of them. */
 export type HomeStackParamList = {
   Tabs: undefined;
   Scan: undefined;

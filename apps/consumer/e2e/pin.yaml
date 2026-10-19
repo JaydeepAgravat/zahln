@@ -1,5 +1,5 @@
 # Sub-flow: confirm a payment with the PIN sheet.
-appId: de.zahln.app
+appId: de.zaster.app
 ---
 - extendedWaitUntil:
     visible: "PIN eingeben|Enter your PIN"

@@ -1,5 +1,5 @@
-import { haptic } from '@zahln/mobile-core';
-import { motion } from '@zahln/shared/tokens';
+import { haptic } from '@zaster/mobile-core';
+import { motion } from '@zaster/shared/tokens';
 import type { ReactNode } from 'react';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';

@@ -38,7 +38,7 @@
     "items_other": "{{count}} items",
     "clear": "Clear",
     "cancel": "Cancel",
-    "scanWithZahln": "Scan with Zahln",
+    "scanWithZaster": "Scan with Zaster",
     "receiptNo": "Receipt no. {{number}}",
     "nextPayment": "Next payment",
     "expiredBody": "This code expired. Nothing was charged.",
@@ -102,7 +102,7 @@
     "merchant": {
       "title": "Your business",
       "subtitle": "This phone becomes the till for:",
-      "none": "This number doesn't belong to a business. ZYSYGY is the till for merchants; to pay, use the Zahln app. For the demo: 0151 0000 0010 (Café Mila).",
+      "none": "This number doesn't belong to a business. Zettel is the till for merchants; to pay, use the Zaster app. For the demo: 0151 0000 0010 (Café Mila).",
       "role": {
         "owner": "Owner",
         "manager": "Manager",
@@ -121,7 +121,7 @@
       "subtitle": "Unlock the app and confirm payments with {{type}}. Your PIN stays as the fallback.",
       "enable": "Turn on {{type}}",
       "notAvailable": "No biometrics are set up on this device. You'll use your PIN.",
-      "prompt": "Unlock Zahln",
+      "prompt": "Unlock Zaster",
       "doneTitle": "Almost done"
     },
     "finishing": "Setting up this device…",
@@ -133,7 +133,7 @@
     "wrong": "Wrong PIN. {{left}} attempts left before a pause.",
     "locked": "Too many attempts. Wait {{seconds}} seconds.",
     "usePin": "Use PIN",
-    "prompt": "Unlock Zahln",
+    "prompt": "Unlock Zaster",
     "cancel": "Cancel",
     "hello": "Hi, {{name}}"
   },
@@ -184,7 +184,7 @@
     "account": "Account",
     "sectionApp": "App",
     "sectionSecurity": "Security",
-    "version": "Zahln 0.1 · Built in Augsburg",
+    "version": "Zaster 0.1 · Built in Augsburg",
     "sectionPrivacy": "Your data",
     "exportData": "Export my data",
     "exportTitle": "Export data",
@@ -209,13 +209,13 @@
     "scanTitle": "Scan QR code",
     "scanHint": "Point the camera at the code on the till.",
     "cameraTitle": "Camera for QR codes",
-    "cameraBody": "Zahln only uses the camera to read payment codes. No photos, no video.",
+    "cameraBody": "Zaster only uses the camera to read payment codes. No photos, no video.",
     "allowCamera": "Allow camera",
     "openSettings": "Open Settings",
     "noCamera": "This device has no camera.",
     "demoQr": "Demo: load the till's QR",
-    "noDemoQr": "No QR is open right now. Create one in ZYSYGY.",
-    "invalidCode": "That's not a Zahln code.",
+    "noDemoQr": "No QR is open right now. Create one in Zettel.",
+    "invalidCode": "That's not a Zaster code.",
     "validFor": "Valid for {{time}}",
     "payWithPin": "Pay with PIN · {{amount}}",
     "paying": "Paying…",
@@ -248,7 +248,7 @@
     "paymentId": "Payment ID",
     "vatIncluded": "incl. VAT {{rate}} %",
     "method": "Payment method",
-    "methodValue": "Zahln · SEPA Instant",
+    "methodValue": "Zaster · SEPA Instant",
     "gobd": "Electronic receipt. Stored tamper-proof under GoBD.",
     "refunded": "Refunded",
     "partiallyRefunded": "Partially refunded"
@@ -279,7 +279,7 @@
     "pinTitle": "PIN for the refund",
     "refundedSoFar": "Already refunded",
     "payment": "Payment",
-    "paused": "Refunds are paused right now. Zahln support can help."
+    "paused": "Refunds are paused right now. Zaster support can help."
   },
   "myQr": {
     "title": "My QR",
@@ -308,7 +308,7 @@
     "off": "NFC is off. Turn it on in Settings."
   },
   "security": {
-    "rooted": "This device may be rooted or jailbroken. Zahln keeps working, but your data is less protected here.",
+    "rooted": "This device may be rooted or jailbroken. Zaster keeps working, but your data is less protected here.",
     "captured": "Screen recording is on: amounts are hidden."
   }
 }

@@ -1,8 +1,8 @@
-import type { PaymentIntent } from '@zahln/shared';
+import type { PaymentIntent } from '@zaster/shared';
 
 export type TabParamList = { Till: undefined; MerchantWallet: undefined; Settings: undefined };
 
-/** Signed-in ZYSYGY: tabs, plus the QR panels, the paid screen and payment details on top of them. */
+/** Signed-in Zettel: tabs, plus the QR panels, the paid screen and payment details on top of them. */
 export type HomeStackParamList = {
   Tabs: undefined;
   Qr: { intent: PaymentIntent };

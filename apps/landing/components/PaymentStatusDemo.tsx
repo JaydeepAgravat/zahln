@@ -1,6 +1,6 @@
 'use client';
 
-import { type AttemptEvent, type AttemptState, attemptReducer, type PaymentIntent } from '@zahln/shared';
+import { type AttemptEvent, type AttemptState, attemptReducer, type PaymentIntent } from '@zaster/shared';
 import { useEffect, useReducer, useRef, useSyncExternalStore } from 'react';
 import type { Copy } from '@/content/types';
 import { isPaused, prefersReducedMotion, subscribe } from '@/lib/motionPref';

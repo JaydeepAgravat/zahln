@@ -11,7 +11,7 @@ test('a pay link: open → sign in with the code → pay → Bezahlt', async ({ 
   await expect(page.getByText('6,30 €').first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'In der App öffnen' })).toHaveAttribute(
     'href',
-    `zahln://i/${intent.ref}`,
+    `zaster://i/${intent.ref}`,
   );
 
   await page.getByRole('button', { name: 'Im Browser bezahlen' }).click();

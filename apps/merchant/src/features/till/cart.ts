@@ -1,4 +1,4 @@
-import type { CatalogueItem } from '@zahln/shared';
+import type { CatalogueItem } from '@zaster/shared';
 import { create } from 'zustand';
 
 /**

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { PLAN_FEATURES, PLANS, type Plan } from '@zahln/shared';
-import { Badge, Button, Card, cx, Empty, money, Spinner, StatusBadge, type Tone, when } from '@zahln/web-ui';
+import { PLAN_FEATURES, PLANS, type Plan } from '@zaster/shared';
+import { Badge, Button, Card, cx, Empty, money, Spinner, StatusBadge, type Tone, when } from '@zaster/web-ui';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { api, download, queryClient } from '../lib/api';
@@ -91,7 +91,7 @@ export function MerchantPage() {
             onClick={async () => {
               setExporting('csv');
               try {
-                await download(`/admin/merchants/${m.id}/export.csv`, `zahln-${m.id}.csv`);
+                await download(`/admin/merchants/${m.id}/export.csv`, `zaster-${m.id}.csv`);
                 void queryClient.invalidateQueries({ queryKey: ['audit'] });
               } finally {
                 setExporting(null);

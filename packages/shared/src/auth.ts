@@ -55,7 +55,7 @@ export const VerifyOtpSchema = z.object({ challengeId: z.uuid(), code: z.string(
 export const MembershipSchema = z.object({
   merchantId: z.string(),
   merchantName: z.string(),
-  /** For the merchant's static QR: pay.zahln.de/@handle. */
+  /** For the merchant's static QR: pay.zaster.de/@handle. */
   handle: z.string(),
   role: z.enum(['owner', 'manager', 'staff']),
   plan: PlanSchema,

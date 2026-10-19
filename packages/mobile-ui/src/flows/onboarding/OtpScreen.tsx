@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ApiRequestError, api, haptic, prettyPhone, useT } from '@zahln/mobile-core';
-import { OTP_LENGTH, RequestOtpResponseSchema, VerifyOtpResponseSchema } from '@zahln/shared';
+import { ApiRequestError, api, haptic, prettyPhone, useT } from '@zaster/mobile-core';
+import { OTP_LENGTH, RequestOtpResponseSchema, VerifyOtpResponseSchema } from '@zaster/shared';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Button, Icon, OtpInput, Text, useTheme } from '../../ds';

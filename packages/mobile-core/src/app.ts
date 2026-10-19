@@ -1,5 +1,5 @@
 /**
- * Which app this bundle is, and its version. Zahln (consumer) and ZYSYGY (merchant) share every package;
+ * Which app this bundle is, and its version. Zaster (consumer) and Zettel (merchant) share every package;
  * the app shell calls `configureApp` once in index.js, before anything renders.
  */
 export type AppKind = 'consumer' | 'merchant';

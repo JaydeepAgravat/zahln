@@ -1,4 +1,4 @@
-import { cx } from '@zahln/web-ui';
+import { cx } from '@zaster/web-ui';
 import { useSyncExternalStore } from 'react';
 import { BrowserRouter, Navigate, NavLink, Route, Routes } from 'react-router';
 import { session } from './lib/api';
@@ -30,7 +30,7 @@ function Shell() {
     <div className="min-h-dvh bg-bg text-text-primary md:pl-60">
       <aside className="flex flex-col gap-6 border-b border-border bg-surface px-4 py-4 md:fixed md:inset-y-0 md:left-0 md:w-60 md:border-r md:border-b-0 md:py-6">
         <p className="flex items-center gap-2 px-2 text-headline font-bold tracking-tight">
-          <img src="/favicon.svg" alt="" className="size-7" /> Zahln Ops
+          <img src="/favicon.svg" alt="" className="size-7" /> Zaster Ops
         </p>
         <nav className="flex gap-1 overflow-x-auto md:flex-col">
           {NAV.map((n) => (

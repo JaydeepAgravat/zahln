@@ -1,4 +1,4 @@
-import { appVersion, useRemoteConfig, useT } from '@zahln/mobile-core';
+import { appVersion, useRemoteConfig, useT } from '@zaster/mobile-core';
 import { Linking, Platform, View } from 'react-native';
 import { Button, Logo, Text } from '../ds';
 import { SafeArea } from '../SafeArea';

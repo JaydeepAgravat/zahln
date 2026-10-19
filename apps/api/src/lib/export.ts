@@ -1,4 +1,4 @@
-import { includedVat, type VatRate } from '@zahln/shared';
+import { includedVat, type VatRate } from '@zaster/shared';
 import { and, eq, gte, lt, sql } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client';
 import { paymentIntents } from '../db/schema';

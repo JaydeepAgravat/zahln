@@ -1,7 +1,7 @@
 'use client';
 
-import type { PaymentIntent } from '@zahln/shared';
-import { Button, Card, Field, Input } from '@zahln/web-ui';
+import type { PaymentIntent } from '@zaster/shared';
+import { Button, Card, Field, Input } from '@zaster/web-ui';
 import Link from 'next/link';
 import { useRef, useState } from 'react';
 import { useT } from '@/components/I18n';

@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { haptic, useIntentStatus, useKillSwitch, useT } from '@zahln/mobile-core';
+import { haptic, useIntentStatus, useKillSwitch, useT } from '@zaster/mobile-core';
 import {
   AmountDisplay,
   Button,
@@ -11,9 +11,9 @@ import {
   Text,
   useCountdown,
   useTheme,
-} from '@zahln/mobile-ui';
-import { nfcPay } from '@zahln/nfc-pay';
-import { payUrlFor } from '@zahln/shared';
+} from '@zaster/mobile-ui';
+import { nfcPay } from '@zaster/nfc-pay';
+import { payUrlFor } from '@zaster/shared';
 import { useEffect } from 'react';
 import { StatusBar, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -109,7 +109,7 @@ export function QrScreen({ navigation, route }: Props) {
               style={{ backgroundColor: colors.qrBackground }}
               accessible
               accessibilityRole="image"
-              accessibilityLabel={t('till.scanWithZahln')}
+              accessibilityLabel={t('till.scanWithZaster')}
             >
               <View style={{ opacity: expired ? 0.12 : 1 }}>
                 <QRCode

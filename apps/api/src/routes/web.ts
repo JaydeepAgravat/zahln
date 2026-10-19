@@ -10,7 +10,7 @@ import {
   PLAN_STAFF_LIMIT,
   PLANS,
   RequestOtpSchema,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { and, desc, eq, gte, isNull, lt, sql } from 'drizzle-orm';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
@@ -97,7 +97,7 @@ function nextSettlement(now = new Date()): string {
 }
 
 /**
- * Zahln Web (the browser): cookie sessions instead of device-bound bearer tokens.
+ * Zaster Web (the browser): cookie sessions instead of device-bound bearer tokens.
  * - The session cookie is httpOnly, so script on the page (an XSS) can never read it.
  * - Every write echoes the readable CSRF cookie in `x-csrf-token`; SameSite=Lax already stops most cross-site posts.
  * - A business session is bound to one merchant: routes use the session's merchant, never an ID from the URL.
@@ -193,13 +193,13 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
         .update(authChallenges)
         .set({ consumedAt: sql`now()` })
         .where(eq(authChallenges.verificationTokenHash, sha256(result.verificationToken)));
-      if (result.isNewUser) throw new ApiError(404, 'no_account', 'no Zahln account for this number');
+      if (result.isNewUser) throw new ApiError(404, 'no_account', 'no Zaster account for this number');
       const [user] = await db
         .select({ id: users.id })
         .from(users)
         .innerJoin(authChallenges, eq(authChallenges.phone, users.phone))
         .where(eq(authChallenges.id, req.body.challengeId));
-      if (!user) throw new ApiError(404, 'no_account', 'no Zahln account for this number');
+      if (!user) throw new ApiError(404, 'no_account', 'no Zaster account for this number');
 
       let merchantId: string | null = null;
       if (req.body.audience === 'business') {
@@ -427,8 +427,8 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
         id: r.refund.id,
         amountCents: r.refund.amountCents,
         reason: r.refund.reason,
-        // Ops refunds show as "Zahln Support", never the operator's name.
-        by: r.by ?? 'Zahln Support',
+        // Ops refunds show as "Zaster Support", never the operator's name.
+        by: r.by ?? 'Zaster Support',
         createdAt: r.refund.createdAt.toISOString(),
       })),
     };
@@ -574,7 +574,7 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
           throw new ApiError(403, 'plan_required', `the ${s.merchant.plan} plan allows ${count?.n} people`);
         const [user] = await tx.select().from(users).where(eq(users.phone, req.body.phone));
         // Production: send an invite SMS and create the membership when they sign up.
-        if (!user) throw new ApiError(404, 'no_account', 'this number has no Zahln account yet');
+        if (!user) throw new ApiError(404, 'no_account', 'this number has no Zaster account yet');
         const [added] = await tx
           .insert(staff)
           .values({ merchantId: s.merchant.id, userId: user.id, role: req.body.role })
@@ -656,7 +656,7 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
         actor: `web:${s.user.id}`,
         action: 'merchant.plan',
         target: s.merchant.id,
-        reason: 'Changed by the owner on Zahln Web',
+        reason: 'Changed by the owner on Zaster Web',
         data: { from, to: req.body.plan },
       });
     });
@@ -674,7 +674,7 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
       const s = business(req);
       feature(s, 'csv_export');
       const { csv } = await merchantCsv(db, s.merchant.id, req.query);
-      const name = `zahln-${s.merchant.handle}-${req.query.from ?? 'alle'}-${req.query.to ?? 'heute'}.csv`;
+      const name = `zaster-${s.merchant.handle}-${req.query.from ?? 'alle'}-${req.query.to ?? 'heute'}.csv`;
       return reply
         .header('content-type', 'text/csv; charset=utf-8')
         .header('content-disposition', `attachment; filename="${name}"`)
@@ -837,7 +837,7 @@ export async function webRoutes(fastify: FastifyInstance, deps: WebDeps) {
     return reply
       .header(
         'content-disposition',
-        `attachment; filename="zahln-daten-${new Date().toISOString().slice(0, 10)}.json"`,
+        `attachment; filename="zaster-daten-${new Date().toISOString().slice(0, 10)}.json"`,
       )
       .header('cache-control', 'no-store')
       .send(await exportAccount(db, s.user.id));

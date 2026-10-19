@@ -1,4 +1,4 @@
-// Tailwind 3 (NativeWind 4). The theme is generated from @zahln/shared tokens: never hand-edit colours here.
+// Tailwind 3 (NativeWind 4). The theme is generated from @zaster/shared tokens: never hand-edit colours here.
 // Tailwind loads this file with jiti, which can require the TypeScript token module directly.
 const { tailwindTheme } = require('../../packages/shared/src/tokens/tailwind.ts');
 

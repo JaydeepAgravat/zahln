@@ -1,6 +1,6 @@
 'use client';
 
-import { cx } from '@zahln/web-ui';
+import { cx } from '@zaster/web-ui';
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 
 type Toast = { id: number; text: string; tone: 'success' | 'error' };

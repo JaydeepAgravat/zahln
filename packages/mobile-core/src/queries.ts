@@ -1,5 +1,5 @@
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { MeResponseSchema, WalletSchema } from '@zahln/shared';
+import { MeResponseSchema, WalletSchema } from '@zaster/shared';
 import { useEffect } from 'react';
 import { api } from './api';
 import { usePrefs } from './prefs';

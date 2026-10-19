@@ -1,7 +1,7 @@
 'use client';
 
-import { type Feature, PLAN_FEATURES, PLANS, type Plan } from '@zahln/shared';
-import { Button, cx } from '@zahln/web-ui';
+import { type Feature, PLAN_FEATURES, PLANS, type Plan } from '@zaster/shared';
+import { Button, cx } from '@zaster/web-ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useT } from '@/components/I18n';

@@ -7,7 +7,7 @@ import {
   PaymentIntentSchema,
   PayResultSchema,
   RefundSchema,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { z } from 'zod';
 import { api } from '../api';
 

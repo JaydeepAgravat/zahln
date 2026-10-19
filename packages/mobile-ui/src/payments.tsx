@@ -1,5 +1,5 @@
-import { haptic, useT } from '@zahln/mobile-core';
-import { spokenMoney } from '@zahln/shared';
+import { haptic, useT } from '@zaster/mobile-core';
+import { spokenMoney } from '@zaster/shared';
 import { type ReactNode, useEffect, useState } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 import Animated, {

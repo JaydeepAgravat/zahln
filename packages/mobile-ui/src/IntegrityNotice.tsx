@@ -1,5 +1,5 @@
-import { useT } from '@zahln/mobile-core';
-import { deviceIntegrity } from '@zahln/secure-screen';
+import { useT } from '@zaster/mobile-core';
+import { deviceIntegrity } from '@zaster/secure-screen';
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { Icon } from './Icon';

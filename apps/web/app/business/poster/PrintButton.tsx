@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@zahln/web-ui';
+import { Button } from '@zaster/web-ui';
 
 export function PrintButton({ label }: { label: string }) {
   return (

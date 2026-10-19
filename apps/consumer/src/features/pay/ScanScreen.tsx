@@ -1,9 +1,9 @@
 import { useIsFocused } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { haptic, payments, useKillSwitch, useT } from '@zahln/mobile-core';
-import { Button, Icon, PressableScale, SafeArea, Text, toast, useTheme } from '@zahln/mobile-ui';
-import { useNfcReader } from '@zahln/nfc-pay';
-import { handleUrlFor, parseHandleUrl, parsePayUrl } from '@zahln/shared';
+import { haptic, payments, useKillSwitch, useT } from '@zaster/mobile-core';
+import { Button, Icon, PressableScale, SafeArea, Text, toast, useTheme } from '@zaster/mobile-ui';
+import { useNfcReader } from '@zaster/nfc-pay';
+import { handleUrlFor, parseHandleUrl, parsePayUrl } from '@zaster/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, Linking, StatusBar, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -109,7 +109,7 @@ export function ScanScreen({ navigation }: Props) {
     [open, openHandle, t],
   );
 
-  // Android: holding the phone against a ZYSYGY till delivers the same reference the QR carries.
+  // Android: holding the phone against a Zettel till delivers the same reference the QR carries.
   const nfcKilled = useKillSwitch('nfc_pay');
   const onNfc = useCallback((ref: string) => onCodes([ref]), [onCodes]);
   useNfcReader(focused && appActive && !nfcKilled, onNfc);

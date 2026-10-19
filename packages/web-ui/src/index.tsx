@@ -2,7 +2,7 @@
 
 // Interactive primitives (hooks inside). In Next.js, server components can still render them;
 // they just hydrate on the client. Vite (the console) ignores the directive.
-import { type Cents, formatMoney, type IntentStatus } from '@zahln/shared';
+import { type Cents, formatMoney, type IntentStatus } from '@zaster/shared';
 import {
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
@@ -186,7 +186,7 @@ const STATUS: Record<IntentStatus, { label: string; tone: Tone }> = {
 };
 export const statusLabel = (s: IntentStatus) => STATUS[s].label;
 
-/** `label` lets a localised app (Zahln Web is German first) name the status; the tone stays the same everywhere. */
+/** `label` lets a localised app (Zaster Web is German first) name the status; the tone stays the same everywhere. */
 export function StatusBadge({ status, label: given }: { status: IntentStatus; label?: string }) {
   const { label: fallback, tone } = STATUS[status];
   const label = given ?? fallback;

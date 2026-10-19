@@ -1,7 +1,7 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useT } from '@zahln/mobile-core';
-import { Icon, PressableScale, ReceiptEdge, SafeArea, Text, useTheme } from '@zahln/mobile-ui';
-import { handleUrlFor } from '@zahln/shared';
+import { useT } from '@zaster/mobile-core';
+import { Icon, PressableScale, ReceiptEdge, SafeArea, Text, useTheme } from '@zaster/mobile-ui';
+import { handleUrlFor } from '@zaster/shared';
 import { StatusBar, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -11,7 +11,7 @@ import { useCurrentMerchant } from './TillScreens';
 type Props = NativeStackScreenProps<HomeStackParamList, 'MyQr'>;
 
 /**
- * The merchant's static QR: pay.zahln.de/@handle. It never expires and carries no amount, so it can
+ * The merchant's static QR: pay.zaster.de/@handle. It never expires and carries no amount, so it can
  * be printed on the counter. The customer types the amount; on every plan, including Free.
  */
 export function MyQrScreen({ navigation }: Props) {

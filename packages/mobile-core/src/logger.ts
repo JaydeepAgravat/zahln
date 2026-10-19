@@ -1,4 +1,4 @@
-import { scrub } from '@zahln/shared';
+import { scrub } from '@zaster/shared';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type LogEntry = { level: LogLevel; message: string; data?: unknown; at: string };
@@ -26,7 +26,7 @@ function log(level: LogLevel, message: string, data?: unknown) {
   for (const sink of sinks) sink(entry);
   if (__DEV__) {
     // biome-ignore lint/suspicious/noConsole: the one place the app prints, development builds only
-    console[level === 'debug' ? 'log' : level](`[zahln] ${entry.message}`, entry.data ?? '');
+    console[level === 'debug' ? 'log' : level](`[zaster] ${entry.message}`, entry.data ?? '');
   }
 }
 

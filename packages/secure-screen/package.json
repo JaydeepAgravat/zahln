@@ -1,5 +1,5 @@
 {
-  "name": "@zahln/secure-screen",
+  "name": "@zaster/secure-screen",
   "version": "0.1.0",
   "private": true,
   "description": "Our own TurboModule: blocks screenshots on Android (FLAG_SECURE), blurs the iOS app-switcher snapshot, reports screen recording, and gives a root/jailbreak hint.",
@@ -10,15 +10,15 @@
     "typecheck": "tsc --noEmit"
   },
   "codegenConfig": {
-    "name": "ZahlnSecureScreenSpec",
+    "name": "ZasterSecureScreenSpec",
     "type": "modules",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "de.zahln.securescreen"
+      "javaPackageName": "de.zaster.securescreen"
     },
     "ios": {
       "modulesProvider": {
-        "ZahlnSecureScreen": "ZahlnSecureScreen"
+        "ZasterSecureScreen": "ZasterSecureScreen"
       }
     }
   },

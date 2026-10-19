@@ -1,4 +1,4 @@
-import { Badge } from '@zahln/web-ui';
+import { Badge } from '@zaster/web-ui';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { CommandPalette, LocaleSwitch, Nav, SignOut } from '@/components/Nav';

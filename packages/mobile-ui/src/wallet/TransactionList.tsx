@@ -1,5 +1,5 @@
-import { useT } from '@zahln/mobile-core';
-import type { WalletTransaction } from '@zahln/shared';
+import { useT } from '@zaster/mobile-core';
+import type { WalletTransaction } from '@zaster/shared';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { EmptyReceiptsIllustration, type IconName, ListRow, Skeleton, Text } from '../ds';

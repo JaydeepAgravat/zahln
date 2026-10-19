@@ -53,7 +53,7 @@ export function Intro({ copy }: { copy: Copy }) {
           </svg>
 
           <p className="intro-fade mb-5 flex items-center justify-between font-display text-[11px] font-bold tracking-[0.16em] text-on-ink-muted uppercase">
-            <span>Zahln</span>
+            <span>Zaster</span>
             <span>{copy.intro.season}</span>
           </p>
           <h1>

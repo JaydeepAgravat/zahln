@@ -1,7 +1,7 @@
 'use client';
 
-import { normalizeGermanPhone, PhoneSchema } from '@zahln/shared';
-import { Button, Field, Input } from '@zahln/web-ui';
+import { normalizeGermanPhone, PhoneSchema } from '@zaster/shared';
+import { Button, Field, Input } from '@zaster/web-ui';
 import { useState } from 'react';
 import { useT } from '@/components/I18n';
 import { ApiError, api } from '@/lib/client';

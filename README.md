@@ -1,13 +1,13 @@
-# Zahln
+# Zaster
 
 **Pay at the counter with your phone, straight from one bank account to another. No card, no terminal, no fees.**
 
 ![A payment in six steps: the café rings up €6.30, a one-time QR code appears, the student scans it, confirms with a PIN, sees "Paid", and the café's till turns green.](docs/screenshots/payment-story.png)
 
-This repository is a working prototype of **Zahln**, a payment app for students, and **ZYSYGY**, the till app for the
+This repository is a working prototype of **Zaster**, a payment app for students, and **Zettel**, the till app for the
 shops where they pay. I am a mobile app developer, and I built it to learn German fintech from the inside: how
 money really moves between bank accounts, what German law asks of a till and a receipt, and how to make a payment
-app that never charges twice. The product idea comes from [Zahln / ZYSYGY](https://zysygy.de). The bank behind
+app that never charges twice. It is an unofficial learning project, not affiliated with any company. The bank behind
 this prototype is simulated, so no real money moves. Everything else is real and runs end to end: two phone apps,
 three websites, and the server that connects them.
 
@@ -50,8 +50,8 @@ take a real part of what she earns.
 **Meet Lena.** She studies at the university and buys coffee at Café Mila most mornings. She wants paying to be
 fast and simple, and she wants to be sure that she never pays twice by mistake.
 
-**Zahln connects them.** Mila's phone becomes her till: she opens the **ZYSYGY** app, taps what Lena ordered, and a
-QR code appears. Lena scans it with the **Zahln** app, checks the amount, and confirms with her PIN or Face ID.
+**Zaster connects them.** Mila's phone becomes her till: she opens the **Zettel** app, taps what Lena ordered, and a
+QR code appears. Lena scans it with the **Zaster** app, checks the amount, and confirms with her PIN or Face ID.
 The money moves from Lena's account to Mila's account through **SEPA Instant**, the European system that
 moves euros between bank accounts in seconds. No card network sits in between, so there is no fee on the payment.
 Shops pay a monthly plan for extra features instead (Free, Pro at €29, Business at €59).
@@ -73,13 +73,13 @@ her balance goes up, and the payment appears on her web dashboard. All of this h
 This is the hardest problem in payments. Lena taps "Pay". The bank moves the money. But the café Wi-Fi drops
 **before the answer reaches her phone**. What should the app say?
 
-A careless app would say "Failed", and Lena would try again, so she pays **twice**. Zahln does something different:
+A careless app would say "Failed", and Lena would try again, so she pays **twice**. Zaster does something different:
 
 <table>
 <tr>
-<td align="center" width="33%"><img src="docs/screenshots/zahln/16-checking.png" width="220" alt="Checking"><br><sub><b>Checking</b>: the app does not guess. It asks the bank what happened.</sub></td>
-<td align="center" width="33%"><img src="docs/screenshots/zahln/13-paid.png" width="220" alt="Paid"><br><sub><b>Paid</b>: the bank says the money arrived. It was charged once.</sub></td>
-<td align="center" width="33%"><img src="docs/screenshots/zahln/14-not-charged.png" width="220" alt="Not charged"><br><sub><b>Not charged</b>: the bank refused. The app says clearly that no money moved.</sub></td>
+<td align="center" width="33%"><img src="docs/screenshots/zaster/16-checking.png" width="220" alt="Checking"><br><sub><b>Checking</b>: the app does not guess. It asks the bank what happened.</sub></td>
+<td align="center" width="33%"><img src="docs/screenshots/zaster/13-paid.png" width="220" alt="Paid"><br><sub><b>Paid</b>: the bank says the money arrived. It was charged once.</sub></td>
+<td align="center" width="33%"><img src="docs/screenshots/zaster/14-not-charged.png" width="220" alt="Not charged"><br><sub><b>Not charged</b>: the bank refused. The app says clearly that no money moved.</sub></td>
 </tr>
 </table>
 
@@ -100,11 +100,11 @@ So the important switches live on the server, and the team controls them from th
 
 | | App | Who uses it | What it does | Built with |
 |---|---|---|---|---|
-| <img src="docs/screenshots/zahln/07-wallet.png" width="60" alt=""> | **Zahln** (iOS, Android) | Students and shoppers | A wallet: pay a QR code, see your history and receipts | React Native |
-| <img src="docs/screenshots/zysygy/03-till.png" width="60" alt=""> | **ZYSYGY** (iOS, Android) | Shop staff at the counter | A till: ring up, show a QR, refund, see today's takings | React Native |
-| <img src="docs/screenshots/web/02-today.png" width="60" alt=""> | **Zahln Web** | Shop owners, and customers without the app | A dashboard for the shop, a web wallet, and a checkout page for payment links | Next.js |
-| <img src="docs/screenshots/console/07-control-room.png" width="60" alt=""> | **Zahln Ops** | The Zahln support team | Find any payment, refund it, change plans, flip switches. Every action is logged | Vite + React |
-| <img src="docs/screenshots/landing/01-edition.png" width="60" alt=""> | **The Zahln Edition** | Everyone, as a first impression | A landing page that tells the product story | Next.js |
+| <img src="docs/screenshots/zaster/07-wallet.png" width="60" alt=""> | **Zaster** (iOS, Android) | Students and shoppers | A wallet: pay a QR code, see your history and receipts | React Native |
+| <img src="docs/screenshots/zettel/03-till.png" width="60" alt=""> | **Zettel** (iOS, Android) | Shop staff at the counter | A till: ring up, show a QR, refund, see today's takings | React Native |
+| <img src="docs/screenshots/web/02-today.png" width="60" alt=""> | **Zaster Web** | Shop owners, and customers without the app | A dashboard for the shop, a web wallet, and a checkout page for payment links | Next.js |
+| <img src="docs/screenshots/console/07-control-room.png" width="60" alt=""> | **Zaster Ops** | The Zaster support team | Find any payment, refund it, change plans, flip switches. Every action is logged | Vite + React |
+| <img src="docs/screenshots/landing/01-edition.png" width="60" alt=""> | **The Zaster Edition** | Everyone, as a first impression | A landing page that tells the product story | Next.js |
 
 All five share one design system called **"Ember and ink"**: warm paper, near-black ink, and one orange accent,
 in light and dark mode. Everything works in **German and English**, and it works with screen readers.
@@ -127,10 +127,10 @@ Honesty matters when money is involved, so here is the exact line:
 
 ```mermaid
 flowchart LR
-  Z["Zahln app (student)"] --> API
-  Y["ZYSYGY app (shop till)"] --> API
-  W["Zahln Web (dashboard, wallet, checkout)"] --> API
-  C["Zahln Ops (support console)"] --> API
+  Z["Zaster app (student)"] --> API
+  Y["Zettel app (shop till)"] --> API
+  W["Zaster Web (dashboard, wallet, checkout)"] --> API
+  C["Zaster Ops (support console)"] --> API
   API["API server (Fastify, TypeScript)"] --> DB["Postgres (double-entry ledger)"]
   API --> BANK["Bank rail (simulated SEPA Instant)"]
   API -. "live updates (SSE)" .-> Y
@@ -141,9 +141,9 @@ One payment, step by step:
 
 ```mermaid
 sequenceDiagram
-  participant Till as ZYSYGY till
+  participant Till as Zettel till
   participant API as API server
-  participant App as Zahln app
+  participant App as Zaster app
   participant Bank as Bank (simulated)
   Till->>API: Create a payment for €6.30
   API-->>Till: One-time QR (signed, 5 minutes)
@@ -168,12 +168,12 @@ sequenceDiagram
 
 ```
 apps/
-  consumer/   Zahln app (bare React Native 0.88, iOS + Android)
-  merchant/   ZYSYGY app (bare React Native 0.88, iOS + Android)
+  consumer/   Zaster app (bare React Native 0.88, iOS + Android)
+  merchant/   Zettel app (bare React Native 0.88, iOS + Android)
   api/        Fastify + Postgres + Drizzle, ledger, simulated bank rail
-  web/        Zahln Web (Next.js 16): dashboard, web wallet, pay-link checkout
-  console/    Zahln Ops (Vite + React + shadcn/ui)
-  landing/    The Zahln Edition (Next.js 16, Lenis, Motion, OGL)
+  web/        Zaster Web (Next.js 16): dashboard, web wallet, pay-link checkout
+  console/    Zaster Ops (Vite + React + shadcn/ui)
+  landing/    The Zaster Edition (Next.js 16, Lenis, Motion, OGL)
 packages/
   shared/        schemas, payment state machines, money, plans, German/English text
   mobile-core/   API client, session, keychain, biometrics, logging
@@ -200,19 +200,19 @@ Then start what you want to see, each in its own terminal:
 
 | To see | Run | Then open |
 |---|---|---|
-| Zahln app | `pnpm pods` once, then `pnpm consumer` and `pnpm consumer:ios` (or `consumer:android`) | the simulator |
-| ZYSYGY app | `pnpm merchant` and `pnpm merchant:ios` (or `merchant:android`) | the simulator |
-| Zahln Web | `pnpm web` | http://localhost:3000 |
-| Zahln Ops | `pnpm console` | http://localhost:5174 (your name + `ADMIN_TOKEN` from `.env`) |
-| Landing page | `pnpm --filter @zahln/landing dev` | http://localhost:3001 |
+| Zaster app | `pnpm pods` once, then `pnpm consumer` and `pnpm consumer:ios` (or `consumer:android`) | the simulator |
+| Zettel app | `pnpm merchant` and `pnpm merchant:ios` (or `merchant:android`) | the simulator |
+| Zaster Web | `pnpm web` | http://localhost:3000 |
+| Zaster Ops | `pnpm console` | http://localhost:5174 (your name + `ADMIN_TOKEN` from `.env`) |
+| Landing page | `pnpm --filter @zaster/landing dev` | http://localhost:3001 |
 | Storybook | `pnpm storybook` | http://localhost:6006 |
 
 **Demo accounts** (the sign-in code is always `123456`, and the demo PIN is `271828`):
 
 | Who | Phone number | Use in |
 |---|---|---|
-| Lena, a student | `0151 0000 0001` | Zahln, the web wallet, payment links |
-| Mila, owner of Café Mila | `0151 0000 0010` | ZYSYGY, the Zahln Web dashboard |
+| Lena, a student | `0151 0000 0001` | Zaster, the web wallet, payment links |
+| Mila, owner of Café Mila | `0151 0000 0010` | Zettel, the Zaster Web dashboard |
 
 On Android 16, allow "nearby devices" when a debug build first opens: Metro needs local-network access.
 
@@ -233,67 +233,67 @@ All 61 screens of the five front ends, captured from the running apps with demo 
 The phone shots come from the iPhone simulator, the web shots from Chrome. They are regenerated by
 `pnpm screens:mobile` (Maestro) and `pnpm screens:web` (Playwright), then `scripts/screens/finish.sh <mobile png dir>`.
 
-### Zahln: the student wallet (iOS and Android)
+### Zaster: the student wallet (iOS and Android)
 <table>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/01-welcome.png" width="200" alt="<b>Welcome</b>"><br><sub><b>Welcome</b>: what Zahln is in one line, with a language switch</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/02-phone.png" width="200" alt="<b>Phone number</b>"><br><sub><b>Phone number</b>: sign-up is a German mobile number, nothing else</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/03-code.png" width="200" alt="<b>Code</b>"><br><sub><b>Code</b>: the one-time SMS code (the dev build shows the demo code)</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/04-pin.png" width="200" alt="<b>Choose a PIN</b>"><br><sub><b>Choose a PIN</b>: six digits that guard payments and the app</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/01-welcome.png" width="200" alt="<b>Welcome</b>"><br><sub><b>Welcome</b>: what Zaster is in one line, with a language switch</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/02-phone.png" width="200" alt="<b>Phone number</b>"><br><sub><b>Phone number</b>: sign-up is a German mobile number, nothing else</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/03-code.png" width="200" alt="<b>Code</b>"><br><sub><b>Code</b>: the one-time SMS code (the dev build shows the demo code)</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/04-pin.png" width="200" alt="<b>Choose a PIN</b>"><br><sub><b>Choose a PIN</b>: six digits that guard payments and the app</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/05-biometrics.png" width="200" alt="<b>Face ID</b>"><br><sub><b>Face ID</b>: optional, the PIN stays as the fallback</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/06-lock.png" width="200" alt="<b>Lock</b>"><br><sub><b>Lock</b>: every launch starts here, PIN or Face ID</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/07-wallet.png" width="200" alt="<b>Wallet</b>"><br><sub><b>Wallet</b>: balance, the zero-fee promise and recent payments</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/08-history.png" width="200" alt="<b>History</b>"><br><sub><b>History</b>: every payment, refund and top-up, searchable and filtered</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/05-biometrics.png" width="200" alt="<b>Face ID</b>"><br><sub><b>Face ID</b>: optional, the PIN stays as the fallback</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/06-lock.png" width="200" alt="<b>Lock</b>"><br><sub><b>Lock</b>: every launch starts here, PIN or Face ID</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/07-wallet.png" width="200" alt="<b>Wallet</b>"><br><sub><b>Wallet</b>: balance, the zero-fee promise and recent payments</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/08-history.png" width="200" alt="<b>History</b>"><br><sub><b>History</b>: every payment, refund and top-up, searchable and filtered</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/09-receipt.png" width="200" alt="<b>Receipt</b>"><br><sub><b>Receipt</b>: itemised with VAT, stored unchangeably (GoBD)</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/10-settings.png" width="200" alt="<b>Profile</b>"><br><sub><b>Profile</b>: language, theme, biometrics, sign out and "Your data" (GDPR)</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/11-pay.png" width="200" alt="<b>Pay</b>"><br><sub><b>Pay</b>: a till QR (or a pay link) opens the basket, with an optional tip</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/12-pin-sheet.png" width="200" alt="<b>Confirm</b>"><br><sub><b>Confirm</b>: the PIN sheet names the amount and the merchant</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/09-receipt.png" width="200" alt="<b>Receipt</b>"><br><sub><b>Receipt</b>: itemised with VAT, stored unchangeably (GoBD)</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/10-settings.png" width="200" alt="<b>Profile</b>"><br><sub><b>Profile</b>: language, theme, biometrics, sign out and "Your data" (GDPR)</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/11-pay.png" width="200" alt="<b>Pay</b>"><br><sub><b>Pay</b>: a till QR (or a pay link) opens the basket, with an optional tip</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/12-pin-sheet.png" width="200" alt="<b>Confirm</b>"><br><sub><b>Confirm</b>: the PIN sheet names the amount and the merchant</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/13-paid.png" width="200" alt="<b>Paid</b>"><br><sub><b>Paid</b>: the green flood and the time the bank took to confirm</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/14-not-charged.png" width="200" alt="<b>Not charged</b>"><br><sub><b>Not charged</b>: the bank refused, and the app says plainly that no money moved</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/15-insufficient.png" width="200" alt="<b>Not enough balance</b>"><br><sub><b>Not enough balance</b>: nothing charged, with a way to top up</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/16-checking.png" width="200" alt="<b>Checking</b>"><br><sub><b>Checking</b>: the answer got lost; the app asks the bank instead of guessing</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/13-paid.png" width="200" alt="<b>Paid</b>"><br><sub><b>Paid</b>: the green flood and the time the bank took to confirm</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/14-not-charged.png" width="200" alt="<b>Not charged</b>"><br><sub><b>Not charged</b>: the bank refused, and the app says plainly that no money moved</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/15-insufficient.png" width="200" alt="<b>Not enough balance</b>"><br><sub><b>Not enough balance</b>: nothing charged, with a way to top up</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/16-checking.png" width="200" alt="<b>Checking</b>"><br><sub><b>Checking</b>: the answer got lost; the app asks the bank instead of guessing</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/17-handle.png" width="200" alt="<b>Static QR</b>"><br><sub><b>Static QR</b>: a merchant's permanent code, where the payer types the amount</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/18-update.png" width="200" alt="<b>Please update</b>"><br><sub><b>Please update</b>: ops can retire an old app version, money stays safe</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/19-wallet-dark.png" width="200" alt="<b>Wallet, dark</b>"><br><sub><b>Wallet, dark</b>: the same "Ember and ink" design in dark mode</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zahln/20-pay-dark.png" width="200" alt="<b>Pay, dark</b>"><br><sub><b>Pay, dark</b>: the checkout sheet in dark mode</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/17-handle.png" width="200" alt="<b>Static QR</b>"><br><sub><b>Static QR</b>: a merchant's permanent code, where the payer types the amount</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/18-update.png" width="200" alt="<b>Please update</b>"><br><sub><b>Please update</b>: ops can retire an old app version, money stays safe</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/19-wallet-dark.png" width="200" alt="<b>Wallet, dark</b>"><br><sub><b>Wallet, dark</b>: the same "Ember and ink" design in dark mode</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zaster/20-pay-dark.png" width="200" alt="<b>Pay, dark</b>"><br><sub><b>Pay, dark</b>: the checkout sheet in dark mode</sub></td>
 </tr>
 </table>
 
-### ZYSYGY: the merchant till (iOS and Android)
+### Zettel: the merchant till (iOS and Android)
 <table>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/01-welcome.png" width="200" alt="<b>Welcome</b>"><br><sub><b>Welcome</b>: the phone becomes the till, no terminal needed</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/02-merchant.png" width="200" alt="<b>Your business</b>"><br><sub><b>Your business</b>: the signed-in number picks which shop this till serves</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/03-till.png" width="200" alt="<b>Till</b>"><br><sub><b>Till</b>: tap the catalogue to build the basket</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/04-keypad.png" width="200" alt="<b>Amount</b>"><br><sub><b>Amount</b>: or just type a price</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/01-welcome.png" width="200" alt="<b>Welcome</b>"><br><sub><b>Welcome</b>: the phone becomes the till, no terminal needed</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/02-merchant.png" width="200" alt="<b>Your business</b>"><br><sub><b>Your business</b>: the signed-in number picks which shop this till serves</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/03-till.png" width="200" alt="<b>Till</b>"><br><sub><b>Till</b>: tap the catalogue to build the basket</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/04-keypad.png" width="200" alt="<b>Amount</b>"><br><sub><b>Amount</b>: or just type a price</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/05-qr.png" width="200" alt="<b>One-time QR</b>"><br><sub><b>One-time QR</b>: valid for this payment only, with a countdown</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/06-customer-reviewing.png" width="200" alt="<b>Customer is reviewing</b>"><br><sub><b>Customer is reviewing</b>: the till sees the scan live</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/07-paid.png" width="200" alt="<b>Paid</b>"><br><sub><b>Paid</b>: the money is in, receipt number shown, back to the till in 4 s</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/08-my-qr.png" width="200" alt="<b>My QR</b>"><br><sub><b>My QR</b>: the static code for the counter; customers type the amount</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/05-qr.png" width="200" alt="<b>One-time QR</b>"><br><sub><b>One-time QR</b>: valid for this payment only, with a countdown</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/06-customer-reviewing.png" width="200" alt="<b>Customer is reviewing</b>"><br><sub><b>Customer is reviewing</b>: the till sees the scan live</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/07-paid.png" width="200" alt="<b>Paid</b>"><br><sub><b>Paid</b>: the money is in, receipt number shown, back to the till in 4 s</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/08-my-qr.png" width="200" alt="<b>My QR</b>"><br><sub><b>My QR</b>: the static code for the counter; customers type the amount</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/09-wallet.png" width="200" alt="<b>Wallet</b>"><br><sub><b>Wallet</b>: today's takings and every incoming payment</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/10-payment.png" width="200" alt="<b>Payment</b>"><br><sub><b>Payment</b>: one sale with its items, ready to refund</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/11-refund.png" width="200" alt="<b>Refund</b>"><br><sub><b>Refund</b>: amount and a reason, confirmed with the PIN (managers only)</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/12-settings.png" width="200" alt="<b>Profile</b>"><br><sub><b>Profile</b>: the signed-in staff member and the till's settings</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/09-wallet.png" width="200" alt="<b>Wallet</b>"><br><sub><b>Wallet</b>: today's takings and every incoming payment</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/10-payment.png" width="200" alt="<b>Payment</b>"><br><sub><b>Payment</b>: one sale with its items, ready to refund</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/11-refund.png" width="200" alt="<b>Refund</b>"><br><sub><b>Refund</b>: amount and a reason, confirmed with the PIN (managers only)</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/12-settings.png" width="200" alt="<b>Profile</b>"><br><sub><b>Profile</b>: the signed-in staff member and the till's settings</sub></td>
 </tr>
 <tr>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/13-till-dark.png" width="200" alt="<b>Till, dark</b>"><br><sub><b>Till, dark</b>: for evening shifts</sub></td>
-<td align="center" valign="top" width="25%"><img src="docs/screenshots/zysygy/14-wallet-dark.png" width="200" alt="<b>Wallet, dark</b>"><br><sub><b>Wallet, dark</b>: takings in dark mode</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/13-till-dark.png" width="200" alt="<b>Till, dark</b>"><br><sub><b>Till, dark</b>: for evening shifts</sub></td>
+<td align="center" valign="top" width="25%"><img src="docs/screenshots/zettel/14-wallet-dark.png" width="200" alt="<b>Wallet, dark</b>"><br><sub><b>Wallet, dark</b>: takings in dark mode</sub></td>
 </tr>
 </table>
 
-### Zahln Web: the merchant dashboard
+### Zaster Web: the merchant dashboard
 <table>
 <tr>
 <td align="center" valign="top" width="50%"><img src="docs/screenshots/web/01-login.png" width="420" alt="<b>Sign in</b>"><br><sub><b>Sign in</b>: the merchant dashboard uses the same phone number and code</sub></td>
@@ -320,11 +320,11 @@ The phone shots come from the iPhone simulator, the web shots from Chrome. They 
 </tr>
 </table>
 
-### Zahln Web: pay link and web wallet (phone browser)
+### Zaster Web: pay link and web wallet (phone browser)
 <table>
 <tr>
 <td align="center" valign="top" width="33%"><img src="docs/screenshots/checkout/01-pay-link.png" width="260" alt="<b>Pay link</b>"><br><sub><b>Pay link</b>: a QR or link opened without the app shows the basket</sub></td>
-<td align="center" valign="top" width="33%"><img src="docs/screenshots/checkout/02-code.png" width="260" alt="<b>Sign in</b>"><br><sub><b>Sign in</b>: pay with the Zahln number and a one-time code</sub></td>
+<td align="center" valign="top" width="33%"><img src="docs/screenshots/checkout/02-code.png" width="260" alt="<b>Sign in</b>"><br><sub><b>Sign in</b>: pay with the Zaster number and a one-time code</sub></td>
 <td align="center" valign="top" width="33%"><img src="docs/screenshots/checkout/03-paid.png" width="260" alt="<b>Paid</b>"><br><sub><b>Paid</b>: the same outcome screens as the app</sub></td>
 </tr>
 <tr>
@@ -334,7 +334,7 @@ The phone shots come from the iPhone simulator, the web shots from Chrome. They 
 </tr>
 </table>
 
-### Zahln Ops: the internal console
+### Zaster Ops: the internal console
 <table>
 <tr>
 <td align="center" valign="top" width="50%"><img src="docs/screenshots/console/01-login.png" width="420" alt="<b>Sign in</b>"><br><sub><b>Sign in</b>: the operator's name plus the ops token, so every action is attributed</sub></td>
@@ -357,9 +357,9 @@ The phone shots come from the iPhone simulator, the web shots from Chrome. They 
 </tr>
 </table>
 
-### The Zahln Edition: the landing page
-<img src="docs/screenshots/landing/01-edition.png" width="860" alt="The Zahln Edition">
-<br><sub><b>The Zahln Edition</b>: an Editions-style launch page for the product (<code>apps/landing</code>)</sub>
+### The Zaster Edition: the landing page
+<img src="docs/screenshots/landing/01-edition.png" width="860" alt="The Zaster Edition">
+<br><sub><b>The Zaster Edition</b>: an Editions-style launch page for the product (<code>apps/landing</code>)</sub>
 
 ## Glossary
 
@@ -383,7 +383,7 @@ The phone shots come from the iPhone simulator, the web shots from Chrome. They 
 
 ## More to read
 
-Everything else is in one document: **[The Zahln Handbook](docs/HANDBOOK.md)**. It tells the whole story:
+Everything else is in one document: **[The Zaster Handbook](docs/HANDBOOK.md)**. It tells the whole story:
 
 1. [What problem this solves, and why](docs/HANDBOOK.md#part-1-the-problem-and-why-it-is-worth-solving)
 2. [The hard parts](docs/HANDBOOK.md#part-2-the-hard-parts)
@@ -393,5 +393,5 @@ Everything else is in one document: **[The Zahln Handbook](docs/HANDBOOK.md)**. 
 
 ---
 
-Built by Jaydeep Agravat, a mobile app developer exploring German fintech. This is an independent prototype, not the
-official Zahln app. The names Zahln and ZYSYGY belong to their owners.
+Built by Jaydeep Agravat, a mobile app developer exploring German fintech. This is an unofficial learning
+prototype, not affiliated with any company, and no real money moves.

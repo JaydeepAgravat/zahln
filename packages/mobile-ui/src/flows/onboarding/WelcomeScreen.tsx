@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { appKind, usePrefs, useT } from '@zahln/mobile-core';
+import { appKind, usePrefs, useT } from '@zaster/mobile-core';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,7 +31,7 @@ export function WelcomeScreen({ navigation }: Props) {
               variant="headline"
               style={{ fontFamily: 'Inter-Bold', letterSpacing: merchant ? 1.2 : -0.4 }}
             >
-              {merchant ? 'ZYSYGY' : 'Zahln'}
+              {merchant ? 'Zettel' : 'Zaster'}
             </Text>
           </View>
           <PressableScale

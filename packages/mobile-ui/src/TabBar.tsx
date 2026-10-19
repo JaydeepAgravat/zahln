@@ -1,5 +1,5 @@
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { haptic } from '@zahln/mobile-core';
+import { haptic } from '@zaster/mobile-core';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, type IconName, PressableScale, Text } from './ds';

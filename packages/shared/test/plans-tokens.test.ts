@@ -5,7 +5,7 @@ import { hasFeature, minimumPlanFor, PLAN_FEATURES } from '../src/plans';
 import { type ColorScheme, colors, contrastRatio } from '../src/tokens';
 
 describe('plans', () => {
-  it('matches zysygy.de/plans', () => {
+  it('matches the published plans', () => {
     expect(hasFeature('free', 'static_qr')).toBe(true);
     expect(hasFeature('free', 'dynamic_qr')).toBe(false);
     expect(hasFeature('pro', 'dynamic_qr')).toBe(true);

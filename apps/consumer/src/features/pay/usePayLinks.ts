@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { parseHandleUrl, parsePayUrl } from '@zahln/shared';
+import { parseHandleUrl, parsePayUrl } from '@zaster/shared';
 import { useEffect } from 'react';
 import { Linking } from 'react-native';
 import type { HomeStackParamList } from '../../app/navigation/types';
@@ -28,7 +28,7 @@ export function startPayLinkBuffer() {
 }
 
 /**
- * Pay links (`https://pay.zahln.de/i/<ref>`, `zahln://i/<ref>`, `…/@handle`) from a browser, a message or the
+ * Pay links (`https://pay.zaster.de/i/<ref>`, `zaster://i/<ref>`, `…/@handle`) from a browser, a message or the
  * web checkout's "In der App öffnen". This runs inside the signed-in, unlocked stack only, so a link can never
  * skip the PIN. The link is only a reference: the Pay screen fetches merchant and amount from the server.
  */

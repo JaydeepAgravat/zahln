@@ -7,7 +7,7 @@ import { ToastProvider } from '@/components/Toast';
 import { serverLocale } from '@/lib/i18n';
 
 export const metadata: Metadata = {
-  title: { default: 'Zahln Business', template: '%s · Zahln Business' },
+  title: { default: 'Zaster Business', template: '%s · Zaster Business' },
   robots: { index: false },
   icons: { icon: '/favicon.svg' },
 };

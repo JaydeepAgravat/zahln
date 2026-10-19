@@ -1,5 +1,5 @@
-import { useT } from '@zahln/mobile-core';
-import { spokenMoney } from '@zahln/shared';
+import { useT } from '@zaster/mobile-core';
+import { spokenMoney } from '@zaster/shared';
 import { Text, type TextTone } from './Text';
 
 type Props = {

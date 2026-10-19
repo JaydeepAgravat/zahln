@@ -1,4 +1,4 @@
-/** The Zahln receipt mark: a receipt with a torn edge carrying a bold Z. */
+/** The Zaster receipt mark: a receipt with a torn edge carrying a bold Z. */
 export function Mark({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden="true" focusable="false">

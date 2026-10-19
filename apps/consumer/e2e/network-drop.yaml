@@ -1,7 +1,7 @@
 # Act 2: the bank settles but the answer never reaches the phone. The app must say "Wird geprüft",
 # then find the outcome by its idempotency key and show Bezahlt, with exactly one ledger transaction.
-appId: de.zahln.app
-name: Zahln · lost response, still charged once
+appId: de.zaster.app
+name: Zaster · lost response, still charged once
 ---
 - launchApp
 - runFlow: unlock.yaml
@@ -13,7 +13,7 @@ name: Zahln · lost response, still charged once
     file: scripts/chaos.js
     env:
       MODE: drop_after_settle
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000

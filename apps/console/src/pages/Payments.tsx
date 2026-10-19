@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table';
-import { INTENT_STATUSES, type IntentStatus } from '@zahln/shared';
+import { INTENT_STATUSES, type IntentStatus } from '@zaster/shared';
 import {
   Card,
   cx,
@@ -12,7 +12,7 @@ import {
   StatusBadge,
   statusLabel,
   when,
-} from '@zahln/web-ui';
+} from '@zaster/web-ui';
 import { useDeferredValue } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { type AdminPayment, api } from '../lib/api';

@@ -1,4 +1,4 @@
-import { type AdminConfig, ATTEMPT_STATUSES, INTENT_STATUSES, type LineItem, PLANS } from '@zahln/shared';
+import { type AdminConfig, ATTEMPT_STATUSES, INTENT_STATUSES, type LineItem, PLANS } from '@zaster/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigserial,
@@ -198,7 +198,7 @@ export const refunds = pgTable(
     reason: text().notNull(),
     /** A merchant's owner/manager in the app… */
     createdByUserId: text().references(() => users.id),
-    /** …or Zahln ops in the internal console (e.g. "console:ops"). Exactly one is set. */
+    /** …or Zaster ops in the internal console (e.g. "console:ops"). Exactly one is set. */
     createdByOps: text(),
     createdAt: createdAt(),
   },
@@ -277,7 +277,7 @@ export const devices = pgTable(
 // ---------- Web sessions (Day 7) ----------
 
 /**
- * A signed-in browser (Zahln Web). The cookie holds a random token; only its SHA-256 is stored, like devices.
+ * A signed-in browser (Zaster Web). The cookie holds a random token; only its SHA-256 is stored, like devices.
  * A business session is bound to one merchant, so dashboard routes never take a merchant ID from the URL.
  * `csrfHash` binds the double-submit CSRF token to this session; `authenticatedAt` is the last OTP (step-up).
  */

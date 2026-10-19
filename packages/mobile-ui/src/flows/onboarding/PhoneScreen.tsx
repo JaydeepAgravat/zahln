@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { api, haptic, useT } from '@zahln/mobile-core';
-import { normalizeGermanPhone, PhoneSchema, RequestOtpResponseSchema } from '@zahln/shared';
+import { api, haptic, useT } from '@zaster/mobile-core';
+import { normalizeGermanPhone, PhoneSchema, RequestOtpResponseSchema } from '@zaster/shared';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { Button, CodeIllustration, Icon, Text, useTheme } from '../../ds';

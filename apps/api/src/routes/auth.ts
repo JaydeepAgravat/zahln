@@ -1,4 +1,4 @@
-import { RegisterDeviceSchema, RequestOtpSchema, VerifyOtpSchema } from '@zahln/shared';
+import { RegisterDeviceSchema, RequestOtpSchema, VerifyOtpSchema } from '@zaster/shared';
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import type { Db } from '../db/client';

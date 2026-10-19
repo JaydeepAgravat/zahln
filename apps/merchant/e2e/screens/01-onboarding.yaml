@@ -1,7 +1,7 @@
 # README gallery: sign out, switch to English, then set this phone up as Café Mila's till (Mila, 0151 0000 0010), one shot per step.
-# Run with scripts/screens/mobile.sh zysygy.
-appId: de.zysygy.app
-name: Screens · ZYSYGY onboarding
+# Run with scripts/screens/mobile.sh zettel.
+appId: de.zettel.app
+name: Screens · Zettel onboarding
 ---
 - stopApp
 - launchApp
@@ -40,7 +40,7 @@ name: Screens · ZYSYGY onboarding
     visible: "Get started"
     timeout: 5000
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-01-welcome
+- takeScreenshot: zettel-01-welcome
 - tapOn: "Get started"
 - tapOn: "151 2345 6789"
 - inputText: "15100000010"
@@ -57,7 +57,7 @@ name: Screens · ZYSYGY onboarding
     visible: "Your business"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-02-merchant
+- takeScreenshot: zettel-02-merchant
 - tapOn: "Continue"
 - extendedWaitUntil:
     visible: "Choose a PIN"

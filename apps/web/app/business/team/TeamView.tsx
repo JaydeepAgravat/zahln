@@ -1,7 +1,7 @@
 'use client';
 
-import { normalizeGermanPhone, PhoneSchema } from '@zahln/shared';
-import { Button, Card, Field, Input, Select } from '@zahln/web-ui';
+import { normalizeGermanPhone, PhoneSchema } from '@zaster/shared';
+import { Button, Card, Field, Input, Select } from '@zaster/web-ui';
 import { useState } from 'react';
 import { useT } from '@/components/I18n';
 import { useStepUp } from '@/components/StepUp';

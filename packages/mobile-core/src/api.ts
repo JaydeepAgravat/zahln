@@ -1,4 +1,4 @@
-import { type ApiErrorCode, ApiErrorSchema } from '@zahln/shared';
+import { type ApiErrorCode, ApiErrorSchema } from '@zaster/shared';
 import { Platform } from 'react-native';
 import type { z } from 'zod';
 import { appKind } from './app';

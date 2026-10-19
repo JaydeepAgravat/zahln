@@ -1,4 +1,4 @@
-import { isPayable, type PaymentIntent } from '@zahln/shared';
+import { isPayable, type PaymentIntent } from '@zaster/shared';
 import type { FastifyInstance } from 'fastify';
 import type { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { z } from 'zod';

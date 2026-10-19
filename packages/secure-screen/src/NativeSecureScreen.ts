@@ -19,4 +19,4 @@ export interface Spec extends TurboModule {
 }
 
 /** `null` where the module isn't linked (Jest, Storybook): callers fall back to no-ops. */
-export default TurboModuleRegistry.get<Spec>('ZahlnSecureScreen');
+export default TurboModuleRegistry.get<Spec>('ZasterSecureScreen');

@@ -10,7 +10,7 @@
           same module, never answers for a payment it doesn't have.
         -->
         <service
-            android:name="de.zahln.nfcpay.PaymentApduService"
+            android:name="de.zaster.nfcpay.PaymentApduService"
             android:enabled="false"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE">

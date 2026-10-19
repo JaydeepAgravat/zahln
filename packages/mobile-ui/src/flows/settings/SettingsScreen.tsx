@@ -12,7 +12,7 @@ import {
   usePrefs,
   useSession,
   useT,
-} from '@zahln/mobile-core';
+} from '@zaster/mobile-core';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Alert, ScrollView, Share, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

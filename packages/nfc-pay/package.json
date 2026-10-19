@@ -1,5 +1,5 @@
 {
-  "name": "@zahln/nfc-pay",
+  "name": "@zaster/nfc-pay",
   "version": "0.1.0",
   "private": true,
   "description": "Our own Android-only TurboModule: the till emulates a card (HCE) that holds the open payment's reference; the payer's phone reads it in reader mode.",
@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "codegenConfig": {
-    "name": "ZahlnNfcPaySpec",
+    "name": "ZasterNfcPaySpec",
     "type": "modules",
     "jsSrcsDir": "src",
     "android": {
-      "javaPackageName": "de.zahln.nfcpay"
+      "javaPackageName": "de.zaster.nfcpay"
     }
   },
   "peerDependencies": {

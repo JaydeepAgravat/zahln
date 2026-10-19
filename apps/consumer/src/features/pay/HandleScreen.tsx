@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import { haptic, payments, useT, uuid } from '@zahln/mobile-core';
+import { haptic, payments, useT, uuid } from '@zaster/mobile-core';
 import {
   AmountDisplay,
   Button,
@@ -11,8 +11,8 @@ import {
   Skeleton,
   Text,
   toast,
-} from '@zahln/mobile-ui';
-import { applyKeypadKey } from '@zahln/shared';
+} from '@zaster/mobile-ui';
+import { applyKeypadKey } from '@zaster/shared';
 import { useRef, useState } from 'react';
 import { View } from 'react-native';
 import type { HomeStackParamList } from '../../app/navigation/types';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Dialog, Field, Input } from '@zahln/web-ui';
+import { Button, Dialog, Field, Input } from '@zaster/web-ui';
 import { createContext, type ReactNode, useCallback, useContext, useRef, useState } from 'react';
 import { ApiError, api } from '@/lib/client';
 import { useT } from './I18n';

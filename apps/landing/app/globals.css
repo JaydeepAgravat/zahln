@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Theme: every colour points at a --z-* variable that lib/tokens.ts renders on <html> from @zahln/shared/tokens.
+ * Theme: every colour points at a --z-* variable that lib/tokens.ts renders on <html> from @zaster/shared/tokens.
  * `inline` makes utilities use the variable directly, so there is one source of truth for every value.
  */
 @theme inline {

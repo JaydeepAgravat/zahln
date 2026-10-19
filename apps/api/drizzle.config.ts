@@ -4,6 +4,6 @@ export default defineConfig({
   dialect: 'postgresql',
   schema: './src/db/schema.ts',
   out: './drizzle',
-  dbCredentials: { url: process.env.DATABASE_URL ?? 'postgres://zahln:zahln@localhost:5432/zahln' },
+  dbCredentials: { url: process.env.DATABASE_URL ?? 'postgres://zaster:zaster@localhost:5432/zaster' },
   casing: 'snake_case',
 });

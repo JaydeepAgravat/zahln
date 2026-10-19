@@ -1,7 +1,7 @@
 import { lettering } from '@/lib/lettering.gen';
 
 /**
- * "Die Zahln Edition" as our own lettering: Inter Tight 800 converted to paths (scripts/letter-title.mjs) plus a
+ * "Die Zaster Edition" as our own lettering: Inter Tight 800 converted to paths (scripts/letter-title.mjs) plus a
  * hand-drawn ember swash that runs out of the Z's base under the rest of the word.
  * Decorative: the <h1> around it carries the real text in an sr-only span.
  */

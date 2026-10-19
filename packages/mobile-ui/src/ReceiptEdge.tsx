@@ -1,4 +1,4 @@
-import type { ColorToken } from '@zahln/shared/tokens';
+import type { ColorToken } from '@zaster/shared/tokens';
 import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';

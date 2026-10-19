@@ -1,6 +1,6 @@
 import type { Preview } from '@storybook/react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient, usePrefs } from '@zahln/mobile-core';
+import { queryClient, usePrefs } from '@zaster/mobile-core';
 import { type ReactNode, useLayoutEffect, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

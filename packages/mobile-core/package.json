@@ -1,8 +1,8 @@
 {
-  "name": "@zahln/mobile-core",
+  "name": "@zaster/mobile-core",
   "version": "0.1.0",
   "private": true,
-  "description": "React Native plumbing shared by Zahln and ZYSYGY: API client, session and lock, keychain, biometrics, prefs, i18n.",
+  "description": "React Native plumbing shared by Zaster and Zettel: API client, session and lock, keychain, biometrics, prefs, i18n.",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
@@ -13,7 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@zahln/shared": "workspace:*",
+    "@zaster/shared": "workspace:*",
     "react-native-sse": "1.2.1"
   },
   "peerDependencies": {

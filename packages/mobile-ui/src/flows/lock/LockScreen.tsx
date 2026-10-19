@@ -7,9 +7,9 @@ import {
   usePrefs,
   useSession,
   useT,
-} from '@zahln/mobile-core';
-import { useSecureScreen } from '@zahln/secure-screen';
-import { MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN } from '@zahln/shared';
+} from '@zaster/mobile-core';
+import { useSecureScreen } from '@zaster/secure-screen';
+import { MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN } from '@zaster/shared';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Avatar, type KeypadKey, Logo } from '../../ds';

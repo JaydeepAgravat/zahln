@@ -1,5 +1,5 @@
-import type { Role } from '@zahln/mobile-core';
-import type { Membership } from '@zahln/shared';
+import type { Role } from '@zaster/mobile-core';
+import type { Membership } from '@zaster/shared';
 import { create } from 'zustand';
 
 /** In-memory only: the PIN and tokens here never touch disk until onboarding completes into the keychain. */

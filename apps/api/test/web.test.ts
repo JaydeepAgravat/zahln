@@ -34,7 +34,7 @@ async function signIn(phone: string, audience: 'business' | 'consumer' = 'busine
         .map(([k, v]) => `${k}=${v}`)
         .join('; '),
     };
-    const csrf = opts.csrf === undefined ? cookies.zahln_csrf : opts.csrf;
+    const csrf = opts.csrf === undefined ? cookies.zaster_csrf : opts.csrf;
     if (method !== 'GET' && csrf) headers['x-csrf-token'] = csrf;
     if (opts.key) headers['idempotency-key'] = opts.key;
     const res = await app.inject({
@@ -86,8 +86,8 @@ describe('web sessions', () => {
     });
     expect(res.statusCode).toBe(200);
     expect(res.json()).toMatchObject({ merchant: { id: 'cafe-mila' }, role: 'owner' });
-    const session = res.cookies.find((c) => c.name === 'zahln_session');
-    const csrf = res.cookies.find((c) => c.name === 'zahln_csrf');
+    const session = res.cookies.find((c) => c.name === 'zaster_session');
+    const csrf = res.cookies.find((c) => c.name === 'zaster_csrf');
     expect(session).toMatchObject({ httpOnly: true, sameSite: 'Lax', secure: true, path: '/' });
     expect(csrf?.httpOnly).toBeFalsy();
     const [row] = await t.db.select().from(webSessions);
@@ -135,8 +135,8 @@ describe('CSRF', () => {
     const body = { amountCents: 100, reason: 'Falsche Bestellung' };
     expect((await mila.call('POST', url, { body, csrf: null, key: randomUUID() })).body.error).toBe('csrf');
     // Header and cookie agree, but they belong to a different session: still refused.
-    const forged = other.cookies.zahln_csrf;
-    mila.cookies.zahln_csrf = forged ?? '';
+    const forged = other.cookies.zaster_csrf;
+    mila.cookies.zaster_csrf = forged ?? '';
     expect((await mila.call('POST', url, { body, csrf: forged, key: randomUUID() })).body.error).toBe('csrf');
   });
 });

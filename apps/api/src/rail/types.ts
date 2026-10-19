@@ -1,5 +1,5 @@
 /**
- * The seam between Zahln and whoever actually moves the money over SEPA Instant
+ * The seam between Zaster and whoever actually moves the money over SEPA Instant
  * (a PSP or partner bank). Today: a simulator. Later: a Tink / finAPI / bank adapter behind the same interface.
  */
 export type RailTransfer = {

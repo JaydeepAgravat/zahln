@@ -79,9 +79,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "de.zysygy.app"
+    namespace "de.zettel.app"
     defaultConfig {
-        applicationId "de.zysygy.app"
+        applicationId "de.zettel.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -110,7 +110,7 @@ android {
 }
 
 /**
- * LAN demo build: `./gradlew assembleRelease -PlanHost=192.168.x.y` (with ZAHLN_API_URL set for the JS bundle).
+ * LAN demo build: `./gradlew assembleRelease -PlanHost=192.168.x.y` (with ZASTER_API_URL set for the JS bundle).
  * Overlays the release network config so plain HTTP is allowed to that one address only, and declares the
  * Android 16 local-network permission. Without -PlanHost the release build stays HTTPS-only.
  */

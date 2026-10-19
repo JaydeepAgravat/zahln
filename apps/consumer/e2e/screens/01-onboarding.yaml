@@ -1,7 +1,7 @@
 # README gallery: sign out, switch to English, then onboard as Lena, one screenshot per step.
 # Run with scripts/screens/mobile.sh (it sets the status bar and collects the PNGs).
-appId: de.zahln.app
-name: Screens · Zahln onboarding
+appId: de.zaster.app
+name: Screens · Zaster onboarding
 ---
 - stopApp
 - launchApp
@@ -31,17 +31,17 @@ name: Screens · Zahln onboarding
     visible: "Get started"
     timeout: 5000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-01-welcome
+- takeScreenshot: zaster-01-welcome
 - tapOn: "Get started"
 - tapOn: "151 2345 6789"
 - inputText: "15100000001"
 - waitForAnimationToEnd
-- takeScreenshot: zahln-02-phone
+- takeScreenshot: zaster-02-phone
 - tapOn: "Continue"
 - extendedWaitUntil:
     visible: "Enter the code"
     timeout: 10000
-- takeScreenshot: zahln-03-code
+- takeScreenshot: zaster-03-code
 # The dev build fills in the demo code; type it only if it is still empty.
 - runFlow:
     when:
@@ -60,7 +60,7 @@ name: Screens · Zahln onboarding
 - tapOn: "7"
 - tapOn: "1"
 - waitForAnimationToEnd
-- takeScreenshot: zahln-04-pin
+- takeScreenshot: zaster-04-pin
 - tapOn: "8"
 - tapOn: "2"
 - tapOn: "8"
@@ -78,7 +78,7 @@ name: Screens · Zahln onboarding
     visible: "Turn on .*|Almost done"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-05-biometrics
+- takeScreenshot: zaster-05-biometrics
 - tapOn: "Skip"
 - extendedWaitUntil:
     visible: "Balance"

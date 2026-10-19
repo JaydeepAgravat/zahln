@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useSession, useT, useUpdateStatus } from '@zahln/mobile-core';
+import { useSession, useT, useUpdateStatus } from '@zaster/mobile-core';
 import {
   BiometricsScreen,
   LockScreen,
@@ -18,7 +18,7 @@ import {
   useNavigationTheme,
   useOnboardingScreenOptions,
   WelcomeScreen,
-} from '@zahln/mobile-ui';
+} from '@zaster/mobile-ui';
 import { MyQrScreen } from '../../features/till/MyQrScreen';
 import { PaidScreen } from '../../features/till/PaidScreen';
 import { PaymentScreen } from '../../features/till/PaymentScreen';

@@ -1,4 +1,4 @@
-import type { ColorToken } from '@zahln/shared/tokens';
+import type { ColorToken } from '@zaster/shared/tokens';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import { Icon, type IconName } from './Icon';

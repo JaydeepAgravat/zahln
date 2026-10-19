@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   // Workspace packages ship TypeScript source.
-  transpilePackages: ['@zahln/shared', '@zahln/web-ui'],
+  transpilePackages: ['@zaster/shared', '@zaster/web-ui'],
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {

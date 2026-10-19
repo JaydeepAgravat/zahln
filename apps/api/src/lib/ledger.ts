@@ -1,4 +1,4 @@
-import { sumCents } from '@zahln/shared';
+import { sumCents } from '@zaster/shared';
 import { eq, sql } from 'drizzle-orm';
 import type { DbOrTx, Tx } from '../db/client';
 import { accounts, ledgerTransactions, postings } from '../db/schema';

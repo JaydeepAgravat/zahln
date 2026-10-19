@@ -1,4 +1,4 @@
-import { AMOUNT_MAX_FONT_SCALE, fontFamily, type TypeStyle, typeScale } from '@zahln/shared/tokens';
+import { AMOUNT_MAX_FONT_SCALE, fontFamily, type TypeStyle, typeScale } from '@zaster/shared/tokens';
 import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
 
 export type TextTone =

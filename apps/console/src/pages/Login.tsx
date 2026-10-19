@@ -1,4 +1,4 @@
-import { Button, Field, Input } from '@zahln/web-ui';
+import { Button, Field, Input } from '@zaster/web-ui';
 import { useState } from 'react';
 import { api, session } from '../lib/api';
 import { errorText } from '../lib/ui';
@@ -31,7 +31,7 @@ export function LoginPage() {
       >
         <div className="flex flex-col gap-1">
           <p className="flex items-center gap-2 text-headline font-bold tracking-tight">
-            <img src="/favicon.svg" alt="" className="size-7" /> Zahln Ops
+            <img src="/favicon.svg" alt="" className="size-7" /> Zaster Ops
           </p>
           <p className="text-footnote text-text-tertiary">Internal. Every change you make is audited.</p>
         </div>

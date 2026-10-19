@@ -1,5 +1,5 @@
-import { type AppLocale, formatMoney } from '@zahln/shared';
-import { defaultLocale, resources } from '@zahln/shared/i18n';
+import { type AppLocale, formatMoney } from '@zaster/shared';
+import { defaultLocale, resources } from '@zaster/shared/i18n';
 import i18n from 'i18next';
 import { initReactI18next, useTranslation } from 'react-i18next';
 import { usePrefs } from './prefs';

@@ -1,4 +1,4 @@
-// Maestro runScript: a customer (Lena) pays the QR that's open on the till, through the API, like Zahln would.
+// Maestro runScript: a customer (Lena) pays the QR that's open on the till, through the API, like Zaster would.
 const api = (typeof API !== 'undefined' && API) || 'http://localhost:4000';
 const uuid = () =>
   'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, () => Math.floor(Math.random() * 16).toString(16));

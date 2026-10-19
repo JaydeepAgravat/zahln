@@ -1,4 +1,4 @@
-import { OTP_LENGTH } from '@zahln/shared';
+import { OTP_LENGTH } from '@zaster/shared';
 import { type ComponentRef, useRef } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { Text } from './Text';

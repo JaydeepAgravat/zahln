@@ -6,8 +6,8 @@ const config: NextConfig = {
   trailingSlash: true,
   // Art is pre-graded into AVIF/WebP srcsets by scripts/grade-art.mjs, so Next's optimizer is not needed.
   images: { unoptimized: true },
-  // @zahln/shared ships TypeScript source.
-  transpilePackages: ['@zahln/shared'],
+  // @zaster/shared ships TypeScript source.
+  transpilePackages: ['@zaster/shared'],
   reactStrictMode: true,
   poweredByHeader: false,
 };

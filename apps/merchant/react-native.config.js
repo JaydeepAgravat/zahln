@@ -3,6 +3,6 @@ module.exports = {
   assets: ['../../packages/mobile-ui/assets/fonts'],
   dependencies: {
     // Phone-to-phone NFC is Android only (see docs/HANDBOOK.md §3.14): not linked into the iOS app at all.
-    '@zahln/nfc-pay': { platforms: { ios: null } },
+    '@zaster/nfc-pay': { platforms: { ios: null } },
   },
 };

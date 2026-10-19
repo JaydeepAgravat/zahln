@@ -28,7 +28,7 @@ export function ExportButton() {
             return res.blob();
           });
           const url = URL.createObjectURL(blob);
-          Object.assign(document.createElement('a'), { href: url, download: 'zahln-daten.json' }).click();
+          Object.assign(document.createElement('a'), { href: url, download: 'zaster-daten.json' }).click();
           URL.revokeObjectURL(url);
         } catch (e) {
           if (!(e instanceof ApiError && e.code === 'cancelled'))

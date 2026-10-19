@@ -1,6 +1,6 @@
-import { useT } from '@zahln/mobile-core';
-import { useSecureScreen } from '@zahln/secure-screen';
-import { spokenMoney } from '@zahln/shared';
+import { useT } from '@zaster/mobile-core';
+import { useSecureScreen } from '@zaster/secure-screen';
+import { spokenMoney } from '@zaster/shared';
 import { useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';

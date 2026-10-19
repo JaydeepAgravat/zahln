@@ -1,1 +1,1 @@
-CREATE DATABASE zahln_test OWNER zahln;
+CREATE DATABASE zaster_test OWNER zaster;

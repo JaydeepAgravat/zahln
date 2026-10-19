@@ -1,5 +1,5 @@
 {
-  "name": "@zahln/api",
+  "name": "@zaster/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@fastify/cookie": "11.1.3",
     "@fastify/cors": "11.3.1",
-    "@zahln/shared": "workspace:*",
+    "@zaster/shared": "workspace:*",
     "drizzle-orm": "0.45.4",
     "fastify": "5.12.7",
     "fastify-plugin": "6.0.1",

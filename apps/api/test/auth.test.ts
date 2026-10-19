@@ -107,7 +107,7 @@ describe('device binding and sessions', () => {
     expect(row?.sessionTokenHash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it('the merchant app (ZYSYGY) only binds staff of a business', async () => {
+  it('the merchant app (Zettel) only binds staff of a business', async () => {
     const lena = await verify(LENA_PHONE);
     const body = {
       verificationToken: lena.verified.body.verificationToken,

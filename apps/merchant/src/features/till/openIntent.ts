@@ -1,4 +1,4 @@
-import { storage } from '@zahln/mobile-core';
+import { storage } from '@zaster/mobile-core';
 
 /**
  * The QR the till is currently showing. If the till auto-locks (or the app restarts) while a customer

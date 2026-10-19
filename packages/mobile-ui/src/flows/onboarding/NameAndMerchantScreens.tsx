@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useT } from '@zahln/mobile-core';
+import { useT } from '@zaster/mobile-core';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Button, Icon, PressableScale, StatusBadge, Text, TextField, TillIllustration } from '../../ds';

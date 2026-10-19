@@ -6,7 +6,7 @@ import {
   type RemoteConfig,
   RemoteConfigSchema,
   updateStatus,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { AppState } from 'react-native';
 import EventSource from 'react-native-sse';
 import { create } from 'zustand';

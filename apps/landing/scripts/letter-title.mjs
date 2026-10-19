@@ -1,4 +1,4 @@
-// Sets "Die Zahln Edition" in Inter Tight 800 and converts it to SVG paths (opentype.js), so the title is
+// Sets "Die Zaster Edition" in Inter Tight 800 and converts it to SVG paths (opentype.js), so the title is
 // our own lettering: tight, optically kerned, drawable stroke by stroke (pathLength=1) on Day 10.
 // The font is fetched from Google Fonts' static TTF (SIL OFL 1.1) into a temp folder, never committed.
 // Output: lib/lettering.gen.ts. Usage: node scripts/letter-title.mjs
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import opentype from 'opentype.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const cacheDir = join(tmpdir(), 'zahln-landing-fonts');
+const cacheDir = join(tmpdir(), 'zaster-landing-fonts');
 await mkdir(cacheDir, { recursive: true });
 const ttf = join(cacheDir, 'InterTight-800.ttf');
 
@@ -49,18 +49,18 @@ function word(text, baseline) {
 
 const lineHeight = SIZE * 0.92;
 const first = SIZE * 0.74;
-// Extra room under "Zahln" for the swash that runs out of the Z's base.
+// Extra room under "Zaster" for the swash that runs out of the Z's base.
 const GAP = 16;
 
 function title(firstWord) {
   const lines = [
     word(firstWord, first),
-    word('Zahln', first + lineHeight),
+    word('Zaster', first + lineHeight),
     word('Edition', first + lineHeight * 2),
   ];
   const width = Math.ceil(Math.max(...lines.map((l) => l.width)));
   const height = Math.ceil(first + lineHeight * 2 + GAP + SIZE * 0.06);
-  // The Z of "Zahln": its bounding box anchors the hand-drawn ember swash (components/Lettering.tsx).
+  // The Z of "Zaster": its bounding box anchors the hand-drawn ember swash (components/Lettering.tsx).
   const z = lines[1].parts[0].box;
   return {
     viewBox: `0 0 ${width} ${height}`,

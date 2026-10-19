@@ -3,13 +3,13 @@ import type { Copy } from './types';
 export const en = {
   lang: 'en',
   meta: {
-    title: 'The Zahln Edition · Autumn ’26',
+    title: 'The Zaster Edition · Autumn ’26',
     description:
-      'Paying, finally finished. Zahln and ZYSYGY in ten chapters: account to account by QR code, 0 % fees, SEPA Instant, built in Augsburg.',
+      'Paying, finally finished. Zaster and Zettel in ten chapters: account to account by QR code, 0 % fees, SEPA Instant, built in Augsburg.',
   },
   skip: 'Skip to content',
   nav: {
-    home: 'Zahln, home',
+    home: 'Zaster, home',
     edition: 'Edition Autumn ’26',
     chapters: 'Chapters',
     index: 'Chapter index',
@@ -22,7 +22,7 @@ export const en = {
     play: 'Play motion',
   },
   intro: {
-    title: 'The Zahln Edition',
+    title: 'The Zaster Edition',
     season: 'Autumn ’26',
     line: 'Paying, finally finished. 10 chapters.',
     chaptersLabel: 'Chapters',
@@ -47,7 +47,7 @@ export const en = {
           media: {
             kind: 'device',
             screen: 'qr',
-            alt: 'The ZYSYGY till shows a QR code for €10.80 and “Customer is checking…”.',
+            alt: 'The Zettel till shows a QR code for €10.80 and “Customer is checking…”.',
             platform: 'android',
           },
         },
@@ -61,7 +61,7 @@ export const en = {
           media: {
             kind: 'device',
             screen: 'confirm',
-            alt: 'Zahln shows Café Mila, three items and “Pay with PIN · €10.80”.',
+            alt: 'Zaster shows Café Mila, three items and “Pay with PIN · €10.80”.',
             platform: 'ios',
           },
         },
@@ -82,7 +82,7 @@ export const en = {
       title: 'Till',
       promise: 'Your counter, minus the card reader.',
       statement:
-        'The ZYSYGY till runs on the phone that is already lying next to the coffee machine. Tap the items, show the code, see “Paid”. A café needs no more hardware than that.',
+        'The Zettel till runs on the phone that is already lying next to the coffee machine. Tap the items, show the code, see “Paid”. A café needs no more hardware than that.',
       features: [
         {
           id: 'katalog-oder-betrag',
@@ -146,7 +146,7 @@ export const en = {
           media: {
             kind: 'device',
             screen: 'wallet',
-            alt: 'The Zahln wallet with a €35.40 balance and recent payments at the university canteen.',
+            alt: 'The Zaster wallet with a €35.40 balance and recent payments at the university canteen.',
             platform: 'ios',
           },
         },
@@ -225,7 +225,7 @@ export const en = {
       title: 'Dead zone',
       promise: 'The connection drops. The payment doesn’t.',
       statement:
-        'In the canteen basement, on the regional train, between two masts: the signal always goes exactly when you pay. Zahln knows at every moment whether money has moved, and tells you honestly.',
+        'In the canteen basement, on the regional train, between two masts: the signal always goes exactly when you pay. Zaster knows at every moment whether money has moved, and tells you honestly.',
       features: [
         {
           id: 'wird-geprueft',
@@ -304,7 +304,7 @@ export const en = {
           id: 'tse',
           label: 'Cash and digital in one cash book',
           blurb:
-            'If you also take cash, German law requires a TSE. ZYSYGY connects a cloud TSE so both end up in one place.',
+            'If you also take cash, German law requires a TSE. Zettel connects a cloud TSE so both end up in one place.',
           soon: 'Soon',
           link: null,
           media: { kind: 'none' },
@@ -338,7 +338,7 @@ export const en = {
           media: {
             kind: 'device',
             screen: 'paid',
-            alt: 'Zahln fully green: “Paid, €10.80 to Café Mila, confirmed in 254 ms”.',
+            alt: 'Zaster fully green: “Paid, €10.80 to Café Mila, confirmed in 254 ms”.',
             platform: 'ios',
           },
         },
@@ -456,7 +456,7 @@ export const en = {
     },
   ],
   plans: {
-    heading: 'Plans for ZYSYGY',
+    heading: 'Plans for Zettel',
     note: 'Per month, excl. VAT. 0 % transaction fees on every plan.',
     recommended: 'Popular',
     items: [
@@ -517,7 +517,7 @@ export const en = {
     credits: 'Picture credits',
     creditsIntro:
       'Every painting comes from a museum’s open-access collection and is in the public domain (CC0 or Public Domain Mark). We changed colour and crop.',
-    note: 'An interview prototype. Zahln and ZYSYGY, built in Augsburg.',
+    note: 'An interview prototype. Zaster and Zettel, built in Augsburg.',
     licence: 'Typefaces: Inter, Inter Tight, Instrument Serif, Pinyon Script (SIL OFL 1.1).',
   },
   art: { label: 'Painting' },

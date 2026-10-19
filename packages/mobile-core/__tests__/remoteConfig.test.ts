@@ -1,4 +1,4 @@
-import { bundledDefaults, type RemoteConfig } from '@zahln/shared';
+import { bundledDefaults, type RemoteConfig } from '@zaster/shared';
 import { configureApp } from '../src/app';
 import { currentConfig, refreshConfig, useConfigStore } from '../src/remoteConfig';
 

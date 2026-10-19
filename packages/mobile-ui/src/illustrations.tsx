@@ -1,4 +1,4 @@
-import { appKind } from '@zahln/mobile-core';
+import { appKind } from '@zaster/mobile-core';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -361,26 +361,26 @@ export function TillIllustration({ width = 260 }: { width?: number }) {
 /**
  * The brand marks: a receipt with a torn edge carrying a bold Z. Same geometry as the app icons
  * (scripts/generate-icons.mjs).
- * Zahln (consumer) is ember-first: a paper receipt and ink Z on an ember tile.
- * ZYSYGY (merchant) is ink-first: a paper receipt and ember Z on an ink tile, like a till slip under counter light.
+ * Zaster (consumer) is ember-first: a paper receipt and ink Z on an ember tile.
+ * Zettel (merchant) is ink-first: a paper receipt and ember Z on an ink tile, like a till slip under counter light.
  */
 export function Logo({
   size = 56,
   tile = true,
-  brand = appKind() === 'merchant' ? 'zysygy' : 'zahln',
+  brand = appKind() === 'merchant' ? 'zettel' : 'zaster',
 }: {
   size?: number;
   tile?: boolean;
-  brand?: 'zahln' | 'zysygy';
+  brand?: 'zaster' | 'zettel';
 }) {
   const { colors } = useTheme();
   const receipt = `M24 26 Q24 18 32 18 H68 Q76 18 76 26 V76${zigzag(24, 76, 52, 5, 6)} Z`;
-  const merchant = brand === 'zysygy';
+  const merchant = brand === 'zettel';
   const paper = '#F7F3EE';
   const ink = '#1B1A17';
   const ember = '#FF4F1F';
   return (
-    <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityLabel={merchant ? 'ZYSYGY' : 'Zahln'}>
+    <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityLabel={merchant ? 'Zettel' : 'Zaster'}>
       {tile ? (
         <Rect x={0} y={0} width={100} height={100} rx={26} fill={merchant ? ink : colors.brand} />
       ) : null}

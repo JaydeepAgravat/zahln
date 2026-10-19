@@ -1,7 +1,7 @@
 'use client';
 
-import { includedVat, isRefundable, type VatRate } from '@zahln/shared';
-import { Button, cx, Field, Input, Spinner } from '@zahln/web-ui';
+import { includedVat, isRefundable, type VatRate } from '@zaster/shared';
+import { Button, cx, Field, Input, Spinner } from '@zaster/web-ui';
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '@/components/I18n';
 import { Status } from '@/components/Status';

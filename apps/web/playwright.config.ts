@@ -41,7 +41,7 @@ export default defineConfig({
   webServer: [
     { command: 'pnpm dev', url: 'http://localhost:3000/login', reuseExistingServer: true, timeout: 120_000 },
     {
-      command: 'pnpm --filter @zahln/console dev',
+      command: 'pnpm --filter @zaster/console dev',
       url: 'http://localhost:5174',
       reuseExistingServer: true,
       timeout: 120_000,

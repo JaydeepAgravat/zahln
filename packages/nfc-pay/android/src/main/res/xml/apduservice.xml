@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  A proprietary AID (F0 prefix) in the "other" category. "payment" would make Zahln compete to be the
+  A proprietary AID (F0 prefix) in the "other" category. "payment" would make Zaster compete to be the
   phone's default payment app (and needs the user to choose it in Settings): not what a till reference is.
 -->
 <host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"

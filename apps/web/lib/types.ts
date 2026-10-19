@@ -1,4 +1,4 @@
-import type { IntentStatus, PaymentIntent, Plan } from '@zahln/shared';
+import type { IntentStatus, PaymentIntent, Plan } from '@zaster/shared';
 
 export type Session = {
   user: { id: string; name: string; phone: string };

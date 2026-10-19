@@ -1,4 +1,4 @@
-# The Zahln Handbook
+# The Zaster Handbook
 
 *One document that explains this whole project: the problem, the hard parts, the choices, how every part works,
 and how to learn the code by heart. Read it from top to bottom once. After that, use it as a map.*
@@ -59,16 +59,15 @@ instant transfers, and at a price no higher than a normal transfer. So the "rail
 on) already exists and is becoming normal.
 
 What is missing is the experience at the counter. A bank transfer form is not a checkout. Typing an IBAN at a café
-is not possible. So the idea of Zahln / ZYSYGY is:
+is not possible. So the idea of Zaster / Zettel is:
 
-- **ZYSYGY** turns the shop's phone into a till. It creates a QR code for exactly one payment.
-- **Zahln** is the customer's wallet. It scans the code, shows what you are paying for, and asks for your PIN or Face ID.
+- **Zettel** turns the shop's phone into a till. It creates a QR code for exactly one payment.
+- **Zaster** is the customer's wallet. It scans the code, shows what you are paying for, and asks for your PIN or Face ID.
 - The money moves **account to account** over SEPA Instant. No card network sits in the middle, so there is no
   card fee to pass on. The business makes money from monthly plans for shops (Free, Pro, Business), not from a
   cut of every payment.
 
-The product idea comes from [Zahln / ZYSYGY](https://zysygy.de). This repository is an independent prototype of
-it. I built it as a mobile app developer to learn German fintech from the inside: how money really moves, what
+This repository is an unofficial learning prototype, not affiliated with any company. I built it as a mobile app developer to learn German fintech from the inside: how money really moves, what
 German rules ask of a till and a receipt, and how to make a payment app that never charges twice.
 
 ### 1.3 Why this is worth building, even as a prototype
@@ -245,7 +244,7 @@ any single framework feature.
 
 ### 3.3 Two apps instead of one app with two modes
 
-**What.** Zahln (`de.zahln.app`) for customers and ZYSYGY (`de.zysygy.app`) for shops. About 90 % of the code lives in
+**What.** Zaster (`de.zaster.app`) for customers and Zettel (`de.zettel.app`) for shops. About 90 % of the code lives in
 shared packages. The apps are thin shells: their navigation, their own screens, and the native project.
 
 **Why.** They are two products for two audiences with different risks. A till bug must not wait for a wallet
@@ -307,7 +306,7 @@ idle → scanned → confirming → authorising → submitting → checking → 
                                                        ↘ not_charged | insufficient_balance | expired | failed
 ```
 
-The Zahln app and the web checkout use the **same** reducer. A second machine
+The Zaster app and the web checkout use the **same** reducer. A second machine
 (`paymentIntent.ts`) describes the till's side: `awaiting_scan → scanned → paid → partially_refunded → refunded`,
 or `expired` / `cancelled`. The server checks this one before every status change.
 
@@ -538,7 +537,7 @@ background job that expires old intents even when no till is watching.
 amount. The app shows those. It also tells the server "scanned", so the till can show "Customer is reviewing". That
 call is "fire and forget": if it fails, paying still works.
 
-The same path works for **payment links** (`https://pay.zahln.de/i/<ref>` or `zahln://i/<ref>`) opened from a browser
+The same path works for **payment links** (`https://pay.zaster.de/i/<ref>` or `zaster://i/<ref>`) opened from a browser
 or a message. A link that arrives while the app is locked waits in a small buffer and is used **only after** the PIN
 unlock. A link can never skip the PIN.
 
@@ -674,7 +673,7 @@ JavaScript. A kill switch is a single, instant, reversible decision.
 ### 4.11 The websites
 
 - **Checkout (`/i/<ref>`)**: rendered on the server for a fast first paint. "Open in the app" or "Pay in the
-  browser" with the Zahln phone number and a one-time code. It uses the **same** payment state machine as the app.
+  browser" with the Zaster phone number and a one-time code. It uses the **same** payment state machine as the app.
   A forged or unknown link shows "Invalid link".
 - **Dashboard (`/business`)**: Today (live), Transactions with receipts, Payment requests, Payouts, Team, Plan,
   Export (DATEV CSV) and a printable QR poster.
@@ -745,8 +744,8 @@ reducer → the checking effect in `usePayment.ts` → `GET /attempts/by-key/:ke
 
 ```
 apps/
-  consumer/    Zahln, the customer app. Thin: navigation + pay, history, receipt screens + native project
-  merchant/    ZYSYGY, the till app. Thin: navigation + till, QR, paid, payment, refund + native project
+  consumer/    Zaster, the customer app. Thin: navigation + pay, history, receipt screens + native project
+  merchant/    Zettel, the till app. Thin: navigation + till, QR, paid, payment, refund + native project
   api/         The server
     src/routes/    HTTP routes (public, auth, payments, events, web, admin, config)
     src/lib/       The real logic: payments, ledger, idempotency, intentRef, config, audit, webSession, sse
@@ -754,8 +753,8 @@ apps/
     src/db/        Drizzle schema, migrations runner, seed data
     drizzle/       SQL migrations, including the ledger and audit triggers
     test/          Vitest tests against a real Postgres
-  web/         Zahln Web (Next.js): app/business, app/wallet, app/i/[ref] (checkout), e2e/ (Playwright)
-  console/     Zahln Ops (Vite + React)
+  web/         Zaster Web (Next.js): app/business, app/wallet, app/i/[ref] (checkout), e2e/ (Playwright)
+  console/     Zaster Ops (Vite + React)
   landing/     The landing page
 packages/
   shared/        Schemas, state machines, money, plans, config rules, scrubber, i18n, tokens

@@ -7,7 +7,7 @@ import '../globals.css';
 import '../tears.gen.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://edition.zahln.example'),
+  metadataBase: new URL('https://edition.zaster.example'),
   title: en.meta.title,
   description: en.meta.description,
   alternates: { canonical: '/en/', languages: { de: '/', en: '/en/' } },

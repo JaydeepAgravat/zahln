@@ -1,7 +1,7 @@
-# Act 1 from the payer's side: a till opens a QR, the link opens Zahln, PIN, Bezahlt.
+# Act 1 from the payer's side: a till opens a QR, the link opens Zaster, PIN, Bezahlt.
 # Run: maestro test apps/consumer/e2e/happy-path.yaml   (API + Metro running, Lena signed in on the simulator)
-appId: de.zahln.app
-name: Zahln · pay a till QR
+appId: de.zaster.app
+name: Zaster · pay a till QR
 ---
 - launchApp
 - runFlow: unlock.yaml
@@ -9,7 +9,7 @@ name: Zahln · pay a till QR
     visible: "Guthaben"
     timeout: 10000
 - runScript: scripts/till-intent.js
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000

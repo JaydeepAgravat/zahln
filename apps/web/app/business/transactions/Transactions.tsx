@@ -1,7 +1,7 @@
 'use client';
 
-import { INTENT_STATUSES } from '@zahln/shared';
-import { Button, Card, Empty, Field, Input, Select, Spinner } from '@zahln/web-ui';
+import { INTENT_STATUSES } from '@zaster/shared';
+import { Button, Card, Empty, Field, Input, Select, Spinner } from '@zaster/web-ui';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { useT } from '@/components/I18n';

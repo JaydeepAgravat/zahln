@@ -1,7 +1,7 @@
 # README gallery: paying. A till QR as a link, the PIN sheet, Paid; then a rejected and a slow-to-confirm
 # payment (simulated rail), a static @handle QR, and the forced-update gate.
-appId: de.zahln.app
-name: Screens · Zahln paying
+appId: de.zaster.app
+name: Screens · Zaster paying
 ---
 - launchApp
 - runFlow: ../unlock.yaml
@@ -10,12 +10,12 @@ name: Screens · Zahln paying
     timeout: 15000
 # Happy path
 - runScript: ../scripts/till-intent.js
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-11-pay
+- takeScreenshot: zaster-11-pay
 - tapOn:
     text: "Pay with PIN · €6.30"
 - extendedWaitUntil:
@@ -25,7 +25,7 @@ name: Screens · Zahln paying
 - tapOn: "7"
 - tapOn: "1"
 - waitForAnimationToEnd
-- takeScreenshot: zahln-12-pin-sheet
+- takeScreenshot: zaster-12-pin-sheet
 - tapOn: "8"
 - tapOn: "2"
 - tapOn: "8"
@@ -33,7 +33,7 @@ name: Screens · Zahln paying
     visible: "Paid"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-13-paid
+- takeScreenshot: zaster-13-paid
 - tapOn: "Done"
 # The rail rejects: nothing charged
 - runScript: ../scripts/till-intent.js
@@ -41,7 +41,7 @@ name: Screens · Zahln paying
     file: ../scripts/chaos.js
     env:
       MODE: reject
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000
@@ -52,7 +52,7 @@ name: Screens · Zahln paying
     visible: "Not charged"
     timeout: 15000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-14-not-charged
+- takeScreenshot: zaster-14-not-charged
 - tapOn: "Done"
 # Not enough balance (simulated): nothing charged, top up offered
 - runScript: ../scripts/till-intent.js
@@ -60,7 +60,7 @@ name: Screens · Zahln paying
     file: ../scripts/chaos.js
     env:
       MODE: insufficient
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000
@@ -71,7 +71,7 @@ name: Screens · Zahln paying
     visible: "Not enough balance"
     timeout: 15000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-15-insufficient
+- takeScreenshot: zaster-15-insufficient
 - runScript:
     file: ../scripts/chaos.js
     env:
@@ -84,7 +84,7 @@ name: Screens · Zahln paying
     file: ../scripts/chaos.js
     env:
       MODE: drop_and_hold
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000
@@ -95,7 +95,7 @@ name: Screens · Zahln paying
     visible: ".*Checking.*"
     timeout: 15000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-16-checking
+- takeScreenshot: zaster-16-checking
 - runScript:
     file: ../scripts/chaos.js
     env:
@@ -105,7 +105,7 @@ name: Screens · Zahln paying
     timeout: 30000
 - tapOn: "Done"
 # A merchant's static QR: the payer types the amount
-- openLink: "zahln://@doener-ali"
+- openLink: "zaster://@doener-ali"
 - extendedWaitUntil:
     visible: "Enter amount"
     timeout: 10000
@@ -113,7 +113,7 @@ name: Screens · Zahln paying
 - tapOn: "5"
 - tapOn: "0"
 - waitForAnimationToEnd
-- takeScreenshot: zahln-17-handle
+- takeScreenshot: zaster-17-handle
 # Forced update: ops raise the minimum version; the app checks /config on launch
 - runScript:
     file: ../scripts/min-version.js
@@ -125,7 +125,7 @@ name: Screens · Zahln paying
     visible: "Please update"
     timeout: 15000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-18-update
+- takeScreenshot: zaster-18-update
 - runScript:
     file: ../scripts/min-version.js
     env:

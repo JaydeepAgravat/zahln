@@ -1,5 +1,5 @@
-import { useT } from '@zahln/mobile-core';
-import { PIN_LENGTH } from '@zahln/shared';
+import { useT } from '@zaster/mobile-core';
+import { PIN_LENGTH } from '@zaster/shared';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {

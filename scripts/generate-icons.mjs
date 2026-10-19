@@ -33,12 +33,12 @@ const png = (file, svgText, size) => {
 const json = (file, data) => writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
 
 /**
- * Zahln (consumer) is ember-first: a paper receipt on an ember tile; dark appearance flips to an ember receipt on ink.
- * ZYSYGY (merchant) is ink-first: a paper receipt with an ember Z on an ink tile, like a till slip under counter light.
+ * Zaster (consumer) is ember-first: a paper receipt on an ember tile; dark appearance flips to an ember receipt on ink.
+ * Zettel (merchant) is ink-first: a paper receipt with an ember Z on an ink tile, like a till slip under counter light.
  */
 const BRANDS = {
   consumer: {
-    project: 'Zahln',
+    project: 'Zaster',
     tile: EMBER,
     light: glyph(PAPER, INK, 1.12),
     dark: { bg: INK_DARK, glyph: glyph(EMBER, INK_DARK, 1.12) },
@@ -47,7 +47,7 @@ const BRANDS = {
     android: (s) => glyph(PAPER, INK, s),
   },
   merchant: {
-    project: 'ZYSYGY',
+    project: 'Zettel',
     tile: INK,
     light: glyph(PAPER, EMBER, 1.12),
     dark: { bg: INK_DARK, glyph: glyph(PAPER_DIM, EMBER, 1.12) },
@@ -131,7 +131,7 @@ for (const [app, b] of Object.entries(BRANDS)) {
   );
 }
 
-// Preview sheet for the docs: Zahln light/dark, ZYSYGY light/dark.
+// Preview sheet for the docs: Zaster light/dark, Zettel light/dark.
 const tileSvg = (inner, bg) =>
   `<svg width="80" height="80" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="${bg}"/>${inner}</svg>`;
 png(
@@ -143,4 +143,4 @@ png(
 <g transform="translate(370 10)">${tileSvg(BRANDS.merchant.dark.glyph, INK_DARK)}</g></svg>`,
   1380,
 );
-process.stdout.write('icons, launch logos and splash assets written for Zahln and ZYSYGY\n');
+process.stdout.write('icons, launch logos and splash assets written for Zaster and Zettel\n');

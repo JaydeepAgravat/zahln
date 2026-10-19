@@ -1,4 +1,4 @@
-import { pinCooldownMs } from '@zahln/shared';
+import { pinCooldownMs } from '@zaster/shared';
 import * as Keychain from 'react-native-keychain';
 
 /**
@@ -7,11 +7,11 @@ import * as Keychain from 'react-native-keychain';
  * and never included in iCloud or device backups (so a restored backup can't clone a session).
  */
 const SERVICE = {
-  session: 'de.zahln.session',
-  device: 'de.zahln.device',
-  pin: 'de.zahln.pin',
-  pinAttempts: 'de.zahln.pin-attempts',
-  biometric: 'de.zahln.biometric-unlock',
+  session: 'de.zaster.session',
+  device: 'de.zaster.device',
+  pin: 'de.zaster.pin',
+  pinAttempts: 'de.zaster.pin-attempts',
+  biometric: 'de.zaster.biometric-unlock',
 } as const;
 
 const base = { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY } as const;
@@ -22,7 +22,7 @@ async function read(service: string): Promise<string | null> {
 }
 
 async function write(service: string, value: string) {
-  await Keychain.setGenericPassword('zahln', value, { ...base, service });
+  await Keychain.setGenericPassword('zaster', value, { ...base, service });
 }
 
 // ---------- Device ID (device binding) ----------
@@ -101,7 +101,7 @@ export async function biometryType(): Promise<Keychain.BIOMETRY_TYPE | null> {
  * and enrolling a new face or finger invalidates it, so someone can't add their own biometrics and unlock.
  */
 export async function enableBiometricUnlock(secret: string): Promise<boolean> {
-  const result = await Keychain.setGenericPassword('zahln', secret, {
+  const result = await Keychain.setGenericPassword('zaster', secret, {
     ...base,
     service: SERVICE.biometric,
     accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_CURRENT_SET,

@@ -1,4 +1,4 @@
-import type { PaymentIntent } from '@zahln/shared';
+import type { PaymentIntent } from '@zaster/shared';
 import Link from 'next/link';
 import { dateTime, money } from '@/lib/format';
 import { serverLocale, translator } from '@/lib/i18n';

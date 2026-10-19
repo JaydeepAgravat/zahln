@@ -5,7 +5,7 @@
  * (WCAG 2.2.2), remembered in localStorage. localStorage can throw (Safari private mode, blocked storage),
  * so every access is wrapped; without storage the choice simply lasts for the visit.
  */
-const KEY = 'zahln.landing.motion';
+const KEY = 'zaster.landing.motion';
 type Listener = () => void;
 const listeners = new Set<Listener>();
 

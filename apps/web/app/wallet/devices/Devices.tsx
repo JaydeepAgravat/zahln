@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@zahln/web-ui';
+import { Button } from '@zaster/web-ui';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useT } from '@/components/I18n';

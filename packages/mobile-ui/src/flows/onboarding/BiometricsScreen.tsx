@@ -11,8 +11,8 @@ import {
   usePrefs,
   useSession,
   useT,
-} from '@zahln/mobile-core';
-import { SessionResponseSchema } from '@zahln/shared';
+} from '@zaster/mobile-core';
+import { SessionResponseSchema } from '@zaster/shared';
 import { useState } from 'react';
 import { Platform, View } from 'react-native';
 import { Button, FaceScanIllustration, Icon, ShieldIllustration, Text } from '../../ds';

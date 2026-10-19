@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
-import type { PaymentAttempt, PaymentIntent } from '@zahln/shared';
+import type { PaymentAttempt, PaymentIntent } from '@zaster/shared';
 import { ApiRequestError } from '../src/api';
 import { configureApp } from '../src/app';
 import { payments } from '../src/payments/client';

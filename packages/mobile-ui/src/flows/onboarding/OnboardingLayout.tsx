@@ -1,4 +1,4 @@
-import { useT } from '@zahln/mobile-core';
+import { useT } from '@zaster/mobile-core';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';

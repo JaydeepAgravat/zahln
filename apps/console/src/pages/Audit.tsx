@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Badge, Card, Empty, Spinner, type Tone, when } from '@zahln/web-ui';
+import { Badge, Card, Empty, Spinner, type Tone, when } from '@zaster/web-ui';
 import { Link } from 'react-router';
 import { type AuditEntry, api } from '../lib/api';
 import { errorText, PageHeader } from '../lib/ui';

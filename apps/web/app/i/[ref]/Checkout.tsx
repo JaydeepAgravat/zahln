@@ -1,14 +1,14 @@
 'use client';
 
-import type { PaymentAttempt, PaymentIntent } from '@zahln/shared';
-import { formatMoney } from '@zahln/shared/money';
+import type { PaymentAttempt, PaymentIntent } from '@zaster/shared';
+import { formatMoney } from '@zaster/shared/money';
 import {
   type AttemptEvent,
   type AttemptState,
   attemptReducer,
   initialAttemptState,
-} from '@zahln/shared/payment';
-import { GERMAN_MOBILE, normalizeGermanPhone } from '@zahln/shared/phone';
+} from '@zaster/shared/payment';
+import { GERMAN_MOBILE, normalizeGermanPhone } from '@zaster/shared/phone';
 import { type ReactNode, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { checkoutCopy } from '@/lib/checkout-copy';
 import type { Locale } from '@/lib/i18n-messages';
@@ -24,7 +24,7 @@ async function call(
   path: string,
   opts: { body?: unknown; key?: string } = {},
 ): Promise<{ status: number | null; body: Json | null }> {
-  const csrf = document.cookie.match(/(?:^|;\s*)zahln_csrf=([^;]+)/)?.[1] ?? '';
+  const csrf = document.cookie.match(/(?:^|;\s*)zaster_csrf=([^;]+)/)?.[1] ?? '';
   try {
     const res = await fetch(`${API}${path}`, {
       method,
@@ -45,7 +45,7 @@ async function call(
 
 /** The key for this attempt survives a reload in this tab, so a refresh during "checking" never pays twice. */
 const keyStore = {
-  name: (intentId: string) => `zahln.pay.${intentId}`,
+  name: (intentId: string) => `zaster.pay.${intentId}`,
   read(intentId: string) {
     try {
       return sessionStorage.getItem(this.name(intentId));
@@ -290,7 +290,7 @@ export function Checkout({ intent: initial, locale }: { intent: PaymentIntent; l
         </button>
       ) : (
         <div className="flex flex-col gap-3">
-          <a href={`zahln://i/${intent.ref}`} className={primary}>
+          <a href={`zaster://i/${intent.ref}`} className={primary}>
             {t('openApp')}
           </a>
           <button type="button" onClick={() => dispatch({ type: 'CONFIRM' })} className={secondary}>

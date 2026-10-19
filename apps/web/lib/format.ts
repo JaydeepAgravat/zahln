@@ -1,4 +1,4 @@
-import { type Cents, formatMoney } from '@zahln/shared';
+import { type Cents, formatMoney } from '@zaster/shared';
 import type { Locale } from './i18n-messages';
 
 // Same locale and timezone on the server and in the browser, so hydration never disagrees.

@@ -7,7 +7,7 @@ import { API, createTillIntent, payFromPhone, resetDemo } from './helpers';
 /**
  * The README gallery (docs/screenshots/<surface>/NN-name.png), regenerated with `pnpm screens:web`.
  * Not a test of behaviour: the other specs do that. This one walks every page with realistic data and shoots it,
- * in English (the `zahln_locale` cookie), so the gallery reads for anyone.
+ * in English (the `zaster_locale` cookie), so the gallery reads for anyone.
  */
 const OUT = resolve(dirname(fileURLToPath(import.meta.url)), '../../../docs/screenshots');
 const CONSOLE = process.env.CONSOLE_URL ?? 'http://localhost:5174';
@@ -19,7 +19,7 @@ const OPS = {
 };
 
 async function english(page: Page) {
-  await page.context().addCookies([{ name: 'zahln_locale', value: 'en', url: WEB }]);
+  await page.context().addCookies([{ name: 'zaster_locale', value: 'en', url: WEB }]);
   return page;
 }
 
@@ -50,7 +50,7 @@ test.beforeAll(async () => {
   for (let i = 0; i < 3; i++) await payFromPhone((await createTillIntent()).id);
 });
 
-test('merchant dashboard (Zahln Web)', async ({ browser }) => {
+test('merchant dashboard (Zaster Web)', async ({ browser }) => {
   const page = await english(
     await browser.newPage({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' }),
   );
@@ -128,7 +128,7 @@ test('pay link and web wallet (phone)', async ({ browser }) => {
   await page.close();
 });
 
-test('Zahln Ops console', async ({ browser }) => {
+test('Zaster Ops console', async ({ browser }) => {
   const page = await browser.newPage({
     viewport: { width: 1440, height: 900 },
     colorScheme: 'light',
@@ -176,7 +176,7 @@ test('Zahln Ops console', async ({ browser }) => {
   await page.close();
 });
 
-test('landing (The Zahln Edition)', async ({ browser }) => {
+test('landing (The Zaster Edition)', async ({ browser }) => {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, colorScheme: 'light' });
   const up = await fetch(LANDING)
     .then((r) => r.ok)

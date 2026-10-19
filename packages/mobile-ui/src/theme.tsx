@@ -1,6 +1,6 @@
-import { usePrefs } from '@zahln/mobile-core';
-import { type ColorScheme, colors } from '@zahln/shared/tokens';
-import { cssVariables } from '@zahln/shared/tokens/tailwind';
+import { usePrefs } from '@zaster/mobile-core';
+import { type ColorScheme, colors } from '@zaster/shared/tokens';
+import { cssVariables } from '@zaster/shared/tokens/tailwind';
 import { vars } from 'nativewind';
 import { createContext, type ReactNode, useContext, useMemo } from 'react';
 import { StatusBar, useColorScheme, View } from 'react-native';

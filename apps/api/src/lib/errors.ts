@@ -1,4 +1,4 @@
-import type { ApiErrorCode } from '@zahln/shared';
+import type { ApiErrorCode } from '@zaster/shared';
 
 /** A business error with a stable code the app can switch on. */
 export class ApiError extends Error {

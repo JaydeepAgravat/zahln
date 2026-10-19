@@ -1,4 +1,4 @@
-import { useConfigOffline, useRemoteConfig, useT, useUpdateStatus } from '@zahln/mobile-core';
+import { useConfigOffline, useRemoteConfig, useT, useUpdateStatus } from '@zaster/mobile-core';
 import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Icon, type IconName } from './Icon';

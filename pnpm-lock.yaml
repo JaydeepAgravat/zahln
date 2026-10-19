@@ -29,7 +29,7 @@ importers:
       '@fastify/cors':
         specifier: 11.3.1
         version: 11.3.1
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       drizzle-orm:
@@ -75,10 +75,10 @@ importers:
       '@tanstack/react-table':
         specifier: 9.3.1
         version: 9.3.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@zahln/web-ui':
+      '@zaster/web-ui':
         specifier: workspace:*
         version: link:../../packages/web-ui
       react:
@@ -130,19 +130,19 @@ importers:
       '@tanstack/react-query':
         specifier: 5.104.4
         version: 5.104.4(@types/react@19.3.0)(react@19.3.0)
-      '@zahln/mobile-core':
+      '@zaster/mobile-core':
         specifier: workspace:*
         version: link:../../packages/mobile-core
-      '@zahln/mobile-ui':
+      '@zaster/mobile-ui':
         specifier: workspace:*
         version: link:../../packages/mobile-ui
-      '@zahln/nfc-pay':
+      '@zaster/nfc-pay':
         specifier: workspace:*
         version: link:../../packages/nfc-pay
-      '@zahln/secure-screen':
+      '@zaster/secure-screen':
         specifier: workspace:*
         version: link:../../packages/secure-screen
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       i18next:
@@ -263,7 +263,7 @@ importers:
 
   apps/landing:
     dependencies:
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       lenis:
@@ -336,19 +336,19 @@ importers:
       '@tanstack/react-query':
         specifier: 5.104.4
         version: 5.104.4(@types/react@19.3.0)(react@19.3.0)
-      '@zahln/mobile-core':
+      '@zaster/mobile-core':
         specifier: workspace:*
         version: link:../../packages/mobile-core
-      '@zahln/mobile-ui':
+      '@zaster/mobile-ui':
         specifier: workspace:*
         version: link:../../packages/mobile-ui
-      '@zahln/nfc-pay':
+      '@zaster/nfc-pay':
         specifier: workspace:*
         version: link:../../packages/nfc-pay
-      '@zahln/secure-screen':
+      '@zaster/secure-screen':
         specifier: workspace:*
         version: link:../../packages/secure-screen
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       i18next:
@@ -457,10 +457,10 @@ importers:
       '@fontsource-variable/inter':
         specifier: 5.3.0
         version: 5.3.0
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@zahln/web-ui':
+      '@zaster/web-ui':
         specifier: workspace:*
         version: link:../../packages/web-ui
       next:
@@ -518,7 +518,7 @@ importers:
       '@tanstack/react-query':
         specifier: 5.104.4
         version: 5.104.4(@types/react@19.3.0)(react@19.3.0)
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../shared
       i18next:
@@ -603,13 +603,13 @@ importers:
       '@shopify/flash-list':
         specifier: 2.3.3
         version: 2.3.3(@babel/runtime@7.29.10)(react-native@0.88.0(@babel/core@7.29.7)(@react-native-community/cli@20.2.0(typescript@5.9.3))(@react-native/metro-config@0.88.0(@babel/core@7.29.7))(@types/react@19.3.0)(react@19.3.0))(react@19.3.0)
-      '@zahln/mobile-core':
+      '@zaster/mobile-core':
         specifier: workspace:*
         version: link:../mobile-core
-      '@zahln/secure-screen':
+      '@zaster/secure-screen':
         specifier: workspace:*
         version: link:../secure-screen
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../shared
       nativewind:
@@ -680,7 +680,7 @@ importers:
       '@fontsource-variable/inter':
         specifier: 5.3.0
         version: 5.3.0
-      '@zahln/shared':
+      '@zaster/shared':
         specifier: workspace:*
         version: link:../shared
     devDependencies:

@@ -1,7 +1,7 @@
 # Act 1 from the till: Mila rings up a cappuccino, shows the QR, a customer pays, the till turns green.
-# Precondition: ZYSYGY installed on the simulator and signed in as Mila (0151 0000 0010, PIN 271828).
-appId: de.zysygy.app
-name: ZYSYGY · till to Bezahlt
+# Precondition: Zettel installed on the simulator and signed in as Mila (0151 0000 0010, PIN 271828).
+appId: de.zettel.app
+name: Zettel · till to Bezahlt
 ---
 - launchApp
 - runFlow:

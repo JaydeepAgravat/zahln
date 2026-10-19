@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { queryClient, useT } from '@zahln/mobile-core';
-import { Button, PaidFlood } from '@zahln/mobile-ui';
+import { queryClient, useT } from '@zaster/mobile-core';
+import { Button, PaidFlood } from '@zaster/mobile-ui';
 import { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import type { HomeStackParamList } from '../../app/navigation/types';

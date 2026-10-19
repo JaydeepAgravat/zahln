@@ -12,7 +12,7 @@ import {
   usePrefs,
   useT,
   uuid,
-} from '@zahln/mobile-core';
+} from '@zaster/mobile-core';
 import {
   AmountDisplay,
   BalanceCard,
@@ -32,9 +32,9 @@ import {
   TransactionList,
   toast,
   useTheme,
-} from '@zahln/mobile-ui';
-import { nfcPay } from '@zahln/nfc-pay';
-import { applyKeypadKey, type CatalogueItem, isPayable } from '@zahln/shared';
+} from '@zaster/mobile-ui';
+import { nfcPay } from '@zaster/nfc-pay';
+import { applyKeypadKey, type CatalogueItem, isPayable } from '@zaster/shared';
 import { useEffect, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';

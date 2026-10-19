@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { IDEMPOTENCY_HEADER, IdempotencyKeySchema } from '@zahln/shared';
+import { IDEMPOTENCY_HEADER, IdempotencyKeySchema } from '@zaster/shared';
 import { and, eq, lt, sql } from 'drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import type { Db, Tx } from '../db/client';

@@ -1,5 +1,5 @@
 import { QueryClient } from '@tanstack/react-query';
-import type { AdminConfig, IntentStatus, PaymentIntent, Plan } from '@zahln/shared';
+import type { AdminConfig, IntentStatus, PaymentIntent, Plan } from '@zaster/shared';
 
 export const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:4000';
 
@@ -8,7 +8,7 @@ export const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? '
 // so closing the tab signs out. Every write the API takes is audited under `console:<name>`.
 
 export type Operator = { token: string; name: string };
-const KEY = 'zahln.ops';
+const KEY = 'zaster.ops';
 
 export function readOperator(): Operator | null {
   try {

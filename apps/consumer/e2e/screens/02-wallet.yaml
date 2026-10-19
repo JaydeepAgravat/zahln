@@ -1,6 +1,6 @@
 # README gallery: lock, wallet, history, receipt, settings. Lena signed in, in English (after 01-onboarding).
-appId: de.zahln.app
-name: Screens · Zahln wallet
+appId: de.zaster.app
+name: Screens · Zaster wallet
 ---
 - stopApp
 - launchApp
@@ -11,7 +11,7 @@ name: Screens · Zahln wallet
 - tapOn: "7"
 - tapOn: "1"
 - waitForAnimationToEnd
-- takeScreenshot: zahln-06-lock
+- takeScreenshot: zaster-06-lock
 - tapOn: "8"
 - tapOn: "2"
 - tapOn: "8"
@@ -19,23 +19,23 @@ name: Screens · Zahln wallet
     visible: "Balance"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-07-wallet
+- takeScreenshot: zaster-07-wallet
 - tapOn: "Receipts"
 - extendedWaitUntil:
     visible: "History"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-08-history
+- takeScreenshot: zaster-08-history
 - tapOn: "Café Mila.*"
 - extendedWaitUntil:
     visible: "Receipt no."
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-09-receipt
+- takeScreenshot: zaster-09-receipt
 - tapOn: "Close"
 - tapOn:
     text: "Back"
     optional: true
 - tapOn: "Profile"
 - waitForAnimationToEnd
-- takeScreenshot: zahln-10-settings
+- takeScreenshot: zaster-10-settings

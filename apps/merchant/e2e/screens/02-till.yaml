@@ -1,7 +1,7 @@
 # README gallery: a sale at the counter. Catalogue, keypad, the one-time QR, the customer checking it, Paid,
 # then My QR, the wallet, a payment and its refund sheet, and settings. Mila signed in (after 01-onboarding).
-appId: de.zysygy.app
-name: Screens · ZYSYGY till
+appId: de.zettel.app
+name: Screens · Zettel till
 ---
 - launchApp
 - runFlow:
@@ -20,13 +20,13 @@ name: Screens · ZYSYGY till
 - tapOn: ".*Cappuccino.*"
 - tapOn: ".*Croissant.*"
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-03-till
+- takeScreenshot: zettel-03-till
 - tapOn: "Amount"
 - tapOn: "4"
 - tapOn: "5"
 - tapOn: "0"
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-04-keypad
+- takeScreenshot: zettel-04-keypad
 - tapOn: "Catalogue"
 - tapOn:
     text: "Charge €6.30"
@@ -34,13 +34,13 @@ name: Screens · ZYSYGY till
     visible: "Waiting for scan.*"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-05-qr
+- takeScreenshot: zettel-05-qr
 - runScript: ../scripts/customer-scans.js
 - extendedWaitUntil:
     visible: "Customer is reviewing.*"
     timeout: 5000
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-06-customer-reviewing
+- takeScreenshot: zettel-06-customer-reviewing
 - runScript: ../scripts/customer-pays.js
 - extendedWaitUntil:
     visible: "Paid"
@@ -49,7 +49,7 @@ name: Screens · ZYSYGY till
 - extendedWaitUntil:
     visible: "Receipt no.*"
     timeout: 3000
-- takeScreenshot: zysygy-07-paid
+- takeScreenshot: zettel-07-paid
 - extendedWaitUntil:
     visible: ".*Cappuccino.*"
     timeout: 15000
@@ -58,7 +58,7 @@ name: Screens · ZYSYGY till
     visible: "My QR"
     timeout: 5000
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-08-my-qr
+- takeScreenshot: zettel-08-my-qr
 - tapOn:
     text: "Close|Back"
     optional: true
@@ -67,15 +67,15 @@ name: Screens · ZYSYGY till
     visible: "Taken today"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-09-wallet
+- takeScreenshot: zettel-09-wallet
 - tapOn: "Lena.*"
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-10-payment
+- takeScreenshot: zettel-10-payment
 - tapOn: "Refund"
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-11-refund
+- takeScreenshot: zettel-11-refund
 - tapOn: "Close"
 - tapOn: "Close"
 - tapOn: "Profile"
 - waitForAnimationToEnd
-- takeScreenshot: zysygy-12-settings
+- takeScreenshot: zettel-12-settings

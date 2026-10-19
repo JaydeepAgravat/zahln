@@ -1,4 +1,4 @@
-import type { ColorToken } from '@zahln/shared/tokens';
+import type { ColorToken } from '@zaster/shared/tokens';
 import type { IconProps as PhosphorProps } from 'phosphor-react-native';
 import { ArrowDownLeftIcon } from 'phosphor-react-native/src/icons/ArrowDownLeft';
 import { ArrowUpRightIcon } from 'phosphor-react-native/src/icons/ArrowUpRight';

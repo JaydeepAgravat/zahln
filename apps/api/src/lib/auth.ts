@@ -5,7 +5,7 @@ import {
   type MeResponse,
   OTP_LENGTH,
   type SessionResponse,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 import type { Db, DbOrTx } from '../db/client';
 import { accounts, authChallenges, devices, merchants, staff, users } from '../db/schema';
@@ -114,7 +114,7 @@ export async function registerDevice(
     deviceId: string;
     platform: 'ios' | 'android';
     name?: string | undefined;
-    /** Which app is binding this device. A till (ZYSYGY) may only be bound by staff of a business. */
+    /** Which app is binding this device. A till (Zettel) may only be bound by staff of a business. */
     app?: 'consumer' | 'merchant';
   },
 ): Promise<SessionResponse> {

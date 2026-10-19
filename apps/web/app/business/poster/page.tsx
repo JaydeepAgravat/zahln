@@ -1,4 +1,4 @@
-import { handleUrlFor } from '@zahln/shared/payUrl';
+import { handleUrlFor } from '@zaster/shared/payUrl';
 import type { Metadata } from 'next';
 import { serverLocale, translator } from '@/lib/i18n';
 import { qrSvg } from '@/lib/qr';

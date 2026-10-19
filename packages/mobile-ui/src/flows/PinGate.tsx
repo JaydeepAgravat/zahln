@@ -1,6 +1,6 @@
-import { checkPin, haptic, useT } from '@zahln/mobile-core';
-import { useSecureScreen } from '@zahln/secure-screen';
-import { MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN } from '@zahln/shared';
+import { checkPin, haptic, useT } from '@zaster/mobile-core';
+import { useSecureScreen } from '@zaster/secure-screen';
+import { MAX_PIN_ATTEMPTS_BEFORE_COOLDOWN } from '@zaster/shared';
 import { useState } from 'react';
 import { Modal, Platform, View } from 'react-native';
 import { Icon, PressableScale } from '../ds';

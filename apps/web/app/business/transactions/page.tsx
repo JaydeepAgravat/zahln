@@ -1,4 +1,4 @@
-import { INTENT_STATUSES, type IntentStatus } from '@zahln/shared';
+import { INTENT_STATUSES, type IntentStatus } from '@zaster/shared';
 import type { Metadata } from 'next';
 import { serverLocale, translator } from '@/lib/i18n';
 import { serverGet } from '@/lib/server';

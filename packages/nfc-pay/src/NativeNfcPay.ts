@@ -19,4 +19,4 @@ export interface Spec extends TurboModule {
 }
 
 /** Android only. `null` on iOS (not linked there) and in tests. */
-export default TurboModuleRegistry.get<Spec>('ZahlnNfcPay');
+export default TurboModuleRegistry.get<Spec>('ZasterNfcPay');

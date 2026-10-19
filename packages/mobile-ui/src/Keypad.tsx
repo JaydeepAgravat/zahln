@@ -1,4 +1,4 @@
-import { haptic, useT } from '@zahln/mobile-core';
+import { haptic, useT } from '@zaster/mobile-core';
 import { View } from 'react-native';
 import { Icon, type IconName } from './Icon';
 import { PressableScale } from './PressableScale';

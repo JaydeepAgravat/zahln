@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, Dialog, Empty } from '@zahln/web-ui';
+import { Button, Card, Dialog, Empty } from '@zaster/web-ui';
 import { useRef, useState } from 'react';
 import { useT } from '@/components/I18n';
 import { useStepUp } from '@/components/StepUp';

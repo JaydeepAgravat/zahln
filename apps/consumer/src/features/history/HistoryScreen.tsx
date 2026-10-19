@@ -1,8 +1,8 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlashList } from '@shopify/flash-list';
-import { useT, useWallet } from '@zahln/mobile-core';
-import { Icon, ListRow, PressableScale, SafeArea, Skeleton, Text, TextField } from '@zahln/mobile-ui';
-import type { WalletTransaction } from '@zahln/shared';
+import { useT, useWallet } from '@zaster/mobile-core';
+import { Icon, ListRow, PressableScale, SafeArea, Skeleton, Text, TextField } from '@zaster/mobile-ui';
+import type { WalletTransaction } from '@zaster/shared';
 import { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import type { HomeStackParamList } from '../../app/navigation/types';

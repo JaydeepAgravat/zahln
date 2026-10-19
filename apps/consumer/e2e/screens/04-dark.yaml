@@ -1,6 +1,6 @@
 # README gallery: the wallet and a payment in dark mode (scripts/screens/mobile.sh switches the simulator).
-appId: de.zahln.app
-name: Screens · Zahln dark
+appId: de.zaster.app
+name: Screens · Zaster dark
 ---
 - stopApp
 - launchApp
@@ -9,11 +9,11 @@ name: Screens · Zahln dark
     visible: "Balance"
     timeout: 15000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-19-wallet-dark
+- takeScreenshot: zaster-19-wallet-dark
 - runScript: ../scripts/till-intent.js
-- openLink: "zahln://i/${output.ref}"
+- openLink: "zaster://i/${output.ref}"
 - extendedWaitUntil:
     visible: "Café Mila"
     timeout: 10000
 - waitForAnimationToEnd
-- takeScreenshot: zahln-20-pay-dark
+- takeScreenshot: zaster-20-pay-dark

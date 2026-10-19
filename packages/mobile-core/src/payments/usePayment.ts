@@ -4,7 +4,7 @@ import {
   attemptReducer,
   initialAttemptState,
   type PaymentIntent,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { ApiRequestError } from '../api';

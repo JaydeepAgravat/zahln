@@ -52,8 +52,8 @@
               "level": "error",
               "options": {
                 "paths": {
-                  "@zahln/consumer": "Packages never import from apps.",
-                  "@zahln/merchant": "Packages never import from apps."
+                  "@zaster/consumer": "Packages never import from apps.",
+                  "@zaster/merchant": "Packages never import from apps."
                 }
               }
             }
@@ -70,9 +70,9 @@
               "level": "error",
               "options": {
                 "paths": {
-                  "@zahln/mobile-ui": "mobile-core is the lower layer: UI depends on core, never the reverse.",
-                  "@zahln/consumer": "Packages never import from apps.",
-                  "@zahln/merchant": "Packages never import from apps."
+                  "@zaster/mobile-ui": "mobile-core is the lower layer: UI depends on core, never the reverse.",
+                  "@zaster/consumer": "Packages never import from apps.",
+                  "@zaster/merchant": "Packages never import from apps."
                 }
               }
             }

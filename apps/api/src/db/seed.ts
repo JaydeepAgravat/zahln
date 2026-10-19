@@ -1,4 +1,4 @@
-import { INITIAL_ADMIN_CONFIG } from '@zahln/shared';
+import { INITIAL_ADMIN_CONFIG } from '@zaster/shared';
 import { eq, sql } from 'drizzle-orm';
 import { accountId, postTransaction } from '../lib/ledger';
 import { createDb, type Db } from './client';
@@ -52,7 +52,7 @@ export const SEED = {
 
 const { users: U, merchants: M } = SEED;
 
-/** Products from the zysygy.de demo till. */
+/** Products on the demo café till. */
 const CAFE_MILA_CATALOGUE = [
   { sku: 'cappuccino', name: 'Cappuccino', priceCents: 380, vatRate: 7 },
   { sku: 'croissant', name: 'Croissant', priceCents: 250, vatRate: 7 },

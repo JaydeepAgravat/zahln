@@ -11,7 +11,7 @@ describe('pay URLs', () => {
   });
 
   it('accepts the app scheme, a bare reference and stray whitespace or query strings', () => {
-    expect(parsePayUrl(`zahln://i/${REF}`)?.intentId).toBe(ID);
+    expect(parsePayUrl(`zaster://i/${REF}`)?.intentId).toBe(ID);
     expect(parsePayUrl(`  ${REF}\n`)?.intentId).toBe(ID);
     expect(parsePayUrl(`${PAY_URL_BASE}${REF}?utm=poster`)?.ref).toBe(REF);
   });
@@ -23,7 +23,7 @@ describe('pay URLs', () => {
       `${PAY_URL_BASE}${ID}`, // no signature
       `${PAY_URL_BASE}${ID}.short`,
       `${PAY_URL_BASE}not-a-uuid.AbCdEf0123_-xyZ9`,
-      'https://pay.zahln.de/i/../../etc/passwd',
+      'https://pay.zaster.de/i/../../etc/passwd',
     ]) {
       expect(parsePayUrl(text)).toBeNull();
     }
@@ -33,14 +33,14 @@ describe('pay URLs', () => {
 describe('static handle URLs', () => {
   it('round-trips a merchant handle and rejects lookalikes', async () => {
     const { handleUrlFor, parseHandleUrl } = await import('../src/payUrl');
-    expect(handleUrlFor('doener-ali')).toBe('https://pay.zahln.de/@doener-ali');
+    expect(handleUrlFor('doener-ali')).toBe('https://pay.zaster.de/@doener-ali');
     expect(parseHandleUrl(handleUrlFor('doener-ali'))).toBe('doener-ali');
-    expect(parseHandleUrl('zahln://@cafe-mila')).toBe('cafe-mila');
+    expect(parseHandleUrl('zaster://@cafe-mila')).toBe('cafe-mila');
     for (const bad of [
       '@doener-ali',
       'https://evil.example/@doener-ali',
-      'https://pay.zahln.de/@Ali',
-      'https://pay.zahln.de/@-x-',
+      'https://pay.zaster.de/@Ali',
+      'https://pay.zaster.de/@-x-',
     ]) {
       expect(parseHandleUrl(bad)).toBeNull();
     }

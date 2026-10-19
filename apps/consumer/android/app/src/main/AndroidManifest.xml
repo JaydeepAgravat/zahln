@@ -25,20 +25,20 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
-        <!-- zahln://i/<ref> and zahln://@handle: the web checkout's "In der App öffnen". -->
+        <!-- zaster://i/<ref> and zaster://@handle: the web checkout's "In der App öffnen". -->
         <intent-filter>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="zahln" />
+            <data android:scheme="zaster" />
         </intent-filter>
-        <!-- App Links: verified against https://pay.zahln.de/.well-known/assetlinks.json at install. -->
+        <!-- App Links: verified against https://pay.zaster.de/.well-known/assetlinks.json at install. -->
         <intent-filter android:autoVerify="true">
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="https" android:host="pay.zahln.de" android:pathPrefix="/i/" />
-            <data android:scheme="https" android:host="pay.zahln.de" android:pathPattern="/@.*" />
+            <data android:scheme="https" android:host="pay.zaster.de" android:pathPrefix="/i/" />
+            <data android:scheme="https" android:host="pay.zaster.de" android:pathPattern="/@.*" />
         </intent-filter>
       </activity>
     </application>

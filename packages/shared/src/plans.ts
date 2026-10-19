@@ -1,5 +1,5 @@
 /**
- * Merchant plans from zysygy.de/plans. Every plan has 0 % transaction fees;
+ * Merchant plans. Every plan has 0 % transaction fees;
  * plans only unlock features. The API enforces these, the app only hides what's unavailable.
  */
 export const PLANS = ['free', 'pro', 'business'] as const;

@@ -1,4 +1,4 @@
-import type { PaymentIntent } from '@zahln/shared';
+import type { PaymentIntent } from '@zaster/shared';
 import type { Metadata } from 'next';
 import { checkoutCopy } from '@/lib/checkout-copy';
 import { serverLocale } from '@/lib/i18n';
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /**
- * The pay link: https://pay.zahln.de/i/<id>.<sig>. The URL is only a reference: the page asks the API for the
+ * The pay link: https://pay.zaster.de/i/<id>.<sig>. The URL is only a reference: the page asks the API for the
  * merchant and the amount, server-side, so the first paint is complete and nothing in the URL can change them.
  */
 export default async function PayLinkPage({ params }: Props) {

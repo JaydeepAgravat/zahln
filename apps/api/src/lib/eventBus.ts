@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import type { PaymentIntent } from '@zahln/shared';
+import type { PaymentIntent } from '@zaster/shared';
 
 /**
  * In-process pub/sub for live intent status (SSE). Publish only *after* the database commit:

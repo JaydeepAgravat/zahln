@@ -6,7 +6,7 @@ import {
   PLAN_FEATURES,
   type Plan,
   type RemoteConfig,
-} from '@zahln/shared';
+} from '@zaster/shared';
 import { and, eq, sql } from 'drizzle-orm';
 import type { DbOrTx } from '../db/client';
 import { appConfig, merchants, staff } from '../db/schema';

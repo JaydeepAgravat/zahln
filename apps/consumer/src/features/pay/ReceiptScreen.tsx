@@ -1,9 +1,17 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import { payments, useT } from '@zahln/mobile-core';
-import { AmountDisplay, Icon, PressableScale, ReceiptEdge, SafeArea, Skeleton, Text } from '@zahln/mobile-ui';
-import { useSecureScreen } from '@zahln/secure-screen';
-import { includedVat, type VatRate } from '@zahln/shared';
+import { payments, useT } from '@zaster/mobile-core';
+import {
+  AmountDisplay,
+  Icon,
+  PressableScale,
+  ReceiptEdge,
+  SafeArea,
+  Skeleton,
+  Text,
+} from '@zaster/mobile-ui';
+import { useSecureScreen } from '@zaster/secure-screen';
+import { includedVat, type VatRate } from '@zaster/shared';
 import type { ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';

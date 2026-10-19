@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { isRefundable } from '@zahln/shared';
+import { isRefundable } from '@zaster/shared';
 import {
   Badge,
   Button,
@@ -12,7 +12,7 @@ import {
   Spinner,
   StatusBadge,
   when,
-} from '@zahln/web-ui';
+} from '@zaster/web-ui';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { api, type PaymentDetail, queryClient } from '../lib/api';
