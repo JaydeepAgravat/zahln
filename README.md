@@ -1,50 +1,245 @@
-# zahln
+# Zahln
 
-An interview MVP of [Zahln / ZYSYGY](https://zysygy.de): zero-fee account-to-account payments over SEPA Instant.
-Five front ends on one realistic payment backend:
+**Pay at the counter with your phone, straight from one bank account to another. No card, no terminal, no fees.**
 
-| | Front end | Stack |
-|---|---|---|
-| 1 | **Zahln**: consumer wallet app (iOS + Android) | bare React Native 0.88 |
-| 2 | **ZYSYGY**: merchant till app (iOS + Android) | bare React Native 0.88 |
-| 3 | **Console**: internal ops tool | Vite + React + shadcn/ui |
-| 4 | **Zahln Web**: merchant dashboard, consumer web wallet, pay-link checkout | Next.js 16 |
-| 5 | **The Zahln Edition**: Editions-style landing page | Next.js 16 + Lenis + Motion + OGL |
+![A payment in six steps: the café rings up €6.30, a one-time QR code appears, the student scans it, confirms with a PIN, sees "Paid", and the café's till turns green.](docs/screenshots/payment-story.png)
 
-> Days 1–12 are built: the API, both mobile apps, Zahln Web, the ops console and the landing page, with Storybook,
-> Playwright, Maestro and CI. The code is built day by day following the guides in [`docs/days`](docs/days/README.md).
-> See every screen in [Screens](#screens).
+This repository is a working prototype of **Zahln**, a payment app for students, and **ZYSYGY**, the till app for the
+shops where they pay. It was built in about two weeks as a job-interview project for the founding mobile team at
+[Zahln / ZYSYGY](https://zysygy.de). It is a prototype, so the bank behind it is simulated and no real money moves.
+Everything else is real and runs end to end: two phone apps, three websites, and the server that connects them.
 
-## Run it
+<table>
+<tr>
+<td valign="top" width="50%">
+
+**New here? Read this way.**
+
+- **Not technical?** Read [The story](#the-story) and [Three moments](#three-moments-that-matter), then look at [every screen](#every-screen). About 5 minutes.
+- **Developer?** Start with [How it works](#how-it-works), then [Run it yourself](#run-it-yourself) and the [decisions](docs/DECISIONS.md).
+- **Unknown word?** The [glossary](#glossary) explains every term in one line.
+
+</td>
+<td valign="top">
+
+**Contents**
+
+1. [The story](#the-story)
+2. [Three moments that matter](#three-moments-that-matter)
+3. [Five apps, one product](#five-apps-one-product)
+4. [What is real and what is simulated](#what-is-real-and-what-is-simulated)
+5. [How it works](#how-it-works)
+6. [Run it yourself](#run-it-yourself)
+7. [How we know it works](#how-we-know-it-works)
+8. [Every screen](#every-screen)
+9. [Glossary](#glossary)
+10. [More to read](#more-to-read)
+
+</td>
+</tr>
+</table>
+
+## The story
+
+**Meet Mila.** She runs Café Mila in Augsburg, a small café near the university. Many of her customers pay by card.
+Every card payment costs her a fee, and the card terminal costs money too. For a €3.80 cappuccino, those costs
+take a real part of what she earns.
+
+**Meet Lena.** She studies at the university and buys coffee at Café Mila most mornings. She wants paying to be
+fast and simple, and she wants to be sure that she never pays twice by mistake.
+
+**Zahln connects them.** Mila's phone becomes her till: she opens the **ZYSYGY** app, taps what Lena ordered, and a
+QR code appears. Lena scans it with the **Zahln** app, checks the amount, and confirms with her PIN or Face ID.
+The money moves from Lena's account to Mila's account through **SEPA Instant**, the European system that
+moves euros between bank accounts in seconds. No card network sits in between, so there is no fee on the payment.
+Shops pay a monthly plan for extra features instead (Free, Pro at €29, Business at €59).
+
+The whole payment takes about three seconds. In this prototype the bank confirms in under half a second.
+
+## Three moments that matter
+
+A payment app must do three things well. Each one is built and works in this prototype. Each one is also a short live demo.
+
+### 1. Paying takes three seconds
+
+Mila taps a cappuccino and a croissant. The till shows a QR code that works **only once**, **only for €6.30**, and
+**only for 5 minutes**. Lena scans it and confirms. Her phone says "Paid". At the same moment, Mila's till turns green,
+her balance goes up, and the payment appears on her web dashboard. All of this happens live, with no refresh.
+
+### 2. The internet drops, and nobody pays twice
+
+This is the hardest problem in payments. Lena taps "Pay". The bank moves the money. But the café Wi-Fi drops
+**before the answer reaches her phone**. What should the app say?
+
+A careless app would say "Failed", and Lena would try again, so she pays **twice**. Zahln does something different:
+
+<table>
+<tr>
+<td align="center" width="33%"><img src="docs/screenshots/zahln/16-checking.png" width="220" alt="Checking"><br><sub><b>Checking</b>: the app does not guess. It asks the bank what happened.</sub></td>
+<td align="center" width="33%"><img src="docs/screenshots/zahln/13-paid.png" width="220" alt="Paid"><br><sub><b>Paid</b>: the bank says the money arrived. It was charged once.</sub></td>
+<td align="center" width="33%"><img src="docs/screenshots/zahln/14-not-charged.png" width="220" alt="Not charged"><br><sub><b>Not charged</b>: the bank refused. The app says clearly that no money moved.</sub></td>
+</tr>
+</table>
+
+How? Every payment carries a unique **ticket number** (developers call it an *idempotency key*). If the phone asks
+twice with the same ticket, the server knows it is the same payment and answers with the first result. It never
+charges twice. You can watch this happen: the ops console can "break" the network on purpose.
+
+### 3. Changing the app without a new release
+
+A phone app cannot be fixed instantly. Every update must pass the App Store review, and many people install it late.
+So the important switches live on the server, and the team controls them from the **ops console**:
+
+- **Upgrade a shop's plan:** Döner Ali moves from Free to Pro, and its till gets one-time QR codes within a second.
+- **Turn a feature off:** if "Tap to Pay" has a problem, one switch hides it on every phone.
+- **Retire an old version:** the team can raise the oldest version that still works. Old apps then show "Please update". The customers' money stays safe.
+
+## Five apps, one product
+
+| | App | Who uses it | What it does | Built with |
+|---|---|---|---|---|
+| <img src="docs/screenshots/zahln/07-wallet.png" width="60" alt=""> | **Zahln** (iOS, Android) | Students and shoppers | A wallet: pay a QR code, see your history and receipts | React Native |
+| <img src="docs/screenshots/zysygy/03-till.png" width="60" alt=""> | **ZYSYGY** (iOS, Android) | Shop staff at the counter | A till: ring up, show a QR, refund, see today's takings | React Native |
+| <img src="docs/screenshots/web/02-today.png" width="60" alt=""> | **Zahln Web** | Shop owners, and customers without the app | A dashboard for the shop, a web wallet, and a checkout page for payment links | Next.js |
+| <img src="docs/screenshots/console/07-control-room.png" width="60" alt=""> | **Zahln Ops** | The Zahln support team | Find any payment, refund it, change plans, flip switches. Every action is logged | Vite + React |
+| <img src="docs/screenshots/landing/01-edition.png" width="60" alt=""> | **The Zahln Edition** | Everyone, as a first impression | A landing page that tells the product story | Next.js |
+
+All five share one design system called **"Ember and ink"**: warm paper, near-black ink, and one orange accent,
+in light and dark mode. Everything works in **German and English**, and it works with screen readers.
+See [the design system](docs/DESIGN_SYSTEM.md).
+
+## What is real and what is simulated
+
+Honesty matters when money is involved, so here is the exact line:
+
+| Real, working code | Simulated or not built yet |
+|---|---|
+| Both phone apps on iOS and Android, sign-up with phone number and code, PIN and Face ID | The **bank** is simulated. It behaves like SEPA Instant: it confirms, it can be slow, it can refuse |
+| One-time QR codes, payment links, static shop QR codes, tips, full and partial refunds | **SMS** is not sent. In development the code is always `123456` |
+| A double-entry ledger, so every cent is accounted for and balances always add up | **German cash-register rules** (KassenSichV/TSE) are not connected |
+| The "no double charge" protection, kill switches, plan features, forced updates | **App Store / Play Store** release, real certificate pins |
+| Security: device binding, screenshot protection, log scrubbing, data export and account deletion (GDPR) | Payouts to a real bank account (the payout runs against the simulated bank) |
+| Phone-to-phone NFC payment on Android (the till acts like a card) | NFC on iPhone (Apple allows it only with a special entitlement and payment-provider status; QR works on every phone) |
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph Phones
+    Z["Zahln app<br/>(student)"]
+    Y["ZYSYGY app<br/>(shop till)"]
+  end
+  subgraph Web
+    W["Zahln Web<br/>(dashboard, web wallet, checkout)"]
+    C["Zahln Ops<br/>(support console)"]
+    L["Landing page"]
+  end
+  API["API server<br/>Fastify + TypeScript"]
+  DB[("Postgres<br/>double-entry ledger")]
+  BANK["Bank rail<br/>(simulated SEPA Instant)"]
+  Z <--> API
+  Y <--> API
+  W <--> API
+  C <--> API
+  API <--> DB
+  API <--> BANK
+```
+
+One payment, step by step:
+
+```mermaid
+sequenceDiagram
+  participant Till as ZYSYGY till
+  participant API as API server
+  participant App as Zahln app
+  participant Bank as Bank (simulated)
+  Till->>API: Create a payment for €6.30
+  API-->>Till: One-time QR (signed, 5 minutes)
+  App->>API: Scanned: what is this QR?
+  API-->>App: Café Mila, €6.30, the items
+  App->>API: Pay, with ticket number K (after PIN)
+  API->>Bank: Move €6.30 from Lena to Mila
+  Bank-->>API: Settled
+  API-->>App: Paid
+  API-->>Till: Paid (live update)
+  Note over App,API: If the answer is lost, the app asks "what happened to ticket K?"<br/>The server answers with the first result. It never charges twice.
+```
+
+**The main ideas, for developers:**
+
+- **One typed state machine for every payment**, shared by both apps and the web checkout. Every state (paying, checking, paid, not charged, not enough balance, expired) has its own screen and its own tests.
+- **Idempotency keys on every request that moves money.** A repeated request returns the stored answer, and Postgres constraints allow only one paid attempt per payment.
+- **A double-entry ledger.** Balances are sums of ledger rows. Database triggers reject any transaction that does not balance.
+- **Server-driven config**: kill switches, plan features, re-authentication limits and minimum app versions. All of it changes live from the console and is audited.
+- **Native code where it is needed:** two TurboModules, written in Swift and Kotlin. One protects sensitive screens from screenshots. The other turns an Android till into an NFC card.
+- **One monorepo** with shared packages, so five front ends never drift apart:
+
+```
+apps/
+  consumer/   Zahln app (bare React Native 0.88, iOS + Android)
+  merchant/   ZYSYGY app (bare React Native 0.88, iOS + Android)
+  api/        Fastify + Postgres + Drizzle, ledger, simulated bank rail
+  web/        Zahln Web (Next.js 16): dashboard, web wallet, pay-link checkout
+  console/    Zahln Ops (Vite + React + shadcn/ui)
+  landing/    The Zahln Edition (Next.js 16, Lenis, Motion, OGL)
+packages/
+  shared/        schemas, payment state machines, money, plans, German/English text
+  mobile-core/   API client, session, keychain, biometrics, logging
+  mobile-ui/     the mobile design system and the screens both apps share
+  web-ui/        the web design system
+  secure-screen/ native module: screenshot protection, integrity hints
+  nfc-pay/       native module: Android phone-to-phone payment
+```
+
+Every important choice, with its trade-offs, is written down in [DECISIONS.md](docs/DECISIONS.md).
+Security is described in [SECURITY.md](docs/SECURITY.md).
+
+## Run it yourself
+
+You need: macOS with Xcode (for iOS) or Android Studio (for Android), Node.js 22 or newer, pnpm 11 and Docker.
+
 ```bash
 cp .env.example .env
 pnpm install
-pnpm db:up && pnpm db:migrate && pnpm db:seed
-pnpm api                 # API on :4000 (OTP is always 123456 in dev)
-pnpm pods                # CocoaPods for both apps
-pnpm consumer            # Metro for Zahln on :8081, then: pnpm consumer:ios | consumer:android
-pnpm merchant            # Metro for ZYSYGY on :8082, then: pnpm merchant:ios | merchant:android
-pnpm web                 # Zahln Web (merchant dashboard) on :3000/business, sign in as Mila with OTP 123456
-pnpm storybook           # web-ui Storybook on :6006 (mobile: pnpm --filter @zahln/consumer storybook)
-pnpm e2e                 # Playwright: checkout, Act 2 in the browser, dashboard, console, axe
-pnpm e2e:mobile          # Maestro on the booted iOS simulator (Lena signed in)
-pnpm console             # Zahln Ops (internal console) on :5174; sign in with your name + ADMIN_TOKEN
+pnpm db:up && pnpm db:migrate && pnpm db:seed   # Postgres in Docker, with demo data
+pnpm api                                        # the API server on :4000
 ```
-On Android 16, allow "nearby devices" on first launch of a debug build (it's the local-network access Metro needs).
-For faster Android dev builds: `./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a`.
 
-Demo logins: `0151 0000 0001` (Lena, student, in **Zahln**) · `0151 0000 0010` (Mila, Café Mila, in **ZYSYGY**).
+Then start what you want to see, each in its own terminal:
 
-![App icons: Zahln and ZYSYGY](docs/screenshots/app-icons.png)
+| To see | Run | Then open |
+|---|---|---|
+| Zahln app | `pnpm pods` once, then `pnpm consumer` and `pnpm consumer:ios` (or `consumer:android`) | the simulator |
+| ZYSYGY app | `pnpm merchant` and `pnpm merchant:ios` (or `merchant:android`) | the simulator |
+| Zahln Web | `pnpm web` | http://localhost:3000 |
+| Zahln Ops | `pnpm console` | http://localhost:5174 (your name + `ADMIN_TOKEN` from `.env`) |
+| Landing page | `pnpm --filter @zahln/landing dev` | http://localhost:3001 |
+| Storybook | `pnpm storybook` | http://localhost:6006 |
 
-![Act 1: the payment moment](docs/screenshots/act1-payment-moment.png)
+**Demo accounts** (the sign-in code is always `123456`, and the demo PIN is `271828`):
 
-Design system **"Ember and ink"**: warm paper, near-black ink, one ember accent, a torn-receipt motif, Phosphor icons,
-custom SVG illustrations, spring motion and haptics. See [DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
+| Who | Phone number | Use in |
+|---|---|---|
+| Lena, a student | `0151 0000 0001` | Zahln, the web wallet, payment links |
+| Mila, owner of Café Mila | `0151 0000 0010` | ZYSYGY, the Zahln Web dashboard |
 
-## Screens
-Every screen of the five front ends, captured from the running apps with demo data (Lena pays, Mila sells).
-The mobile shots come from the iPhone simulator, the web shots from Chrome. They are regenerated by
+On Android 16, allow "nearby devices" when a debug build first opens: Metro needs local-network access.
+
+## How we know it works
+
+| Check | What it covers | Run |
+|---|---|---|
+| Unit and API tests | Ledger, payments, idempotency, refunds, plans, security rules (Vitest, Jest) | `pnpm turbo run test` |
+| Browser tests | Checkout, a lost connection in the browser, the dashboard, the console, with automatic accessibility checks in light and dark mode (Playwright + axe) | `pnpm e2e` |
+| Phone tests | Pay a QR, survive a lost connection, the till from QR to "Paid" (Maestro, on the iOS simulator) | `pnpm e2e:mobile` |
+| Design system | Every component in light and dark, German and English (Storybook) | `pnpm storybook` |
+| Code quality | Lint and format (Biome), types (TypeScript), performance and accessibility budgets for the landing page (Lighthouse) | `pnpm biome ci .` |
+
+One CI pipeline ([`ci.yml`](.github/workflows/ci.yml)) runs all of this on GitHub, except the phone tests, which need a Mac.
+
+## Every screen
+All 61 screens of the five front ends, captured from the running apps with demo data: Lena pays, Mila sells.
+The phone shots come from the iPhone simulator, the web shots from Chrome. They are regenerated by
 `pnpm screens:mobile` (Maestro) and `pnpm screens:web` (Playwright), then `scripts/screens/finish.sh <mobile png dir>`.
 
 ### Zahln: the student wallet (iOS and Android)
@@ -175,13 +370,36 @@ The mobile shots come from the iPhone simulator, the web shots from Chrome. They
 <img src="docs/screenshots/landing/01-edition.png" width="860" alt="The Zahln Edition">
 <br><sub><b>The Zahln Edition</b>: an Editions-style launch page for the product (<code>apps/landing</code>)</sub>
 
-## Docs
-- [Plan](docs/PLAN.md): product understanding, demo script, architecture, schedule
-- [Tech decisions](docs/DECISIONS.md): every library choice, its trade-offs, and the interview questions it answers
-- [Design system "Ember and ink"](docs/DESIGN_SYSTEM.md): light and dark tokens, typography, components
-- [Landing page](docs/LANDING.md): teardown of Shopify Editions Winter '26 and the spec for "The Zahln Edition"
-- [Daily guides](docs/days/README.md): Day 1 to Day 13
+## Glossary
 
-## Stack
-Bare React Native 0.88 · TypeScript · NativeWind · React Navigation · TanStack Query · Zustand ·
-Fastify · Postgres · Drizzle · Next.js · Vite + React + shadcn/ui · Lenis · Motion · OGL · pnpm + Turborepo · Biome · Vitest · Jest · Maestro · Playwright · Lighthouse CI
+| Term | Meaning |
+|---|---|
+| **SEPA Instant** | The European system that moves euros between bank accounts in about 10 seconds or less, any time of day. |
+| **Account-to-account (A2A)** | Money goes straight from the payer's bank account to the shop's. No card network sits in between. |
+| **QR code** | A square barcode a phone camera can read. Here, each one stands for exactly one payment. |
+| **Idempotency key** | A unique "ticket number" on a payment request. Sending the same ticket twice can never charge twice. |
+| **Ledger (double-entry)** | The accounting book. Every payment is written twice, once as money out and once as money in, so the totals always balance. |
+| **Kill switch** | A switch on the server that turns a feature off in every app at once, without an app update. |
+| **Feature flag / plan** | A server setting that decides which features a shop gets (Free, Pro or Business). |
+| **Forced update** | Old app versions are blocked and asked to update, for example after a security fix. |
+| **NFC** | The short-range radio behind contactless cards. Here, the Android till can act like a card. |
+| **GoBD / DATEV** | German rules for keeping business records, and the accounting format German tax advisers use. |
+| **GDPR** | The EU privacy law. Users can export their data and delete their account in the app. |
+| **React Native** | A way to build iPhone and Android apps from one codebase in TypeScript, with native code where needed. |
+| **TurboModule** | A piece of native code (Swift or Kotlin) that a React Native app can call directly. |
+| **Monorepo** | All apps and shared code in one repository, so a change to shared code updates every app. |
+| **Simulator** | A virtual iPhone or Android phone on a computer, used for development and the screenshots here. |
+
+## More to read
+
+- [PLAN.md](docs/PLAN.md): the product, the 5-minute demo, the architecture and the schedule.
+- [DECISIONS.md](docs/DECISIONS.md): every library and design choice, and why.
+- [DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md): colours, type, components, light and dark.
+- [SECURITY.md](docs/SECURITY.md): what protects money and data, and what production would add.
+- [LANDING.md](docs/LANDING.md): how the landing page was designed.
+- [Daily build guides](docs/days/README.md): the project was built day by day. Each day has a goal, the ideas behind it, and what actually happened.
+
+---
+
+Built by Jaydeep Agravat as an interview project for Zahln / ZYSYGY. This is not the official Zahln app.
+The names Zahln and ZYSYGY belong to their owners.
