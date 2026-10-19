@@ -5,9 +5,11 @@
 ![A payment in six steps: the café rings up €6.30, a one-time QR code appears, the student scans it, confirms with a PIN, sees "Paid", and the café's till turns green.](docs/screenshots/payment-story.png)
 
 This repository is a working prototype of **Zahln**, a payment app for students, and **ZYSYGY**, the till app for the
-shops where they pay. It was built in about two weeks as a job-interview project for the founding mobile team at
-[Zahln / ZYSYGY](https://zysygy.de). It is a prototype, so the bank behind it is simulated and no real money moves.
-Everything else is real and runs end to end: two phone apps, three websites, and the server that connects them.
+shops where they pay. I am a mobile app developer, and I built it to learn German fintech from the inside: how
+money really moves between bank accounts, what German law asks of a till and a receipt, and how to make a payment
+app that never charges twice. The product idea comes from [Zahln / ZYSYGY](https://zysygy.de). The bank behind
+this prototype is simulated, so no real money moves. Everything else is real and runs end to end: two phone apps,
+three websites, and the server that connects them.
 
 <table>
 <tr>
@@ -401,5 +403,5 @@ The phone shots come from the iPhone simulator, the web shots from Chrome. They 
 
 ---
 
-Built by Jaydeep Agravat as an interview project for Zahln / ZYSYGY. This is not the official Zahln app.
-The names Zahln and ZYSYGY belong to their owners.
+Built by Jaydeep Agravat, a mobile app developer exploring German fintech. This is an independent prototype, not the
+official Zahln app. The names Zahln and ZYSYGY belong to their owners.
