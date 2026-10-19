@@ -2,7 +2,7 @@ import { type PaymentIntent, PaymentIntentSchema } from '@zahln/shared';
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import EventSource from 'react-native-sse';
-import { API_URL, authHeaders } from '../api';
+import { apiUrl, authHeaders } from '../api';
 import { payments } from './client';
 
 const FINAL = new Set<PaymentIntent['status']>([
@@ -45,7 +45,7 @@ export function useIntentStatus(initial: PaymentIntent) {
         .catch(() => undefined);
     };
 
-    const source = new EventSource<'status'>(`${API_URL}/intents/${initial.id}/events`, {
+    const source = new EventSource<'status'>(`${apiUrl()}/intents/${initial.id}/events`, {
       headers: authHeaders(),
       pollingInterval: 3000, // react-native-sse reconnects by itself
     });

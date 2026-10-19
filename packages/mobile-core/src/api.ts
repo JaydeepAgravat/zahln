@@ -5,7 +5,15 @@ import { appKind } from './app';
 import { logger } from './logger';
 
 /** The Android emulator reaches the host machine at 10.0.2.2; the iOS simulator shares localhost. */
-export const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
+const DEFAULT_API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
+let currentApiUrl = DEFAULT_API_URL;
+
+/** Where the API lives. Set once at startup (apps' configure.ts) when a build bakes in another address, e.g. a LAN demo. */
+export function setApiUrl(url: string) {
+  currentApiUrl = url.replace(/\/+$/, '');
+}
+
+export const apiUrl = () => currentApiUrl;
 
 export class ApiRequestError extends Error {
   constructor(
@@ -71,7 +79,7 @@ export async function api<S extends z.ZodType>(
 
   let res: Response;
   try {
-    res = await fetch(`${API_URL}${path}`, {
+    res = await fetch(`${apiUrl()}${path}`, {
       method: opts.method ?? 'GET',
       headers,
       body: opts.body === undefined ? undefined : JSON.stringify(opts.body),

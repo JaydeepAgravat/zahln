@@ -46,7 +46,8 @@ react {
 
     /* Hermes Commands */
     //   The hermes compiler command to run. By default it is 'hermesc'
-    // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
+    // The workspace hoists hermes-compiler to the repo root (pnpm, nodeLinker: hoisted).
+    hermesCommand = "$rootDir/../../../node_modules/hermes-compiler/hermesc/%OS-BIN%/hermesc"
     //
     //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
     // hermesFlags = ["-O", "-output-source-map"]
@@ -106,6 +107,34 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
+}
+
+/**
+ * LAN demo build: `./gradlew assembleRelease -PlanHost=192.168.x.y` (with ZAHLN_API_URL set for the JS bundle).
+ * Overlays the release network config so plain HTTP is allowed to that one address only, and declares the
+ * Android 16 local-network permission. Without -PlanHost the release build stays HTTPS-only.
+ */
+def lanHost = project.findProperty("lanHost")
+if (lanHost) {
+    def lanDir = file("$buildDir/generated/lan")
+    new File(lanDir, "res/xml").mkdirs()
+    new File(lanDir, "res/xml/network_security_config.xml").text = """<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated for the LAN demo build (-PlanHost=${lanHost}). Never ship this to a store. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors><certificates src="system" /></trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">${lanHost}</domain>
+    </domain-config>
+</network-security-config>
+"""
+    new File(lanDir, "AndroidManifest.xml").text = """<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+</manifest>
+"""
+    android.sourceSets.release.res.srcDirs += "$lanDir/res"
+    android.sourceSets.release.manifest.srcFile "$lanDir/AndroidManifest.xml"
 }
 
 dependencies {

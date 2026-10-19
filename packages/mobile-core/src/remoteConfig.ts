@@ -11,7 +11,7 @@ import { AppState } from 'react-native';
 import EventSource from 'react-native-sse';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware';
-import { API_URL, api, authHeaders } from './api';
+import { api, apiUrl, authHeaders } from './api';
 import { appKind, appVersion } from './app';
 import { logger } from './logger';
 import { usePrefs } from './prefs';
@@ -114,7 +114,7 @@ export function startRemoteConfig(): () => void {
   const offSession = useSession.subscribe((s, prev) => {
     if (s.status === 'ready' && prev.status !== 'ready') void refreshConfig();
   });
-  const source = new EventSource<'config'>(`${API_URL}/config/events`, {
+  const source = new EventSource<'config'>(`${apiUrl()}/config/events`, {
     headers: authHeaders(),
     pollingInterval: 5000,
   });

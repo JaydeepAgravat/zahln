@@ -1,4 +1,4 @@
-export { API_URL, ApiRequestError, api, authHeaders, setAuth } from './api';
+export { ApiRequestError, api, apiUrl, authHeaders, setApiUrl, setAuth } from './api';
 export { type AppKind, appKind, appVersion, configureApp } from './app';
 export { type BiometryInfo, prefetchBiometry, useBiometry } from './biometrics';
 export { prettyPhone } from './format';
