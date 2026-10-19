@@ -127,24 +127,14 @@ Honesty matters when money is involved, so here is the exact line:
 
 ```mermaid
 flowchart LR
-  subgraph Phones
-    Z["Zahln app<br/>(student)"]
-    Y["ZYSYGY app<br/>(shop till)"]
-  end
-  subgraph Web
-    W["Zahln Web<br/>(dashboard, web wallet, checkout)"]
-    C["Zahln Ops<br/>(support console)"]
-    L["Landing page"]
-  end
-  API["API server<br/>Fastify + TypeScript"]
-  DB[("Postgres<br/>double-entry ledger")]
-  BANK["Bank rail<br/>(simulated SEPA Instant)"]
-  Z <--> API
-  Y <--> API
-  W <--> API
-  C <--> API
-  API <--> DB
-  API <--> BANK
+  Z["Zahln app (student)"] --> API
+  Y["ZYSYGY app (shop till)"] --> API
+  W["Zahln Web (dashboard, wallet, checkout)"] --> API
+  C["Zahln Ops (support console)"] --> API
+  API["API server (Fastify, TypeScript)"] --> DB["Postgres (double-entry ledger)"]
+  API --> BANK["Bank rail (simulated SEPA Instant)"]
+  API -. "live updates (SSE)" .-> Y
+  API -. "live updates (SSE)" .-> W
 ```
 
 One payment, step by step:
