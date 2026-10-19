@@ -200,6 +200,29 @@ describe('dropped responses (campus wifi)', () => {
     expect(await t.api.balance(LENA)).toBe(5000 - 630);
   });
 
+  it('drop_and_hold: lookups fail until the bank "answers", then find the one payment', async () => {
+    t.chaos.set('drop_and_hold');
+    const intent = (await t.api.createIntent(CART)).body;
+    const key = randomUUID();
+    const app = await t.app;
+    await app
+      .inject({
+        method: 'POST',
+        url: `/intents/${intent.id}/pay`,
+        headers: { 'x-user-id': LENA, 'idempotency-key': key },
+        payload: {},
+      })
+      .catch(() => undefined);
+
+    const held = await t.call('GET', `/attempts/by-key/${key}`, { user: LENA });
+    expect(held.status).toBe(503);
+
+    t.chaos.set('ok');
+    const lookup = await t.call('GET', `/attempts/by-key/${key}`, { user: LENA });
+    expect(lookup.body.status).toBe('paid');
+    expect(await t.api.balance(LENA)).toBe(5000 - 630);
+  });
+
   it('a key the server never saw returns 404, so it is safe to resend with that key', async () => {
     const res = await t.call('GET', `/attempts/by-key/${randomUUID()}`, { user: LENA });
     expect(res.status).toBe(404);

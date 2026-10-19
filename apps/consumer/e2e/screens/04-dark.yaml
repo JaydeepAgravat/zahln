@@ -1,0 +1,19 @@
+# README gallery: the wallet and a payment in dark mode (scripts/screens/mobile.sh switches the simulator).
+appId: de.zahln.app
+name: Screens · Zahln dark
+---
+- stopApp
+- launchApp
+- runFlow: ../unlock.yaml
+- extendedWaitUntil:
+    visible: "Balance"
+    timeout: 15000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-19-wallet-dark
+- runScript: ../scripts/till-intent.js
+- openLink: "zahln://i/${output.ref}"
+- extendedWaitUntil:
+    visible: "Café Mila"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-20-pay-dark

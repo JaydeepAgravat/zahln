@@ -1,0 +1,41 @@
+# README gallery: lock, wallet, history, receipt, settings. Lena signed in, in English (after 01-onboarding).
+appId: de.zahln.app
+name: Screens · Zahln wallet
+---
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible: "Enter your PIN"
+    timeout: 15000
+- tapOn: "2"
+- tapOn: "7"
+- tapOn: "1"
+- waitForAnimationToEnd
+- takeScreenshot: zahln-06-lock
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "8"
+- extendedWaitUntil:
+    visible: "Balance"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-07-wallet
+- tapOn: "Receipts"
+- extendedWaitUntil:
+    visible: "History"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-08-history
+- tapOn: "Café Mila.*"
+- extendedWaitUntil:
+    visible: "Receipt no."
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-09-receipt
+- tapOn: "Close"
+- tapOn:
+    text: "Back"
+    optional: true
+- tapOn: "Profile"
+- waitForAnimationToEnd
+- takeScreenshot: zahln-10-settings

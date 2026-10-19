@@ -3,7 +3,7 @@ appId: de.zahln.app
 ---
 - runFlow:
     when:
-      visible: "Gib deine PIN ein"
+      visible: "Gib deine PIN ein|Enter your PIN"
     commands:
       - tapOn: "2"
       - tapOn: "7"

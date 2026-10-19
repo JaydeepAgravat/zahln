@@ -1,0 +1,81 @@
+# README gallery: a sale at the counter. Catalogue, keypad, the one-time QR, the customer checking it, Paid,
+# then My QR, the wallet, a payment and its refund sheet, and settings. Mila signed in (after 01-onboarding).
+appId: de.zysygy.app
+name: Screens · ZYSYGY till
+---
+- launchApp
+- runFlow:
+    when:
+      visible: "Gib deine PIN ein|Enter your PIN"
+    commands:
+      - tapOn: "2"
+      - tapOn: "7"
+      - tapOn: "1"
+      - tapOn: "8"
+      - tapOn: "2"
+      - tapOn: "8"
+- extendedWaitUntil:
+    visible: ".*Cappuccino.*"
+    timeout: 15000
+- tapOn: ".*Cappuccino.*"
+- tapOn: ".*Croissant.*"
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-03-till
+- tapOn: "Amount"
+- tapOn: "4"
+- tapOn: "5"
+- tapOn: "0"
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-04-keypad
+- tapOn: "Catalogue"
+- tapOn:
+    text: "Charge €6.30"
+- extendedWaitUntil:
+    visible: "Waiting for scan.*"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-05-qr
+- runScript: ../scripts/customer-scans.js
+- extendedWaitUntil:
+    visible: "Customer is reviewing.*"
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-06-customer-reviewing
+- runScript: ../scripts/customer-pays.js
+- extendedWaitUntil:
+    visible: "Paid"
+    timeout: 5000
+# The till returns to the catalogue by itself after 4 s, so shoot as soon as the receipt number is in.
+- extendedWaitUntil:
+    visible: "Receipt no.*"
+    timeout: 3000
+- takeScreenshot: zysygy-07-paid
+- extendedWaitUntil:
+    visible: ".*Cappuccino.*"
+    timeout: 15000
+- tapOn: "My QR"
+- extendedWaitUntil:
+    visible: "My QR"
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-08-my-qr
+- tapOn:
+    text: "Close|Back"
+    optional: true
+- tapOn: "Wallet"
+- extendedWaitUntil:
+    visible: "Taken today"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-09-wallet
+- tapOn: "Lena.*"
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-10-payment
+- tapOn: "Refund"
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-11-refund
+- tapOn: "Close"
+- tapOn: "Close"
+- tapOn: "Profile"
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-12-settings

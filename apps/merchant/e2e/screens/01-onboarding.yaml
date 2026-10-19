@@ -1,0 +1,88 @@
+# README gallery: sign out, switch to English, then set this phone up as Café Mila's till (Mila, 0151 0000 0010), one shot per step.
+# Run with scripts/screens/mobile.sh zysygy.
+appId: de.zysygy.app
+name: Screens · ZYSYGY onboarding
+---
+- stopApp
+- launchApp
+- runFlow:
+    when:
+      visible: "Gib deine PIN ein|Enter your PIN"
+    commands:
+      - tapOn: "2"
+      - tapOn: "7"
+      - tapOn: "1"
+      - tapOn: "8"
+      - tapOn: "2"
+      - tapOn: "8"
+- extendedWaitUntil:
+    visible: "Loslegen|Get started|.*Cappuccino.*"
+    timeout: 20000
+# Signed in? Sign out first, so the flow starts at the welcome screen either way.
+- runFlow:
+    when:
+      visible: ".*Cappuccino.*"
+    commands:
+      - tapOn: "Profil|Profile"
+      - scrollUntilVisible:
+          element: "Abmelden|Sign out"
+      - tapOn: "Abmelden|Sign out"
+- extendedWaitUntil:
+    visible: "Loslegen|Get started"
+    timeout: 10000
+# The gallery is in English: the language switch on the welcome screen (it is remembered).
+- runFlow:
+    when:
+      visible: "Loslegen"
+    commands:
+      - tapOn: "Switch to English"
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-01-welcome
+- tapOn: "Get started"
+- tapOn: "151 2345 6789"
+- inputText: "15100000010"
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Enter the code"
+    timeout: 10000
+- runFlow:
+    when:
+      visible: "Enter the code"
+    commands:
+      - inputText: "123456"
+- extendedWaitUntil:
+    visible: "Your business"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-02-merchant
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Choose a PIN"
+    timeout: 10000
+- waitForAnimationToEnd
+- tapOn: "2"
+- tapOn: "7"
+- tapOn: "1"
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "8"
+- extendedWaitUntil:
+    visible: "Repeat your PIN"
+    timeout: 5000
+- waitForAnimationToEnd
+- tapOn: "2"
+- tapOn: "7"
+- tapOn: "1"
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "8"
+- extendedWaitUntil:
+    visible: "Skip"
+    timeout: 10000
+- tapOn: "Skip"
+- extendedWaitUntil:
+    visible: ".*Cappuccino.*"
+    timeout: 15000

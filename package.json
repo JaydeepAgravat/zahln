@@ -28,7 +28,9 @@
     "landing": "pnpm --filter @zahln/landing dev",
     "e2e": "pnpm --filter @zahln/web e2e",
     "e2e:mobile": "maestro test apps/consumer/e2e/happy-path.yaml apps/consumer/e2e/network-drop.yaml",
-    "storybook": "pnpm --filter @zahln/web-ui storybook"
+    "storybook": "pnpm --filter @zahln/web-ui storybook",
+    "screens:web": "SCREENS=1 pnpm --filter @zahln/web exec playwright test --project=screens",
+    "screens:mobile": "scripts/screens/mobile.sh"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

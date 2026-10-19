@@ -2,7 +2,7 @@
 appId: de.zahln.app
 ---
 - extendedWaitUntil:
-    visible: "PIN eingeben"
+    visible: "PIN eingeben|Enter your PIN"
     timeout: 5000
 - tapOn: "2"
 - tapOn: "7"

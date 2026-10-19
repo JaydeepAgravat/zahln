@@ -147,6 +147,17 @@ describe('console: merchants and payments', () => {
     expect(detail.attempts[0]).toMatchObject({ status: 'paid', payerName: 'Lena Hoffmann' });
   });
 
+  it("lists merchants with their team size and today's takings", async () => {
+    const intent = (await t.api.createIntent(CART)).body;
+    await t.api.pay(intent.id);
+    const res = await t.call('GET', '/admin/merchants', { headers: OPS });
+    expect(res.status).toBe(200);
+    expect(res.body.find((m: { id: string }) => m.id === 'cafe-mila')).toMatchObject({
+      staffCount: 2,
+      todayCents: 630,
+    });
+  });
+
   it('exports a DATEV-style CSV German Excel can open', async () => {
     const intent = (await t.api.createIntent(CART)).body;
     await t.api.pay(intent.id);

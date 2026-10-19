@@ -246,13 +246,15 @@ export async function adminRoutes(fastify: FastifyInstance, deps: AdminDeps) {
   // ---------- Merchants ----------
   app.get('/admin/merchants', async (req) => {
     ops(req);
+    // Fully qualified: inside these subqueries Drizzle prints a bare "id", which clashes with lt.id.
+    const merchantId = sql.raw('"merchants"."id"');
     const rows = await db
       .select({
         merchant: merchants,
-        staffCount: sql<number>`(SELECT count(*)::int FROM ${staff} s WHERE s.merchant_id = ${merchants.id})`,
+        staffCount: sql<number>`(SELECT count(*)::int FROM ${staff} s WHERE s.merchant_id = ${merchantId})`,
         todayCents: sql<number>`(SELECT coalesce(sum(p.amount_cents), 0)::int FROM ${postings} p
           JOIN ${ledgerTransactions} lt ON lt.id = p.transaction_id
-          WHERE p.account_id = 'merchant_wallet:' || ${merchants.id} AND lt.kind = 'payment' AND lt.created_at >= ${todayStart})`,
+          WHERE p.account_id = 'merchant_wallet:' || ${merchantId} AND lt.kind = 'payment' AND lt.created_at >= ${todayStart})`,
       })
       .from(merchants)
       .orderBy(merchants.name);

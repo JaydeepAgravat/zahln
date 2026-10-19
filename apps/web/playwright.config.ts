@@ -33,6 +33,10 @@ export default defineConfig({
       },
       testMatch: /console.*\.spec\.ts/,
     },
+    // Screenshots for the README gallery: only with SCREENS=1 (`pnpm screens:web`), never in the normal e2e run.
+    ...(process.env.SCREENS === '1'
+      ? [{ name: 'screens', use: { channel: 'chrome' as const }, testMatch: /screens\.spec\.ts/ }]
+      : []),
   ],
   webServer: [
     { command: 'pnpm dev', url: 'http://localhost:3000/login', reuseExistingServer: true, timeout: 120_000 },

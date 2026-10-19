@@ -182,6 +182,8 @@ export const API_ERROR_CODES = [
   'refund_exceeds_payment',
   'insufficient_merchant_balance',
   'feature_disabled',
+  // The simulated bank has not answered yet (dev chaos `drop_and_hold`): keep checking.
+  'rail_unavailable',
   // Zahln Web (Day 7)
   'csrf',
   'step_up_required',

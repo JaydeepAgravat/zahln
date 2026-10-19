@@ -1,0 +1,85 @@
+# README gallery: sign out, switch to English, then onboard as Lena, one screenshot per step.
+# Run with scripts/screens/mobile.sh (it sets the status bar and collects the PNGs).
+appId: de.zahln.app
+name: Screens · Zahln onboarding
+---
+- stopApp
+- launchApp
+- runFlow: ../unlock.yaml
+- extendedWaitUntil:
+    visible: "Guthaben|Balance|Loslegen|Get started"
+    timeout: 20000
+# Signed in? Sign out first, so the flow starts at the welcome screen either way.
+- runFlow:
+    when:
+      visible: "Guthaben|Balance"
+    commands:
+      - tapOn: "Profil|Profile"
+      - scrollUntilVisible:
+          element: "Abmelden|Sign out"
+      - tapOn: "Abmelden|Sign out"
+- extendedWaitUntil:
+    visible: "Loslegen|Get started"
+    timeout: 10000
+# The gallery is in English: the language switch on the welcome screen (it is remembered).
+- runFlow:
+    when:
+      visible: "Loslegen"
+    commands:
+      - tapOn: "Switch to English"
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 5000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-01-welcome
+- tapOn: "Get started"
+- tapOn: "151 2345 6789"
+- inputText: "15100000001"
+- waitForAnimationToEnd
+- takeScreenshot: zahln-02-phone
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Enter the code"
+    timeout: 10000
+- takeScreenshot: zahln-03-code
+# The dev build fills in the demo code; type it only if it is still empty.
+- runFlow:
+    when:
+      visible: "Enter the code"
+    commands:
+      - inputText: "123456"
+- runFlow:
+    when:
+      visible: "What's your name\\?"
+    commands:
+      - tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Choose a PIN"
+    timeout: 10000
+- tapOn: "2"
+- tapOn: "7"
+- tapOn: "1"
+- waitForAnimationToEnd
+- takeScreenshot: zahln-04-pin
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "8"
+- extendedWaitUntil:
+    visible: "Repeat your PIN"
+    timeout: 5000
+- waitForAnimationToEnd
+- tapOn: "2"
+- tapOn: "7"
+- tapOn: "1"
+- tapOn: "8"
+- tapOn: "2"
+- tapOn: "8"
+- extendedWaitUntil:
+    visible: "Turn on .*|Almost done"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zahln-05-biometrics
+- tapOn: "Skip"
+- extendedWaitUntil:
+    visible: "Balance"
+    timeout: 10000

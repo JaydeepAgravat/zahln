@@ -11,6 +11,7 @@ const bootScript = `(function(){var d=document.documentElement;d.classList.add('
 export function Document({ lang, children }: { lang: 'de' | 'en'; children: ReactNode }) {
   return (
     <html lang={lang} className={fontVariables} style={tokenStyle} suppressHydrationWarning>
+      {/* biome-ignore lint/style/noHeadElement: an App Router root layout owns <head>; the rule is for pages/ */}
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static, first-party boot script */}
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />

@@ -4,9 +4,18 @@
  * - slow:               settle after a delay
  * - reject:             the rail rejects the transfer
  * - drop_after_settle:  settle and commit, then drop the HTTP response (the worst case on campus wifi)
+ * - drop_and_hold:      the same, and "what happened?" lookups fail until the mode changes: the app holds
+ *                       "Wird geprüft" (for screenshots and the demo of a bank that is slow to answer)
  * - insufficient:       pretend the payer's balance is too low
  */
-export const CHAOS_MODES = ['ok', 'slow', 'reject', 'drop_after_settle', 'insufficient'] as const;
+export const CHAOS_MODES = [
+  'ok',
+  'slow',
+  'reject',
+  'drop_after_settle',
+  'drop_and_hold',
+  'insufficient',
+] as const;
 export type ChaosMode = (typeof CHAOS_MODES)[number];
 
 export class Chaos {

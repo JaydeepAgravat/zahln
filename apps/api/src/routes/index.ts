@@ -100,7 +100,7 @@ export async function respondToPay(
   // A replay with the same key returns the stored response: that's how the app and the web reconcile.
   if (
     deps.chaosEnabled &&
-    chaos.mode === 'drop_after_settle' &&
+    (chaos.mode === 'drop_after_settle' || chaos.mode === 'drop_and_hold') &&
     !result.replayed &&
     result.statusCode === 201
   ) {
@@ -235,6 +235,9 @@ export async function routes(fastify: FastifyInstance, deps: RouteDeps) {
     { schema: { params: z.object({ key: IdempotencyKeySchema }) } },
     async (req) => {
       const actor = requireActor(req);
+      if (deps.chaosEnabled && chaos.mode === 'drop_and_hold') {
+        throw new ApiError(503, 'rail_unavailable', 'chaos: the bank has not answered yet');
+      }
       return getAttemptByKey(db, actor.userId, req.params.key.toLowerCase());
     },
   );

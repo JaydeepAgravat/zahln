@@ -18,7 +18,9 @@ import { RootNavigator } from './navigation/RootNavigator';
 
 // NativeWind's css-interop registers every RN component at startup, including ImageBackground,
 // which trips RN 0.88's deprecation getter. We don't use ImageBackground. Remove when NativeWind 5 lands.
-LogBox.ignoreLogs(['ImageBackground is deprecated']);
+// `[zahln]` lines come from our logger: handled conditions (a dropped request the app recovers from),
+// still printed to the console, but not worth a warning toast over the screen.
+LogBox.ignoreLogs(['ImageBackground is deprecated', /^\[zahln\] /]);
 
 export function App() {
   const boot = useSession((s) => s.boot);

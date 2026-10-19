@@ -1,0 +1,30 @@
+# README gallery: the till and the wallet in dark mode (scripts/screens/mobile.sh switches the simulator).
+appId: de.zysygy.app
+name: Screens · ZYSYGY dark
+---
+- stopApp
+- launchApp
+- runFlow:
+    when:
+      visible: "Gib deine PIN ein|Enter your PIN"
+    commands:
+      - tapOn: "2"
+      - tapOn: "7"
+      - tapOn: "1"
+      - tapOn: "8"
+      - tapOn: "2"
+      - tapOn: "8"
+- extendedWaitUntil:
+    visible: ".*Cappuccino.*"
+    timeout: 15000
+- tapOn: ".*Cappuccino.*"
+- tapOn: ".*Croissant.*"
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-13-till-dark
+- tapOn: "Clear"
+- tapOn: "Wallet"
+- extendedWaitUntil:
+    visible: "Taken today"
+    timeout: 10000
+- waitForAnimationToEnd
+- takeScreenshot: zysygy-14-wallet-dark

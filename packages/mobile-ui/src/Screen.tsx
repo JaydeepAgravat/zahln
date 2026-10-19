@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Keyboard, Platform, ScrollView, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type Props = {
   children: ReactNode;
@@ -10,15 +10,18 @@ type Props = {
 };
 
 /**
- * RN 0.88 runs Android edge-to-edge, where `adjustResize` no longer shrinks the window and
- * KeyboardAvoidingView doesn't move content. So on Android we pad by the keyboard height ourselves.
+ * RN 0.88 runs Android edge-to-edge, where `adjustResize` no longer shrinks the window, and on iOS
+ * KeyboardAvoidingView left the footer button under the number pad. So we pad by the keyboard height
+ * ourselves on both (iOS gets the "will" events, so the footer moves with the keyboard).
  */
-function useAndroidKeyboardHeight() {
+function useKeyboardHeight() {
   const [height, setHeight] = useState(0);
   useEffect(() => {
-    if (Platform.OS !== 'android') return;
-    const show = Keyboard.addListener('keyboardDidShow', (e) => setHeight(e.endCoordinates.height));
-    const hide = Keyboard.addListener('keyboardDidHide', () => setHeight(0));
+    const ios = Platform.OS === 'ios';
+    const show = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', (e) =>
+      setHeight(e.endCoordinates.height),
+    );
+    const hide = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', () => setHeight(0));
     return () => {
       show.remove();
       hide.remove();
@@ -29,15 +32,14 @@ function useAndroidKeyboardHeight() {
 
 /** Safe area + 20 pt gutter + themed background. Every screen starts here. */
 export function Screen({ children, footer, scroll = true }: Props) {
-  const keyboardHeight = useAndroidKeyboardHeight();
+  const keyboard = useKeyboardHeight();
+  // On iOS the keyboard covers the home-indicator inset too, which SafeAreaView already pads.
+  const { bottom } = useSafeAreaInsets();
+  const keyboardPadding = Platform.OS === 'ios' ? Math.max(0, keyboard - bottom) : keyboard;
   const body = <View className="flex-1 gap-6 px-5 pb-6 pt-4">{children}</View>;
   return (
     <SafeAreaView className="flex-1 bg-bg" edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={{ paddingBottom: keyboardHeight }}
-      >
+      <View className="flex-1" style={{ paddingBottom: keyboardPadding }}>
         {scroll ? (
           <ScrollView contentContainerClassName="flex-grow" keyboardShouldPersistTaps="handled">
             {body}
@@ -46,7 +48,7 @@ export function Screen({ children, footer, scroll = true }: Props) {
           body
         )}
         {footer ? <View className="gap-3 px-5 pb-4">{footer}</View> : null}
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
