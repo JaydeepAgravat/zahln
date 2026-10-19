@@ -18,7 +18,7 @@ three websites, and the server that connects them.
 **New here? Read this way.**
 
 - **Not technical?** Read [The story](#the-story) and [Three moments](#three-moments-that-matter), then look at [every screen](#every-screen). About 5 minutes.
-- **Developer?** Start with [How it works](#how-it-works), then [Run it yourself](#run-it-yourself) and the [decisions](docs/DECISIONS.md).
+- **Developer?** Start with [How it works](#how-it-works), then [Run it yourself](#run-it-yourself) and [the handbook](docs/HANDBOOK.md).
 - **Unknown word?** The [glossary](#glossary) explains every term in one line.
 
 </td>
@@ -35,7 +35,7 @@ three websites, and the server that connects them.
 7. [How we know it works](#how-we-know-it-works)
 8. [Every screen](#every-screen)
 9. [Glossary](#glossary)
-10. [More to read](#more-to-read)
+10. [More to read: the handbook](#more-to-read)
 
 </td>
 </tr>
@@ -108,7 +108,7 @@ So the important switches live on the server, and the team controls them from th
 
 All five share one design system called **"Ember and ink"**: warm paper, near-black ink, and one orange accent,
 in light and dark mode. Everything works in **German and English**, and it works with screen readers.
-See [the design system](docs/DESIGN_SYSTEM.md).
+See [the handbook](docs/HANDBOOK.md#317-text-and-design).
 
 ## What is real and what is simulated
 
@@ -193,8 +193,7 @@ packages/
   nfc-pay/       native module: Android phone-to-phone payment
 ```
 
-Every important choice, with its trade-offs, is written down in [DECISIONS.md](docs/DECISIONS.md).
-Security is described in [SECURITY.md](docs/SECURITY.md).
+Every choice, its trade-offs and the alternatives are explained in [the handbook](docs/HANDBOOK.md).
 
 ## Run it yourself
 
@@ -394,12 +393,13 @@ The phone shots come from the iPhone simulator, the web shots from Chrome. They 
 
 ## More to read
 
-- [PLAN.md](docs/PLAN.md): the product, the 5-minute demo, the architecture and the schedule.
-- [DECISIONS.md](docs/DECISIONS.md): every library and design choice, and why.
-- [DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md): colours, type, components, light and dark.
-- [SECURITY.md](docs/SECURITY.md): what protects money and data, and what production would add.
-- [LANDING.md](docs/LANDING.md): how the landing page was designed.
-- [Daily build guides](docs/days/README.md): the project was built day by day. Each day has a goal, the ideas behind it, and what actually happened.
+Everything else is in one document: **[The Zahln Handbook](docs/HANDBOOK.md)**. It tells the whole story:
+
+1. [What problem this solves, and why](docs/HANDBOOK.md#part-1-the-problem-and-why-it-is-worth-solving)
+2. [The hard parts](docs/HANDBOOK.md#part-2-the-hard-parts)
+3. [The tech stack: why, the trade-offs, and when something else is better](docs/HANDBOOK.md#part-3-the-tech-stack-what-why-the-price-and-when-something-else-wins)
+4. [How it works end to end, and why it works this way](docs/HANDBOOK.md#part-4-how-it-works-end-to-end)
+5. [How to learn the codebase by heart](docs/HANDBOOK.md#part-5-learning-the-codebase-by-heart)
 
 ---
 

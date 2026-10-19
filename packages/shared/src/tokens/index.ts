@@ -1,7 +1,7 @@
 /**
- * "Ember and ink" design tokens (Quittung system, v2 palette) (docs/DESIGN_SYSTEM.md). The single source of truth:
+ * "Ember and ink" design tokens (Quittung system, v2 palette) (docs/HANDBOOK.md §3.17). The single source of truth:
  * generated into a Tailwind 3 preset for NativeWind (Day 2) and CSS variables for the web console (Day 5).
- * Contrast ratios are documented in DESIGN_SYSTEM.md and checked in test/tokens.test.ts.
+ * Contrast ratios are checked in test/tokens.test.ts.
  */
 export const colors = {
   light: {

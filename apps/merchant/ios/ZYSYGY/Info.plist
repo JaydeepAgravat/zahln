@@ -35,7 +35,7 @@
 		<key>NSPinnedDomains</key>
 		<dict>
 			<!-- Release API only. SPKI SHA-256 pins: the issuing CA key plus a backup key, never just the leaf.
-			     Placeholders until the domain exists; see docs/SECURITY.md for how to compute and rotate them. -->
+			     Placeholders until the domain exists; compute each with: openssl x509 -in ca.pem -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64. -->
 			<key>api.zahln.example</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>

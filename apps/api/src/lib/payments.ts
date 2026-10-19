@@ -322,7 +322,7 @@ export type PayOutcome = { kind: 'attempted'; result: PayResult } | { kind: 'exp
  *
  * MVP simplification: the (simulated, in-process) rail call happens inside the DB transaction.
  * With a real PSP the call is external, so production would reserve funds, commit, call the rail,
- * and settle via an outbox. See docs/days/DAY-1.md.
+ * and settle via an outbox. See docs/HANDBOOK.md §4.5.
  */
 export async function payIntent(
   tx: Tx,

@@ -5,7 +5,7 @@ import NativeNfcPay from './NativeNfcPay';
 /**
  * Phone-to-phone NFC. Android only: on iOS a third-party app can read tags (Core NFC) but card emulation
  * needs Apple's EEA HCE entitlement (iOS 17.4+, an agreement and a review), and Tap to Pay on iPhone is for
- * cards through approved PSPs, not our account-to-account references. See docs/adr/0004-nfc.md.
+ * cards through approved PSPs, not our account-to-account references. See docs/HANDBOOK.md §3.14.
  */
 export const nfcPay = {
   supported: Platform.OS === 'android' && (NativeNfcPay?.isSupported() ?? false),

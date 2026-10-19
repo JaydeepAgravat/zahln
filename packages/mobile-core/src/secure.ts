@@ -53,7 +53,7 @@ export async function readSession(): Promise<StoredSession | null> {
 // ---------- PIN ----------
 // MVP: the PIN is kept in the keychain and compared on device, with an attempt counter that is also
 // in the keychain (so clearing app data doesn't reset it). Production: verify the PIN on the server
-// (rate-limited per device) so a jailbroken phone can't brute-force it offline. See DAY-2.md.
+// (rate-limited per device) so a jailbroken phone can't brute-force it offline. See docs/HANDBOOK.md §4.1.
 
 export async function savePin(pin: string) {
   await write(SERVICE.pin, pin);

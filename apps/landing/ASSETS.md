@@ -12,7 +12,7 @@ public domain:
 The raw evidence (API values on the day of the check) is in `art-src/records.json`. Checked **2026-10-18**.
 
 > The paintings are centuries out of copyright; the question is the *photograph*. We only use files the museum
-> itself publishes under CC0 / PDM, never a copy found elsewhere (see DAY-9 pitfalls).
+> itself publishes under CC0 / PDM, never a copy found elsewhere.
 
 ## Paintings
 

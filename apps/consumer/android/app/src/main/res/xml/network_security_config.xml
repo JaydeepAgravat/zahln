@@ -2,7 +2,9 @@
 <!--
   Release: HTTPS only, system CAs only (no user-installed CAs), and the release API pinned to two SPKI hashes
   (the CA key plus a backup) with an expiry, so a rotation can never brick old app versions forever.
-  Pins are placeholders until the domain exists; docs/SECURITY.md has the openssl command and rotation plan.
+  Pins are placeholders until the domain exists; compute each with
+  openssl x509 -in ca.pem -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
+  and ship the next CA's pin as the backup one release ahead (docs/HANDBOOK.md §4.12).
 -->
 <network-security-config>
     <base-config cleartextTrafficPermitted="false">
