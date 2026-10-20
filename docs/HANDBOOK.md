@@ -781,6 +781,77 @@ You know the codebase by heart when you can answer these from memory:
 9. Why are there two apps and not one? What is shared, and what is not?
 10. What would you change first to connect a real payment provider? (Hint: section 4.5, the outbox.)
 
+<details>
+<summary><strong>Answers</strong> (try first, then open)</summary>
+
+**1. When the key is created, and why it goes to disk first.**
+The key stands for *one decision to pay*. If it were created when the screen opens, it could be reused for a
+different amount or a different try after a cancel, and the server would return an old answer for a new payment.
+It is created after the PIN or Face ID, so one key means exactly "Lena said yes to this payment". It is written to
+disk *before* the request leaves because the phone can die at any moment after sending. On the next launch the app
+finds the key and starts in `checking`. Without that, the app would forget a payment the server may have made.
+
+**2. Three worlds that look the same.**
+(a) the request never arrived; (b) it arrived and was refused; (c) it arrived, the money moved, and the answer was
+lost. `checking` asks `GET /attempts/by-key/<key>`. A stored answer means (b) or (c), and the app shows it
+("Not charged" or "Paid"). A 404 means (a), and it is safe to send again **with the same key**. A request still
+running answers "in progress", and the app asks again after a pause.
+
+**3. Two tills, same second.**
+Both reach `payIntent` in their own transaction. Each one calls `lockAccount(tx, payer)`
+(`apps/api/src/lib/payments.ts`, which runs `SELECT … FOR UPDATE` in `apps/api/src/lib/ledger.ts`) *before*
+`balanceOf`. The second transaction waits on the lock until the first commits. Then it reads the new balance,
+which already includes the first payment. If the money is not enough any more, it records "not enough balance".
+Without the lock, both would read the old balance and both would spend it.
+
+**4. Why an unbalanced ledger transaction cannot be saved.**
+The rule lives in the database, not in the code. A `DEFERRABLE INITIALLY DEFERRED` constraint trigger
+(`apps/api/drizzle/0001_ledger_rules.sql`) checks at `COMMIT` that the lines of each transaction sum to zero. If
+they do not, Postgres raises an error and rolls back the whole transaction. Other triggers refuse every `UPDATE` or
+`DELETE` on ledger lines. A forgotten `if` in TypeScript cannot skip any of this.
+
+**5. What the QR holds.**
+Only `<intent id>.<16 characters of HMAC-SHA256>`: a pointer to a payment on the server, plus a signature that
+only the server can make. With no amount and no account in it, a sticker cannot change who gets paid or how much.
+A forged reference fails the signature check. The amount and the shop name shown to Lena always come from
+`GET /intents/by-ref/:ref`.
+
+**6. Why "paid" is published after the commit.**
+Until the commit, the payment may still roll back (a failed ledger check, a lost connection, a crash). If the event
+went out first, the till could turn green and hand over the croissant for money that never moved. Publishing after
+the commit means the till can be one second late, but never wrong.
+
+**7. The SSE stream dies.**
+*The till* (`useIntentStatus.ts`): the SSE library tries to reconnect by itself, and in the meantime the hook polls
+`GET /intents/:id` every 2 seconds. Coming back to the foreground always refetches. When the stream is back, the
+first event is the current status, so a missed event catches up by itself. *The customer's phone* does not depend
+on SSE for paying at all. It learns the result from the answer to `POST /pay`, or from `checking` by key.
+
+**8. The config server is down at start.**
+The app never waits for config. It starts with the last config it saved, or, on a very first launch, with the
+`bundledDefaults` built into the app (`packages/shared/src/config.ts`): no kill switch on, no flags, no plan
+features assumed, and **never** a forced update. This is safe because the server still checks every rule on every
+request: an old or missing config can at most show a button that the server then refuses. And a stale default can
+never lock someone out of their money.
+
+**9. Two apps, not one.**
+Two audiences with different risks and release needs: a till bug must not wait for a wallet release, only the
+wallet needs the camera, and each app gets its own store listing and permissions. The server also uses the app
+identity (`x-app`) to refuse till requests from people who are not shop staff. *Shared:* schemas, state machines,
+money, plans, config rules, text, design tokens (`shared`); API client, session, Keychain, remote config, logger
+(`mobile-core`); design system and common flows like onboarding, lock, settings and wallet (`mobile-ui`); and the
+native modules. *Not shared:* each app's navigation, its own screens (pay and receipt; till, QR and refund) and its
+`ios/` and `android/` projects.
+
+**10. Connecting a real payment provider.**
+Write an adapter for the `PaymentRail` interface, and move the bank call **out of** the database transaction with
+the outbox pattern: reserve the funds and write "payment requested" to an outbox table in one transaction; commit;
+a worker sends the request to the provider with its own idempotency key; the provider's answer or webhook settles or
+releases the reservation in a new transaction. Then add daily reconciliation against the bank's statement. The phone,
+the ticket number and `checking` stay the same.
+
+</details>
+
 ### 5.5 Run it, break it, watch it
 
 ```bash
