@@ -893,8 +893,183 @@ The prototype is honest about its edges. A real launch would add, roughly in thi
 5. **Scale**: a shared event bus across server instances, a background job for expiry, push notifications.
 6. **Store release**: real certificate pins, app review, and the iPhone NFC entitlement if it is worth it.
 
+**Why this order.** Each step unlocks the next. Without step 1 no real euro can move, so nothing else matters yet.
+Without step 2 the partner and the regulator will not let a payment through. Step 3 must be done before the first
+shop uses Zettel as its till. Step 4 is what lets a small team sleep at night once real people pay. Step 5 matters
+only when one server is not enough. Step 6 can run in parallel with the others, but it is the last gate before the
+public can download the apps.
+
+The sections below explain each step the same way as Part 4: **what is missing today**, **what it means**, **how it
+would fit into this code**, and **the price**.
+
+### E.1 A licensed partner behind `PaymentRail`
+
+**What is missing today.** The bank is `SimulatedSepaInstantRail` (`apps/api/src/rail/`). It moves money between
+accounts that exist only in our own database. Nobody outside this project ever sees a euro.
+
+**What it means.** In Germany (and the EU), only a licensed institution may hold customer money or initiate
+payments: a bank, an e-money institution, or a payment institution regulated by BaFin. Getting such a licence takes
+a year or more and a lot of capital. So a start-up works with a **partner** that already has one. There are two
+realistic models, and the choice changes the product:
+
+| Model | How the money moves | What changes in the app |
+|---|---|---|
+| **Wallet with a balance** (e-money, through a partner bank or e-money institution) | Lena tops up her Zaster balance once; each payment moves money between accounts the partner holds. | Close to today: the ledger mirrors the partner's accounts. Top-ups become real transfers in. |
+| **Pay from your own bank account** (payment initiation, PSD2 "PIS", through providers such as Tink or finAPI) | Each payment is a real SEPA Instant transfer from Lena's bank to Mila's bank. Zaster never holds money. | No Zaster balance. Lena confirms in her bank's flow (or through a delegated authentication), and the "insufficient balance" check is done by her bank. |
+
+**How it would fit.** The seam is already there. `PaymentRail` in `apps/api/src/rail/types.ts` has one method,
+`submit(transfer)`, and the transfer already carries our attempt ID as the **end-to-end reference**, so the partner
+can de-duplicate as well. A real adapter would implement the same interface. Three things come with it:
+
+- **The outbox pattern** (section 4.5). A real bank call is slow and lives at another company, so it must leave the
+  database transaction. One transaction **reserves** the funds and writes "payment requested" to an outbox table. A
+  worker sends it to the partner with the attempt ID as its idempotency key. The answer **settles** or **releases**
+  the reservation in a new transaction. The phone does not notice: it already handles "not known yet" with `checking`.
+- **Webhooks.** Many partners answer later, by calling *our* server. A webhook handler must check the partner's
+  signature on every call, store the partner's event ID so the same event processed twice changes nothing (the same
+  ticket-number idea, in the other direction), answer quickly, and do the real work in a worker.
+- **Daily reconciliation.** Every morning, compare our ledger with the partner's statement of the day before (in the
+  banking world usually an ISO 20022 `camt.053` file). Every payment must appear on both sides with the same amount.
+  Anything that does not match goes into a queue in the support console for a person to resolve. This is how a
+  payment company finds the bugs that tests did not.
+
+**The price.** Contracts, due diligence, fees per transaction or per month, and the partner's rules on top of our
+own (who may sign up, which countries, which limits, how customers are identified). Customer identification (KYC)
+also becomes real: a phone number is no longer enough to open a wallet.
+
+### E.2 Strong customer authentication, done properly
+
+**What is missing today.** The PIN is checked **on the phone** (section 4.1). Face ID only unlocks the Keychain on
+the phone. The server trusts the device token and does not see any proof that Lena approved *this* payment.
+
+**What it means.** PSD2 requires **strong customer authentication (SCA)**: two of three factors (something you know,
+something you have, something you are), and **dynamic linking**: the proof must be tied to the exact amount and the
+exact payee. A token that says "this is Lena's phone" does not prove that Lena said yes to €6.30 for Café Mila.
+
+**How it would fit.**
+
+1. **A key that never leaves the chip.** At device registration, the app creates a key pair in the Secure Enclave
+   (iPhone) or StrongBox / TEE (Android). The private key cannot be exported, and using it requires Face ID or the
+   device passcode. The server stores the public key next to the device.
+2. **Sign each payment.** When Lena taps "Pay", the server gives a short-lived challenge that contains the intent ID,
+   the amount and the payee. The phone signs it with the hardware key. `POST /intents/:id/pay` carries the signature,
+   and the server checks it before calling the rail. A changed amount or a different shop breaks the signature.
+3. **PIN on the server.** The PIN is sent over TLS and checked against a slow hash (for example Argon2) on the
+   server, with a lockout per account, counted across all devices. A jailbroken phone can no longer try a million
+   PINs offline against its own Keychain.
+
+The ticket number stays exactly as it is: the signature proves *who agreed*, the ticket number makes sure the
+agreement is used *once*.
+
+**The price.** More round trips at the till (the challenge must be fetched first, which adds tens of milliseconds),
+a careful flow for a lost or new phone, and a recovery path for people who forget the PIN. Depending on the partner
+model in E.1, some of this may be done by the partner or the customer's bank instead.
+
+### E.3 German cash-register law: KassenSichV and the TSE
+
+**What is missing today.** Receipts have a running number per shop, a timestamp and a VAT breakdown (GoBD, section
+2.6). But nothing outside our own database proves that a receipt was not changed or deleted later.
+
+**What it means.** The *Kassensicherungsverordnung* (KassenSichV) requires every electronic recording system with a
+till function in Germany to be protected by a **certified technical security device (TSE)**. The TSE signs every
+transaction the moment it happens, with a counter that cannot go backwards, so a missing or changed receipt is
+visible in a tax audit. The receipt must show the TSE's data: transaction number, start and end time, the signature
+counter, the TSE's serial number and the signature itself. Shops must also give a receipt for every sale, register
+the till with the tax office, and be able to export their records in the **DSFinV-K** format. As soon as a shop uses
+Zettel as its till (and certainly if it also records cash sales in it), this applies. A tax adviser should confirm the
+exact scope for the final product.
+
+**How it would fit.** A **cloud TSE** (offered by Fiskaltrust, fiskaly and others) avoids a hardware stick in every
+shop. The server calls the TSE when a payment becomes `paid`, stores the signature next to the receipt, and the
+receipt screens in both apps and on the web print it, usually also as a QR code. The DSFinV-K export sits next to the
+existing DATEV export in the dashboard. The order matters: the receipt number and the TSE signature belong to the
+same sale, so they must be written together, through the outbox in E.1, never as a separate "later" step that can be
+forgotten.
+
+**The price.** A fee per till per month, one more external service on the path to a receipt, and a plan for what
+happens when the TSE is down (the law allows a documented failure mode, but the shop must notice and report it).
+
+### E.4 Operations: seeing problems before the customer does
+
+**What is missing today.** The prototype tells you about problems only if you are looking at the console. In
+production, the team must know about a problem before the first angry message.
+
+**What it means, and how it would fit.**
+
+- **A crash reporter in an EU region.** For example Sentry with its EU data region, so personal data stays in the EU
+  (GDPR). Every event goes through the existing `scrub()` from `packages/shared/src/scrub.ts` in the reporter's
+  "before send" hook, so the reporter can never receive a token, a PIN, a phone number, an IBAN or a balance. Because
+  the apps can only log through one `logger` today, this is one hook, not a hunt through every screen.
+- **Metrics that match the promise.** The most important number is **time to confirmation**: from the tap on "Pay"
+  to green on both phones. Next to it: how often a payment goes into `checking`, how long `checking` lasts, the share
+  of "not charged" answers, and the rail's error rate. Each one gets a target (for example "95 % of payments confirm
+  within 2 seconds") and an alert when it is missed.
+- **Staged roll-outs.** App Store phased release and Play Console staged roll-out send a new version to 1 %, then
+  10 %, then everyone, and can be paused. On the server, the same idea applies to flags: turn a feature on for a few
+  shops first. The kill switches from section 4.10 are the emergency brake if a stage goes wrong.
+- **Play Integrity / App Attest.** These ask Google or Apple to confirm that a request comes from the genuine,
+  unmodified app on a real device. The server checks the attestation at device registration and on money calls. It
+  does not replace the server's own checks, but it makes scripted attacks with a modified app much harder. The
+  root/jailbreak hints in `secure-screen` stay a soft signal; attestation is the strong one.
+- **Single sign-on and four-eyes approval in the console.** Today an operator signs in to the console on its own
+  terms. In production the console signs in through the company's identity provider (OpenID Connect, for example
+  Google Workspace or Microsoft Entra), so leaving the company means losing access at once. Risky actions (large
+  refunds, plan changes, kill switches, the minimum app version) need a **second operator** to approve before they
+  run. The append-only audit log already records who did what; four-eyes adds who *allowed* it.
+
+**The price.** More services to pay for and keep up to date, and an on-call rota. But a payment company without
+these is flying blind.
+
+### E.5 Scale: more than one server
+
+**What is missing today.** Three things only work because there is exactly one server process.
+
+- **The event bus** is a Node `EventEmitter` (`apps/api/src/lib/eventBus.ts`). With two servers behind a load
+  balancer, the till's SSE stream may be connected to server A while the payment runs on server B. The till would
+  never hear "paid" (it would still find out by polling, but slowly). **Fix:** keep the two functions
+  (`publishIntent` and the subscribe side) and put them on **Postgres LISTEN/NOTIFY** (no new service) or **Redis
+  pub/sub** (more headroom). The rule "publish only after commit" stays.
+- **Expiry** happens inside the open SSE stream (`apps/api/src/routes/events.ts`): when no till is watching, an unpaid
+  intent stays `awaiting_scan` in the database after its five minutes. This is not a money risk, because `payIntent`
+  already checks the expiry by the database clock, but lists and reports show a wrong status. **Fix:** a small
+  background job that every minute marks all overdue intents as `expired` in one `UPDATE` and publishes the change.
+  With several servers, only one of them may run it (a Postgres advisory lock is enough).
+- **Push notifications** (APNs for iPhone, FCM for Android). SSE only works while the app is open. "You received
+  €6.30" or "Your refund arrived" needs a push. The push is a **hint** like SSE: it opens the app, and the app asks
+  the server for the truth. A push text on a lock screen should not show a balance, for the same privacy reason the
+  balance is hidden during screen recording.
+
+**The price.** One more moving part (Redis, or more load on Postgres), and a job runner to watch.
+
+### E.6 Store release
+
+**What is missing today.** The apps run in the simulator and in development builds. A few release details are
+placeholders on purpose.
+
+- **Real certificate pins.** The pins in `apps/consumer/ios/Zaster/Info.plist` (`NSPinnedDomains`) and
+  `apps/consumer/android/app/src/main/res/xml/network_security_config.xml` (and the same files in the merchant app)
+  are placeholders for `api.zaster.example`. Before release, they become the SPKI hashes of the real API's issuing CA
+  **plus a backup key**, with the expiry date in place. The next CA's pin always ships one release *before* a
+  rotation, so old app versions are never locked out.
+- **App review.** Apple asks that apps offering financial services in regulated areas are submitted by the
+  regulated company itself (or its licensed partner), not by a single developer account. Google Play asks for a
+  financial-features declaration. Both need a privacy policy, the privacy "nutrition labels" or Data Safety form, a
+  working demo account for the reviewer, and an explanation of why the camera (and NFC) are needed.
+- **The iPhone NFC entitlement, if it is worth it.** Since iOS 17.4, apps in the EEA may use the iPhone's NFC chip
+  for in-store contactless payments (host card emulation). This needs a commercial agreement with Apple, a special
+  entitlement, payment-provider status, and Apple's fees. QR already works on every phone, so this is a business
+  decision: worth it only if tap-to-pay on iPhone clearly brings more payments than it costs. The `nfc_pay` kill
+  switch would cover iPhone as well.
+
+**The price.** Weeks, not days: reviews can bounce, and the legal entity behind the apps must exist first.
+
+### What does not change
+
 None of these change the core story. The ticket number, the ledger, the state machine and the server-driven switches
-are the parts that make a payment app trustworthy, and they are already here.
+are the parts that make a payment app trustworthy, and they are already here. Every step above plugs in **behind** a
+seam that exists today: the rail behind `PaymentRail`, the crash reporter behind `logger` and `scrub()`, the event bus
+behind `publishIntent`, the hardware signature next to the ticket number. That is the real test of the prototype's
+design: a real launch adds parts, but it does not have to rewrite the parts that handle money.
 
 ---
 
@@ -924,4 +1099,11 @@ are the parts that make a payment app trustworthy, and they are already here.
 | **KassenSichV / TSE** | German cash-register law, and the certified security module that signs receipts. |
 | **GDPR** | The EU privacy law: people can see, export and delete their data. |
 | **PSD2 / SCA** | EU payment rules that require strong customer authentication (two factors) for payments. |
+| **Dynamic linking** | The SCA rule that the proof of approval must be tied to the exact amount and payee. |
+| **PIS** | Payment initiation service: a licensed provider starts a transfer from the customer's own bank account. |
+| **Webhook** | A call from a partner's server to ours, to report that something happened. |
+| **Reconciliation** | Comparing our ledger with the bank's statement, line by line, to find any difference. |
+| **DSFinV-K** | The German export format a tax auditor asks for from an electronic till. |
+| **App Attest / Play Integrity** | Apple and Google services that confirm a request comes from the genuine app on a real device. |
+| **Four-eyes approval** | A risky action runs only after a second person approves it. |
 | **Monorepo** | All apps and shared code in one repository. |
